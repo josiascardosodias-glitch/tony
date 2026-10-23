@@ -15,7 +15,8 @@ O Tony é o meu agente de IA próprio: código em `~/projetos/tony` (público), 
 
 ## Inteligência — o que o Tony lê
 
-A única pasta do vault liberada para o Tony (`08-Tony/Inteligência/`). Tudo aqui vai para o modelo
+A única pasta do vault liberada para o Tony (`08-Tony/Inteligência/`). Na v1, todas as notas daqui
+entram no prompt no início de cada conversa: é a memória dele sobre mim. Tudo aqui vai para o modelo
 na nuvem: só entra o que pode sair da máquina. Uma nota = um assunto, com o prefixo `Tony - `.
 
 1. [[Tony - Sobre o Josias]] — quem eu sou e como prefiro as respostas

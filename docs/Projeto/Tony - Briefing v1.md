@@ -13,106 +13,96 @@ fonte: própria (conversas com GPT, Claude web e Claude Code)
 > [[Tony - Conceito inicial (GPT)]] e o rascunho feito no Claude web. As decisões técnicas, com o
 > motivo de cada uma, ficam no `DECISOES.md` do repositório. O andamento fica no [[Tony - Diário de bordo]].
 
-Você vai me ajudar a construir a v1 do Tony, meu agente de IA próprio. Leia tudo antes de agir e
-pare para me mostrar o resultado nos pontos marcados com ⏸.
+> [!note] Mudança de foco (2026-10-23)
+> A primeira versão deste briefing fazia o Tony responder perguntas sobre o vault com ferramentas.
+> A v1 agora é **só diálogo**: o Tony não precisa ser útil logo de cara, precisa conversar bem e
+> melhorar a cada conversa. Ferramentas e busca passaram para a v2.
 
 ## 1. O que é o Tony
 
-Um agente de terminal em Python que entende linguagem natural e usa ferramentas para responder.
-O código é meu, público no GitHub; o modelo de linguagem é um componente trocável.
+Um agente de terminal em Python, meu, com código público no GitHub. O modelo de linguagem é um
+componente trocável; o que é do Tony é a personalidade, a memória e a forma como ele evolui.
 
-**A v1 faz uma coisa só, e bem:** responder perguntas sobre a pasta de inteligência do Tony no meu
-vault do Obsidian (`My-Brain/08-Tony/Inteligência/`), citando a nota de onde tirou a resposta.
+**A v1 faz uma coisa só:** conversar — e ficar melhor nisso com o uso.
 
-## 2. Decisões fechadas
+## 2. O que "evoluir o diálogo" quer dizer na v1
+
+| Peça | Como funciona |
+|---|---|
+| **Personalidade em arquivos** | `personalidade/*.md` (identidade, tom, regras) no repositório. Mudar o jeito do Tony é editar texto, e o git guarda a história de cada mudança. |
+| **Memória sobre mim** | As notas de `My-Brain/08-Tony/Inteligência/` entram no prompt no início de cada conversa (sem busca: são poucas). |
+| **Continuidade** | Ao sair, o Tony resume a conversa; a próxima começa sabendo onde a anterior parou. |
+| **Conversa longa** | Quando o contexto enche, as mensagens antigas viram um resumo — nunca são cortadas em silêncio. |
+| **Feedback** | `/bom` e `/ruim <motivo>` marcam a última resposta no log. |
+| **Revisão** (etapa 4) | O Tony lê os turnos marcados e propõe mudanças na personalidade; eu aceito ou não. |
+| **Falas de teste** (etapa 5) | Situações fixas de conversa, rodadas a cada mudança de personalidade ou de modelo, para comparar antes e depois. |
+
+## 3. Decisões fechadas
 
 | Tema | Decisão |
 |---|---|
 | Nome | **Tony** (pacote, comando e prompt). Sem apelido. |
 | Repositório | `~/projetos/tony`, **público** no GitHub |
-| Motor | Modelo **na nuvem do Ollama**, chamado pelo Ollama instalado na máquina (mesma API do modelo local). Trocar para um modelo local é mudar uma linha do config. |
-| Cliente | Biblioteca nativa `ollama` (não o endpoint `/v1`), isolada em `cliente.py` — o único arquivo que sabe que o Ollama existe. |
-| Modelfile | **Não usar.** Prompt, `num_ctx` e temperatura saem do config e vão em cada requisição: uma fonte de verdade só. |
-| O que o Tony lê | **Só** `My-Brain/08-Tony/Inteligência/`. Nada mais do vault. Só leitura na v1. |
-| Ferramentas | Funções Python com docstring e tipos, uma por arquivo em `tony/ferramentas/`, descobertas sozinhas. A lib `ollama` gera o esquema a partir da função. |
-| Saída estruturada | Não na v1. Tool calling para agir; JSON Schema só quando houver extração de dados (v2). |
-| Especialistas | Fora da v1. |
-| Busca | Textual (palavras-chave) na v1. Embeddings na v1.1. |
-| Thinking | Desligado por padrão (configurável). |
+| Motor | Modelo **na nuvem do Ollama**, chamado pelo Ollama instalado na máquina. Trocar para local é mudar uma linha do config. |
+| Cliente | Biblioteca nativa `ollama`, isolada em `cliente.py`. Sem Modelfile: tudo sai do config. |
+| Ambiente Python | `uv` (o Python do sistema não tem `venv` nem `pip`) |
+| Ferramentas, busca, especialistas | **Fora da v1.** Entram na v2. |
+| Resposta | Em streaming (o texto aparece enquanto é gerado) |
 
-## 3. Regras por ser público
+## 4. Regras por ser público
 
-O vault é privado e o código é público. Nada que identifique o vault vai para o git:
+- Personalidade (`personalidade/`) é pública: é o "jeito" do Tony, não dado meu.
+- O que é meu fica fora do git: `config.local.yaml` (caminho do vault), `logs/` e `dados/` (resumos).
+- Antes do primeiro push, conferir com `git ls-files` que nada disso escapou.
 
-- `config.exemplo.yaml` vai para o git; `config.local.yaml` (caminho real do vault) fica no `.gitignore`.
-- `logs/` e `dados/` ficam no `.gitignore`: contêm trechos das notas.
-- Os testes rodam contra notas **falsas** em `exemplos/inteligencia/`, nunca contra o vault real.
-- Antes do primeiro push, conferir com `git status` e `git ls-files` que nada disso escapou.
-
-## 4. Estrutura
+## 5. Estrutura
 
 ```
 tony/
-├── README.md               # instalar, configurar, adicionar ferramenta
-├── DECISOES.md             # decisão, motivo, alternativa descartada
-├── pyproject.toml          # pip install -e . → comando `tony`
-├── config.exemplo.yaml     # modelo, num_ctx, temperatura, keep_alive, pasta liberada
-├── prompts/
-│   └── sistema.md          # quem é o Tony (editável sem mexer em código)
+├── README.md · DECISOES.md · pyproject.toml · .gitignore
+├── config.exemplo.yaml      # modelo, temperatura, contexto, pasta da Inteligência
+├── personalidade/
+│   ├── identidade.md        # quem o Tony é
+│   ├── tom.md               # como ele fala
+│   └── regras.md            # o que ele sempre / nunca faz
 ├── tony/
-│   ├── main.py             # loop do terminal (/sair, /ruim)
-│   ├── config.py           # junta config.exemplo + config.local
-│   ├── cliente.py          # conversa com o Ollama; checa se o modelo suporta tools ao iniciar
-│   ├── orquestrador.py     # laço de tool calling, com limite de voltas
-│   ├── registro.py         # importa tony/ferramentas/*.py e entrega as funções
-│   ├── acesso.py           # trava de caminhos: nada fora da pasta liberada (nem com ../)
-│   └── ferramentas/
-│       ├── buscar_no_cerebro.py   # busca por palavras, devolve notas + trechos
-│       └── ler_nota.py            # lê uma nota inteira da pasta liberada
-├── exemplos/inteligencia/  # 3–5 notas falsas para teste
-├── testes/
-│   ├── perguntas.yaml      # pergunta + o que a resposta precisa conter
-│   └── rodar.py            # roda as perguntas e mostra acertos
-├── logs/                   # (gitignored) um .jsonl por sessão
-└── dados/                  # (gitignored) índice da v1.1
+│   ├── main.py              # loop do terminal e comandos /
+│   ├── config.py            # junta config.exemplo + config.local
+│   ├── cliente.py           # único arquivo que conhece o Ollama
+│   ├── conversa.py          # histórico, prompt de sistema, resumo quando o contexto enche
+│   ├── memoria.py           # lê a Inteligência e o resumo da última conversa
+│   └── registro.py          # log .jsonl por sessão + marcações /bom /ruim
+├── logs/                    # (gitignored)
+└── dados/                   # (gitignored) resumos das conversas
 ```
 
-## 5. Comportamento esperado
-
-- A data de hoje entra no prompt de sistema ao iniciar a sessão (não precisa de ferramenta).
-- Resposta sempre cita a nota usada. Sem nota que responda, o Tony diz que não encontrou — não inventa.
-- O laço de ferramentas tem limite (ex.: 5 voltas) e trata erro de ferramenta devolvendo a mensagem ao modelo.
-- Ferramenta retorna texto curto: trechos, não notas gigantes. Corte com aviso, nunca em silêncio.
-- Cada turno vai para `logs/<data-hora>.jsonl`: pergunta, chamadas de ferramenta, resposta, modelo, tempo.
-- `/ruim` marca o último turno como erro no log (material para melhorar o prompt).
+Comandos no chat: `/sair`, `/nova`, `/bom`, `/ruim <motivo>`, `/prompt` (mostra o prompt de sistema montado), `/ajuda`.
 
 ## 6. Ordem de trabalho
 
-1. **Ambiente:** versão do Python, instalar o Ollama, `ollama signin`, listar os modelos de nuvem
-   disponíveis no plano gratuito e propor 2 ou 3 com suporte a tools (prós, contras, limites). ⏸
-2. **Esqueleto:** estrutura, `pyproject.toml`, configs, `sistema.md`, `cliente.py`, `registro.py`,
-   `orquestrador.py`, `main.py` e uma ferramenta de teste trivial. Testar que conversa e chama a ferramenta. ⏸
-3. **Ferramentas reais:** `acesso.py`, `buscar_no_cerebro`, `ler_nota`, notas de exemplo.
-4. **Testes:** `perguntas.yaml` com ~10 perguntas sobre as notas de exemplo e o `rodar.py`.
-5. **Documentar:** README curto e `DECISOES.md` atualizado.
-6. **Publicar:** `git init`, conferência do que vai para o git e criação do repositório público. ⏸
+1. **Esqueleto que conversa** — estrutura, config, personalidade inicial, streaming, logs, `/bom` e `/ruim`.
+2. **Motor** — instalar o Ollama, `ollama signin`, escolher o modelo de nuvem. ⏸
+3. **Memória** — Inteligência no prompt, resumo ao sair, resumo quando o contexto enche.
+4. **Revisão** — comando que lê as marcações e propõe mudanças na personalidade. ⏸
+5. **Falas de teste** — `testes/falas.yaml` e um script que roda e salva as respostas para comparar.
+6. **Publicar** — conferência do git e repositório público. ⏸
 
 ## 7. Depois da v1
 
-- **v1.1** — embeddings (`nomic-embed-text` local, índice em `numpy` + `.npz`), notas divididas por título antes de indexar; comparar com a busca textual usando os mesmos testes.
-- **v2** — primeira ferramenta de escrita (`anotar_na_inteligencia`), com confirmação no terminal; especialistas como `.yaml` (outro prompt, mesmo modelo); saída estruturada para extração.
-- **v3** — fontes externas (e-mail da escola), agendamento diário.
-- **Horizonte** — o que o Tony consulta sempre sobe para o prompt; fine-tuning só se os logs mostrarem que prompt e busca não bastam (e em GPU na nuvem).
+- **v2** — ferramentas (laço de tool calling, descoberta automática), começando por ler a Inteligência sob demanda.
+- **v2.x** — busca no vault (textual, depois embeddings), primeira ferramenta de escrita com confirmação.
+- **v3** — fontes externas (e-mail da escola), agendamento.
+- **Horizonte** — fine-tuning só se os logs mostrarem que personalidade e memória em texto não bastam.
 
 ## 8. Como trabalhar comigo
 
 - Sou desenvolvedor júnior: explique as decisões importantes de forma direta, com o porquê.
-- Soluções simples; nada de LangChain ou similares sem me perguntar antes.
-- Se algo aqui não fizer sentido no meu ambiente, diga e proponha alternativa.
+- Este projeto existe para eu ganhar conhecimento e experiência: prefira código que eu consiga ler a atalhos mágicos.
+- Nada de LangChain ou similares sem me perguntar antes.
 - Toda decisão nova vai para o `DECISOES.md`.
 
 ## Relacionado
 
-- [[Tony - Conceito inicial (GPT)]] — a primeira ideia, de onde saíram o nome e o caso do e-mail
+- [[Tony - Conceito inicial (GPT)]] — a primeira ideia, de onde saiu o nome
 - [[Tony - Diário de bordo]] — o que já foi feito e o que travou
-- [[Tony - Sobre o Josias]] — exemplo do que vai na pasta que o Tony lê
+- [[Tony - Sobre o Josias]] — o que o Tony sabe sobre mim (entra no prompt)

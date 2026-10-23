@@ -10,6 +10,16 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-10-23 — Mudança de foco e início da construção
+
+**Feito**
+- A v1 deixou de ser "perguntas sobre o vault" e virou **só diálogo**: o Tony não precisa ser útil
+  logo, precisa conversar bem e evoluir. Ferramentas e busca foram para a v2 ([[Tony - Briefing v1]]).
+- Começou a construção do esqueleto em `~/projetos/tony` com `uv`.
+
+**Aprendi**
+- O Python do sistema (Ubuntu) vem sem `venv` e `pip`; o `uv` cria o ambiente sem precisar de `sudo`.
+
 ## 2026-10-23 — Definição da v1
 
 **Feito**
