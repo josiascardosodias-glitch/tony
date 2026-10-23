@@ -10,6 +10,28 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-10-23 — v0.1.0 publicada
+
+**Feito**
+- Corrigida a terceira pessoa: antes, 8 de 8 respostas diziam "o projeto do Josias"; depois de mudar o
+  `identidade.md`, 8 de 8 em segunda pessoa ("você me criou", "o seu projeto"). Commit `68c6d83`.
+- Licença MIT, `CHANGELOG.md` e link do repositório no README.
+- Publicado em [github.com/josiascardosodias-glitch/tony](https://github.com/josiascardosodias-glitch/tony),
+  com a tag e a release `v0.1.0`. Conferido antes que config local, logs e resumos ficaram fora do git.
+- Documentação no vault: [[Tony - Como usar e evoluir]], mapa com o estado atual e o briefing com o andamento das etapas.
+
+**Pendente**
+- Conversar de verdade e marcar `/bom` e `/ruim`.
+- v0.2: etapa 4 (revisão pelas marcações) e etapa 5 (falas de teste).
+
+**Aprendi**
+- Para corrigir o jeito do modelo: reproduzir o erro várias vezes, mudar o texto e medir de novo do
+  mesmo jeito. Uma resposta só não prova nada, porque com temperatura 0,7 cada uma sai diferente.
+- O modelo não deduz relações óbvias para a gente: saber "quem me criou" e "com quem estou falando" não
+  basta, é preciso dizer que é a mesma pessoa.
+- O `gh repo create --push` usa a credencial do `gh`, mas um `git push` depois não. Dá para usar o `gh`
+  como credencial num comando só: `git -c credential.helper='!gh auth git-credential' push`.
+
 ## 2026-10-23 — Mudança de foco e início da construção
 
 **Feito**

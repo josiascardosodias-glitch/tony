@@ -42,8 +42,8 @@ componente trocável; o que é do Tony é a personalidade, a memória e a forma 
 | Tema | Decisão |
 |---|---|
 | Nome | **Tony** (pacote, comando e prompt). Sem apelido. |
-| Repositório | `~/projetos/tony`, **público** no GitHub |
-| Motor | Modelo **na nuvem do Ollama**, chamado pelo Ollama instalado na máquina. Trocar para local é mudar uma linha do config. |
+| Repositório | `~/projetos/tony`, **público** em [github.com/josiascardosodias-glitch/tony](https://github.com/josiascardosodias-glitch/tony), licença MIT |
+| Motor | `gemma4:31b-cloud` **na nuvem do Ollama** (plano gratuito), chamado pelo Ollama instalado na máquina. Trocar para local (ex.: `gemma4:e4b`) é mudar uma linha do config. |
 | Cliente | Biblioteca nativa `ollama`, isolada em `cliente.py`. Sem Modelfile: tudo sai do config. |
 | Ambiente Python | `uv` (o Python do sistema não tem `venv` nem `pip`) |
 | Ferramentas, busca, especialistas | **Fora da v1.** Entram na v2. |
@@ -59,7 +59,7 @@ componente trocável; o que é do Tony é a personalidade, a memória e a forma 
 
 ```
 tony/
-├── README.md · DECISOES.md · pyproject.toml · .gitignore
+├── README.md · DECISOES.md · CHANGELOG.md · LICENSE · pyproject.toml · .gitignore
 ├── config.exemplo.yaml      # modelo, temperatura, contexto, pasta da Inteligência
 ├── personalidade/
 │   ├── identidade.md        # quem o Tony é
@@ -80,12 +80,17 @@ Comandos no chat: `/sair`, `/nova`, `/bom`, `/ruim <motivo>`, `/prompt` (mostra 
 
 ## 6. Ordem de trabalho
 
-1. **Esqueleto que conversa** — estrutura, config, personalidade inicial, streaming, logs, `/bom` e `/ruim`.
-2. **Motor** — instalar o Ollama, `ollama signin`, escolher o modelo de nuvem. ⏸
-3. **Memória** — Inteligência no prompt, resumo ao sair, resumo quando o contexto enche.
-4. **Revisão** — comando que lê as marcações e propõe mudanças na personalidade. ⏸
-5. **Falas de teste** — `testes/falas.yaml` e um script que roda e salva as respostas para comparar.
-6. **Publicar** — conferência do git e repositório público. ⏸
+"v1" é o plano deste briefing inteiro. As entregas no GitHub vão subindo em `v0.x` até ele estar
+completo, que vira a `v1.0`.
+
+| # | Etapa | Estado |
+|---|---|---|
+| 1 | **Esqueleto que conversa** — estrutura, config, personalidade inicial, streaming, logs, `/bom` e `/ruim` | ✅ v0.1.0 |
+| 2 | **Motor** — Ollama, `ollama signin`, modelo de nuvem | ✅ v0.1.0 (`gemma4:31b-cloud`) |
+| 3 | **Memória** — Inteligência no prompt, resumo ao sair, resumo quando o contexto enche | 🟡 código na v0.1.0; falta testar o resumo entre sessões com o modelo real |
+| 4 | **Revisão** — comando que lê as marcações e propõe mudanças na personalidade ⏸ | ⬜ próxima (v0.2) |
+| 5 | **Falas de teste** — `testes/falas.yaml` e um script que roda e salva as respostas para comparar | ⬜ v0.2 |
+| 6 | **Publicar** — conferência do git e repositório público | ✅ v0.1.0 (adiantada) |
 
 ## 7. Depois da v1
 
@@ -105,4 +110,5 @@ Comandos no chat: `/sair`, `/nova`, `/bom`, `/ruim <motivo>`, `/prompt` (mostra 
 
 - [[Tony - Conceito inicial (GPT)]] — a primeira ideia, de onde saiu o nome
 - [[Tony - Diário de bordo]] — o que já foi feito e o que travou
+- [[Tony - Como usar e evoluir]] — o guia de uso e o ciclo de melhoria do diálogo
 - [[Tony - Sobre o Josias]] — o que o Tony sabe sobre mim (entra no prompt)

@@ -4,14 +4,23 @@ tags: [mapa, tony, projeto, ia]
 
 # 🗺️ Tony
 
-O Tony é o meu agente de IA próprio: código em `~/projetos/tony` (público), motor trocável
-(hoje, modelo na nuvem do Ollama). Esta pasta (`08-Tony/`) é escrita à mão — o vault-sync não mexe aqui.
+O Tony é o meu agente de IA próprio, construído do zero em Python para aprender como agentes funcionam.
+Esta pasta (`08-Tony/`) é escrita à mão — o vault-sync não mexe aqui.
+
+> [!success] Estado atual: v0.1.0 (2026-10-23)
+> Só conversa: personalidade versionada, memória, resumo entre sessões e `/bom`/`/ruim`.
+> Modelo: `gemma4:31b-cloud` (Ollama, plano gratuito).
+> Código: [github.com/josiascardosodias-glitch/tony](https://github.com/josiascardosodias-glitch/tony) (público, MIT) ·
+> local em `~/projetos/tony` · rodar com `uv run tony`.
 
 ## Projeto — o que nós planejamos (o Tony não lê)
 
-1. [[Tony - Briefing v1]] — versão oficial: decisões, estrutura, ordem de trabalho e roadmap
-2. [[Tony - Diário de bordo]] — o que foi feito, travou e aprendi em cada sessão
-3. [[Tony - Conceito inicial (GPT)]] — histórico: a primeira ideia, substituída pelo briefing
+1. [[Tony - Como usar e evoluir]] — comandos, onde fica cada coisa e o ciclo para melhorar o diálogo
+2. [[Tony - Briefing v1]] — o plano da v1: decisões, estrutura, etapas e roadmap
+3. [[Tony - Diário de bordo]] — o que foi feito, travou e aprendi em cada sessão
+4. [[Tony - Conceito inicial (GPT)]] — histórico: a primeira ideia, substituída pelo briefing
+
+No repositório: `DECISOES.md` (cada decisão com o porquê) e `CHANGELOG.md` (o que mudou em cada versão).
 
 ## Inteligência — o que o Tony lê
 
