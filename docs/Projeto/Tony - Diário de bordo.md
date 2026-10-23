@@ -19,9 +19,15 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
   memória (Inteligência + resumo da última conversa), resumo automático quando o contexto enche,
   log `.jsonl` com `/bom` e `/ruim`, comandos `/nova` e `/prompt`. Testado sem o modelo (com um modelo falso).
 
+- Etapa 2 pronta: Ollama 0.40.10 instalado, login pelo GitHub. Comparei 3 modelos de nuvem com a
+  personalidade real; escolhido o `gemma4:31b-cloud` (gratuito, ~1 s, tom mais natural).
+  O `deepseek-v4.1-flash` só funciona no plano Pro. Primeiro commit: `8c3b81a`.
+- **Primeiro ponto a evoluir:** o Tony disse "sou a primeira versão do projeto do Josias" falando
+  com o próprio Josias — não ligou o criador a quem está conversando.
+
 **Pendente**
-- Etapa 2: instalar o Ollama (`curl -fsSL https://ollama.com/install.sh | sh`), `ollama signin` e escolher o modelo de nuvem.
-- Primeiro commit do repositório.
+- Conversar com o Tony (`cd ~/projetos/tony && uv run tony`) e marcar `/bom` e `/ruim`.
+- Etapa 3 (memória) já está quase toda no esqueleto; falta testar o resumo entre sessões de verdade.
 
 **Aprendi**
 - O Python do sistema (Ubuntu) vem sem `venv` e `pip`; o `uv` cria o ambiente sem precisar de `sudo`.
