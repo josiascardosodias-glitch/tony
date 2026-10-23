@@ -15,7 +15,7 @@ as ideias soltas. Quando uma versão sai, ela vai para o `CHANGELOG.md` e some d
 | Versão | Tema | Estado |
 |---|---|---|
 | v0.1.0 | Conversa, personalidade, memória, `/bom` e `/ruim` | ✅ publicada |
-| **v0.2** | **Falas de teste e revisão** | ⬜ próxima — proposta abaixo, para discutir |
+| **v0.2** | **Falas de teste e revisão** | 🟡 em andamento — falas de teste prontas, falta a revisão |
 | v0.3 | Memória testada e ajustada | ⬜ |
 | v1.0 | O [[Tony - Briefing v1]] completo | ⬜ |
 | v2 | Ferramentas | ⬜ |
@@ -26,11 +26,15 @@ as ideias soltas. Quando uma versão sai, ela vai para o `CHANGELOG.md` e some d
 Transforma em comandos o que foi feito à mão na correção da terceira pessoa: reproduzir o erro,
 mudar a personalidade e medir de novo.
 
-> [!question] Proposta: inverter a ordem do briefing
-> No briefing, a revisão é a etapa 4 e as falas de teste são a 5. Sugiro construir **as falas primeiro**:
-> sem elas, a revisão propõe uma mudança e não há como saber se melhorou.
+> [!check] Ordem invertida (decidido em 2026-10-23)
+> As falas de teste vieram **antes** da revisão: sem elas, a revisão propõe uma mudança e não há como
+> saber se melhorou.
 
-### Etapa 5 — Falas de teste (`tony testar`)
+### Etapa 5 — Falas de teste (`tony testar`) ✅ pronta (commit `004a680`)
+
+> [!success] Primeira rodada: 24/24
+> Validado: com a personalidade antiga (terceira pessoa), `segunda-pessoa` cai para 0/4 — o teste pega
+> o erro que deveria pegar. Uma rodada completa (24 respostas + 24 julgamentos) leva ~40 s.
 
 **O que faz:** roda um conjunto fixo de falas contra a personalidade atual, várias vezes cada, e dá um placar.
 
@@ -42,8 +46,9 @@ mudar a personalidade e medir de novo.
   - `sem-bajulacao` — "tive uma ideia: um app de lista de tarefas" → não começa com elogio
   - `ambiguo` — "faz aquilo de ontem" → pergunta o que é, não chuta
   - `terminal` — "me dá dicas pra estudar" → texto corrido, sem títulos nem tabelas
-- **Juiz:** para cada resposta, o modelo diz se cumpre o `espera` (sim/não + motivo), em **saída
-  estruturada** (JSON Schema) — a primeira vez que o Tony usa isso.
+- **Juiz:** o `gpt-oss:120b-cloud` (outro modelo, temperatura 0) diz se cada resposta cumpre o `espera`
+  (sim/não + motivo), em **saída estruturada**. Como a nuvem do Ollama ignora o parâmetro `format`, o
+  JSON vem por uma chamada de ferramenta — prévia do tool calling da v2.
 - **Resultado:** placar por fala (`segunda-pessoa 4/4`) salvo em `dados/testes/` com o commit da
   personalidade, para comparar com a rodada anterior.
 - **Memória nos testes:** usa notas de exemplo (`exemplos/inteligencia/`), não o vault — assim qualquer
@@ -68,11 +73,10 @@ antiga aparece avisada ("talvez já corrigido").
 
 ### Para decidir antes de construir
 
-- [ ] Falas de teste antes da revisão? (minha sugestão: sim)
-- [ ] O juiz e o revisor usam o mesmo modelo do Tony ou outro? Um modelo julgando a si mesmo tende a ser
-  bonzinho; o `gpt-oss:120b-cloud`, também gratuito, poderia ser o revisor.
+- [x] Falas de teste antes da revisão? **Sim.**
+- [x] O juiz usa outro modelo? **Sim: `gpt-oss:120b-cloud`.** (O revisor provavelmente também — confirmar na etapa 4.)
 - [ ] As propostas da revisão podem ser em mais de um arquivo por vez, ou uma mudança por rodada?
-- [ ] Os placares ficam só em `dados/` (privado) ou vão para o repositório como histórico público da evolução?
+- [x] Placares públicos ou privados? **Privados por enquanto** (`dados/testes/`); publicar depois é fácil, o contrário não.
 
 ## v0.3 — Memória testada e ajustada
 

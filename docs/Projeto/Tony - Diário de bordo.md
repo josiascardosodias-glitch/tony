@@ -10,6 +10,31 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-10-23 — v0.2: falas de teste
+
+**Feito**
+- Decidido: testes antes da revisão; juiz em outro modelo (`gpt-oss:120b-cloud`); placares privados.
+- `tony testar` com 6 falas (segunda pessoa, honestidade, tamanho, sem bajulação, pedido ambíguo,
+  formato de terminal). Primeira rodada: **24/24**. Commit `004a680` (local).
+- Validação do teste: voltando a personalidade antiga, `segunda-pessoa` deu 0/4.
+
+**Travou**
+- A saída estruturada (parâmetro `format`) não funciona nos modelos de nuvem: testei 5 modelos e todos
+  responderam em texto solto. Saída: o juiz entrega o veredito chamando uma ferramenta cujos parâmetros
+  são o esquema — funcionou de primeira.
+
+**Pendente**
+- Etapa 4: `tony revisar` (decidir: uma mudança por rodada ou várias).
+- Conversar com o Tony e marcar `/ruim`, que é a entrada da revisão.
+
+**Aprendi**
+- Um teste que sempre passa não prova nada: é preciso ver ele **falhar** quando deveria (rodar contra a
+  versão com o defeito) antes de confiar no 24/24.
+- Uma API pode aceitar um parâmetro e ignorá-lo em silêncio. Testar o recurso isolado antes de construir
+  em cima dele economizou a etapa inteira.
+- Tool calling serve para mais do que "fazer coisas": é também um jeito de obrigar o modelo a responder
+  num formato.
+
 ## 2026-10-23 — v0.1.0 publicada
 
 **Feito**

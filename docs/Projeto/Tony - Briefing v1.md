@@ -89,7 +89,7 @@ completo, que vira a `v1.0`.
 | 2 | **Motor** — Ollama, `ollama signin`, modelo de nuvem | ✅ v0.1.0 (`gemma4:31b-cloud`) |
 | 3 | **Memória** — Inteligência no prompt, resumo ao sair, resumo quando o contexto enche | 🟡 código na v0.1.0; falta testar o resumo entre sessões com o modelo real |
 | 4 | **Revisão** — comando que lê as marcações e propõe mudanças na personalidade ⏸ | ⬜ próxima (v0.2) |
-| 5 | **Falas de teste** — `testes/falas.yaml` e um script que roda e salva as respostas para comparar | ⬜ v0.2 |
+| 5 | **Falas de teste** — `testes/falas.yaml` e um script que roda e salva as respostas para comparar | ✅ feita antes da 4 (`tony testar`, 24/24) |
 | 6 | **Publicar** — conferência do git e repositório público | ✅ v0.1.0 (adiantada) |
 
 ## 7. Depois da v1
