@@ -1,5 +1,6 @@
-"""Tony no terminal: o loop da conversa e os comandos /."""
+"""Tony no terminal: `tony` conversa; `tony testar` roda as falas de teste."""
 
+import argparse
 import readline  # noqa: F401 — só importar já dá setas e histórico ao input()
 import time
 
@@ -95,8 +96,8 @@ class Sessao:
         self.registro.turno_completo(texto, "".join(pedacos), time.monotonic() - inicio)
 
 
-def main() -> None:
-    sessao = Sessao(config.carregar())
+def conversar(cfg: dict) -> None:
+    sessao = Sessao(cfg)
     print(f"Tony · {sessao.cliente.modelo} · /ajuda para os comandos\n")
     while True:
         try:
@@ -112,6 +113,26 @@ def main() -> None:
         else:
             sessao.falar(texto)
     sessao.encerrar_conversa()
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(prog="tony", description="Tony: agente de IA pessoal. Sem comando, abre a conversa.")
+    comandos = parser.add_subparsers(dest="comando")
+    testar = comandos.add_parser("testar", help="roda as falas de teste e mostra o placar")
+    testar.add_argument("ids", nargs="*", help="só estas falas (padrão: todas)")
+    testar.add_argument("--vezes", type=int, help="quantas vezes cada fala roda")
+    args = parser.parse_args()
+
+    cfg = config.carregar()
+    if args.comando == "testar":
+        from .testes import rodar
+
+        try:
+            rodar(cfg, args.ids, args.vezes)
+        except ErroDoModelo as e:
+            raise SystemExit(f"\n[erro] {e}")
+    else:
+        conversar(cfg)
 
 
 if __name__ == "__main__":

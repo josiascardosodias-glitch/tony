@@ -1,5 +1,12 @@
 # Changelog
 
+## Em andamento (v0.2)
+
+- `tony testar`: falas fixas em `testes/falas.yaml`, rodadas várias vezes, com placar dado por um modelo
+  juiz (`gpt-oss:120b-cloud`) e comparado com a rodada anterior.
+- Saída estruturada no cliente (`estruturado`), entregue por chamada de ferramenta.
+- Memória de exemplo em `exemplos/inteligencia/` para os testes.
+
 ## v0.1.0 — 2026-10-23
 
 Primeira versão: o Tony só conversa, e o foco é a evolução do diálogo.

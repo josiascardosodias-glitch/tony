@@ -41,6 +41,24 @@ uv run tony
 | `/prompt` | mostra o prompt de sistema montado |
 | `/sair` | encerra, guardando um resumo para a próxima vez |
 
+## Testar
+
+```bash
+uv run tony testar                 # todas as falas de testes/falas.yaml
+uv run tony testar tamanho ambiguo # só algumas
+uv run tony testar --vezes 8       # mais repetições, placar mais confiável
+```
+
+Cada fala roda várias vezes (a resposta varia) numa conversa nova, com a memória de exemplo de
+`exemplos/inteligencia/`. Um segundo modelo, o juiz (`testes.juiz` no config), confere cada resposta
+contra o critério `espera` e o placar sai por fala, comparado com a rodada anterior:
+
+```
+segunda-pessoa   ✓✓✓✓  4/4   (antes: 0/4)
+```
+
+As respostas e os motivos do juiz ficam em `dados/testes/` (fora do git).
+
 ## Como o Tony evolui
 
 1. **Personalidade** — `personalidade/*.md`. Edite o texto e faça commit: o log de cada sessão
@@ -48,6 +66,7 @@ uv run tony
 2. **Memória** — as notas da pasta `memoria.inteligencia` entram no prompt; ao sair, a conversa vira
    um resumo em `dados/resumos/`, lido no início da próxima.
 3. **Retorno** — `logs/*.jsonl` guarda cada fala, resposta e marcação `/bom`/`/ruim`.
+4. **Medida** — `tony testar` antes e depois de cada mudança: só fica a mudança que não piora o placar.
 
 ## Estrutura
 
@@ -55,12 +74,15 @@ uv run tony
 tony/
 ├── config.exemplo.yaml   padrões (config.local.yaml sobrescreve)
 ├── personalidade/        quem o Tony é, como fala, regras
+├── testes/falas.yaml     falas de teste e o critério de cada uma
+├── exemplos/             memória de exemplo usada nos testes
 └── tony/
     ├── main.py           loop do terminal e comandos
     ├── cliente.py        único arquivo que conhece o Ollama
     ├── conversa.py       histórico, prompt de sistema e resumo quando o contexto enche
     ├── memoria.py        personalidade, notas e resumos
     ├── registro.py       log da sessão
+    ├── testes.py         falas de teste e juiz
     └── config.py         leitura da configuração
 ```
 

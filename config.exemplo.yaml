@@ -22,3 +22,10 @@ memoria:
 
 personalidade: "personalidade"
 logs: "logs"
+
+testes:
+  falas: "testes/falas.yaml"
+  vezes: 4                          # quantas vezes cada fala roda (a resposta varia a cada vez)
+  juiz: "gpt-oss:120b-cloud"        # outro modelo: quem julga a si mesmo tende a ser bonzinho
+  inteligencia: "exemplos/inteligencia"   # memória de exemplo: o placar não depende das suas notas
+  resultados: "dados/testes"        # placares e respostas de cada rodada (fora do git)

@@ -55,3 +55,20 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
 19. **Licença MIT.** Qualquer pessoa pode usar e modificar, mantendo o crédito.
 20. **Personalidade fala com o criador em segunda pessoa.** No teste, 8 de 8 respostas diziam "o projeto
     do Josias" para o próprio Josias; a identidade agora diz que quem conversa é o criador. Depois: 8 de 8 certas.
+
+## 2026-10-23 — v0.2: falas de teste
+
+21. **Falas de teste antes da revisão.** *Por quê:* sem uma medida, a revisão propõe mudanças sem saber
+    se melhoram. *Fora:* construir a revisão primeiro, como estava no briefing.
+22. **O juiz é outro modelo (`gpt-oss:120b-cloud`, temperatura 0).** *Por quê:* um modelo julgando as
+    próprias respostas tende a ser bonzinho. Validado: com a personalidade antiga (terceira pessoa) o
+    juiz deu 0/4; com a atual, 4/4.
+23. **Saída estruturada por chamada de ferramenta.** Os modelos de nuvem do Ollama ignoram o parâmetro
+    `format` (testados `gpt-oss` 120b e 20b, `beam`, `nemotron-3-nano` e `nemotron-3-super`: todos
+    responderam em texto solto). O `estruturado()` do cliente oferece uma ferramenta `responder` cujos
+    parâmetros são o esquema; o modelo a chama e os argumentos são o resultado. O resto do código não
+    sabe desse detalhe. *Fora:* pedir JSON no prompt e torcer.
+24. **Testes isolados:** conversa nova a cada repetição, sem resumo da última conversa e com memória de
+    exemplo (`exemplos/inteligencia/`). *Por quê:* o placar só deve mudar quando mudam a personalidade
+    ou o modelo — e qualquer pessoa consegue rodar.
+25. **Placares privados por enquanto** (`dados/testes/`, fora do git). Publicar depois é fácil; o contrário não.
