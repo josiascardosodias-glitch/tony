@@ -64,7 +64,7 @@ tony/
     └── config.py         leitura da configuração
 ```
 
-As decisões de projeto, com o motivo de cada uma, estão em [DECISOES.md](DECISOES.md); o que mudou em cada versão, em [CHANGELOG.md](CHANGELOG.md).
+As decisões de projeto, com o motivo de cada uma, estão em [DECISOES.md](DECISOES.md); o que mudou em cada versão, em [CHANGELOG.md](CHANGELOG.md); para onde ele vai, em [ROADMAP.md](ROADMAP.md).
 
 ## Licença
 
