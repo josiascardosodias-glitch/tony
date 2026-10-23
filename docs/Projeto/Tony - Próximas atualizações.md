@@ -15,13 +15,16 @@ as ideias soltas. Quando uma versão sai, ela vai para o `CHANGELOG.md` e some d
 | Versão | Tema | Estado |
 |---|---|---|
 | v0.1.0 | Conversa, personalidade, memória, `/bom` e `/ruim` | ✅ publicada |
-| **v0.2** | **Falas de teste e revisão** | 🟡 em andamento — falas de teste prontas, falta a revisão |
-| v0.3 | Memória testada e ajustada | ⬜ |
+| v0.2.0 | Falas de teste e revisão | ✅ publicada (28/28) |
+| **v0.3** | **Memória testada e ajustada** | ⬜ próxima |
 | v1.0 | O [[Tony - Briefing v1]] completo | ⬜ |
 | v2 | Ferramentas | ⬜ |
 | v3 | O mundo de fora | ⬜ |
 
-## v0.2 — Falas de teste e revisão
+## v0.2 — Falas de teste e revisão ✅
+
+> [!success] Publicada em 2026-10-23 como v0.2.0 (commit `f8187ef`). O que saiu está no `CHANGELOG.md`;
+> esta seção fica como registro de como foi planejada.
 
 Transforma em comandos o que foi feito à mão na correção da terceira pessoa: reproduzir o erro,
 mudar a personalidade e medir de novo.
@@ -54,7 +57,13 @@ mudar a personalidade e medir de novo.
 - **Memória nos testes:** usa notas de exemplo (`exemplos/inteligencia/`), não o vault — assim qualquer
   pessoa roda os testes, e o resultado não muda quando eu edito minhas notas.
 
-### Etapa 4 — Revisão (`tony revisar`)
+### Etapa 4 — Revisão (`tony revisar`) ✅ pronta
+
+> [!note] Como ficou
+> Igual ao plano, com dois acréscimos que o teste pediu: **aceitar não é manter** (aplica, testa e só
+> depois você decide se fica) e as falas marcadas são testadas **no contexto** da conversa (campo `antes`).
+> No teste com um log de exemplo, a proposta resolveu uma marcação (4/4) e só metade da outra (2/4) —
+> o tipo de coisa que, sem o teste, passaria como "resolvido".
 
 **O que faz:** lê as marcações dos logs e propõe mudanças na personalidade, que eu aceito ou não.
 
@@ -74,11 +83,11 @@ antiga aparece avisada ("talvez já corrigido").
 ### Para decidir antes de construir
 
 - [x] Falas de teste antes da revisão? **Sim.**
-- [x] O juiz usa outro modelo? **Sim: `gpt-oss:120b-cloud`.** (O revisor provavelmente também — confirmar na etapa 4.)
-- [ ] As propostas da revisão podem ser em mais de um arquivo por vez, ou uma mudança por rodada?
+- [x] O juiz e o revisor usam outro modelo? **Sim: `gpt-oss:120b-cloud`** nos dois.
+- [x] Uma mudança por rodada ou várias? **Uma por rodada.**
 - [x] Placares públicos ou privados? **Privados por enquanto** (`dados/testes/`); publicar depois é fácil, o contrário não.
 
-## v0.3 — Memória testada e ajustada
+## v0.3 — Memória testada e ajustada ⬜ próxima
 
 - Testar o resumo entre sessões com o modelo real: ele lembra? lembra demais? inventa?
 - Juntar resumos: hoje só o último é lido. Ideia: um resumo dos resumos, para lembrar de semanas atrás.

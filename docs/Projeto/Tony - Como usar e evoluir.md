@@ -8,7 +8,7 @@ fonte: própria
 
 # Tony — Como usar e evoluir
 
-Guia rápido do Tony v0.1: como conversar, onde fica cada coisa e o ciclo para melhorar o diálogo.
+Guia rápido do Tony v0.2: como conversar, onde fica cada coisa e o ciclo para melhorar o diálogo.
 
 ## Conversar
 
@@ -37,6 +37,17 @@ Cada fala de `testes/falas.yaml` roda 4 vezes; o juiz (`gpt-oss:120b-cloud`) con
 o placar sai comparado com a rodada anterior. Para criar um teste novo, acrescente uma fala com um
 `espera` que dê para responder com sim ou não.
 
+## Revisar
+
+```bash
+cd ~/projetos/tony && uv run tony revisar
+```
+
+Junta as respostas marcadas com `/ruim` e o revisor (`gpt-oss:120b-cloud`) propõe **uma** mudança na
+personalidade, mostrada como diff. Opções: **aceitar** (aplica e testa: placar antes e depois, mais as
+falas marcadas no contexto delas — no fim você decide se fica), **outra proposta**, **descartar** as
+marcações (não eram problema) ou **sair**. Mudança mantida → o comando mostra o `git commit` sugerido.
+
 ## Onde fica cada coisa
 
 | O quê | Onde | No GitHub? |
@@ -49,14 +60,17 @@ o placar sai comparado com a rodada anterior. Para criar um teste novo, acrescen
 | Logs com `/bom` e `/ruim` | `~/projetos/tony/logs/*.jsonl` | **não** |
 | Falas de teste | `~/projetos/tony/testes/falas.yaml` | sim |
 | Placares e respostas dos testes | `~/projetos/tony/dados/testes/` | **não** |
+| O que já foi revisado | `~/projetos/tony/dados/revisoes.jsonl` | **não** |
 
 ## O ciclo de evolução
 
 1. **Conversar e marcar** — use `/ruim <motivo>` sem dó; é a matéria-prima.
-2. **Ler as marcações** — nos logs, cada linha `"tipo": "marca"` aponta o turno com problema.
-3. **Reproduzir** — virar o problema uma fala em `testes/falas.yaml` e rodar `tony testar <id>`.
-4. **Ajustar a personalidade** — mudar o texto em `personalidade/`.
-5. **Medir de novo** — `tony testar` completo: a fala nova tem que melhorar e as outras não podem piorar.
+2. **Revisar** — `tony revisar` lê as marcações, propõe uma mudança e mede antes e depois.
+3. **Se o problema vai voltar a ser testado** — vire-o uma fala em `testes/falas.yaml` (com `antes`, se
+   depender da conversa), para que nenhuma mudança futura o traga de volta.
+4. **À mão, quando preferir** — mudar o texto em `personalidade/` e rodar `tony testar` completo:
+   a fala do problema tem que melhorar e as outras não podem piorar.
+5. **Decidir** — só fica a mudança que melhora sem piorar o resto.
 6. **Commit** — uma mudança por commit, com o antes e o depois na mensagem. O log de cada sessão
    guarda o commit da personalidade em uso, então dá para comparar versões do Tony.
 

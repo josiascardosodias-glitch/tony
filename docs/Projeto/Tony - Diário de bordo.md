@@ -10,6 +10,23 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-10-23 — v0.2.0 publicada: revisão
+
+**Feito**
+- `tony revisar`: lê os `/ruim`, o revisor (`gpt-oss:120b-cloud`) propõe **uma** mudança, diff no
+  terminal, aceitar → testa antes e depois → você decide se fica. Commit manual.
+- Testado com um log de exemplo (marcações inventadas por mim, mudança desfeita no fim): o revisor achou o
+  padrão certo ("toda resposta termina com pergunta"), placar geral seguiu 24/24, e as falas marcadas
+  deram 4/4 e 2/4 — correção só parcial, que o teste deixou visível.
+- Falas de teste com conversa anterior (`antes`) e fala nova `encerramento`. Placar: **28/28**.
+- Publicado: tag e release `v0.2.0` (commit `f8187ef`).
+
+**Aprendi**
+- Contexto muda o resultado: "valeu, era isso" sozinho não é a mesma fala que no fim de uma conversa.
+- Uma rodada parcial de testes não pode virar "a rodada anterior" de tudo: comparar fala por fala.
+- No bash, `H='-c x=!gh auth ...'` e depois `git $H` quebra o argumento nos espaços: argumento com espaço
+  vai escrito por extenso (ou num array).
+
 ## 2026-10-23 — v0.2: falas de teste
 
 **Feito**
