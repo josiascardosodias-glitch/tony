@@ -94,6 +94,8 @@ completo, que vira a `v1.0`.
 
 ## 7. Depois da v1
 
+> [!tip] O detalhe de cada versão, inclusive a próxima, está em [[Tony - Próximas atualizações]].
+
 - **v2** — ferramentas (laço de tool calling, descoberta automática), começando por ler a Inteligência sob demanda.
 - **v2.x** — busca no vault (textual, depois embeddings), primeira ferramenta de escrita com confirmação.
 - **v3** — fontes externas (e-mail da escola), agendamento.

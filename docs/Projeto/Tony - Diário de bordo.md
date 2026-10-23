@@ -19,6 +19,7 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
 - Publicado em [github.com/josiascardosodias-glitch/tony](https://github.com/josiascardosodias-glitch/tony),
   com a tag e a release `v0.1.0`. Conferido antes que config local, logs e resumos ficaram fora do git.
 - Documentação no vault: [[Tony - Como usar e evoluir]], mapa com o estado atual e o briefing com o andamento das etapas.
+- Roadmap: [[Tony - Próximas atualizações]] no vault (com a v0.2 detalhada para discutir) e `ROADMAP.md` no repositório.
 
 **Pendente**
 - Conversar de verdade e marcar `/bom` e `/ruim`.

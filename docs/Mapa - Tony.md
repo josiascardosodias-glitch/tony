@@ -16,11 +16,13 @@ Esta pasta (`08-Tony/`) é escrita à mão — o vault-sync não mexe aqui.
 ## Projeto — o que nós planejamos (o Tony não lê)
 
 1. [[Tony - Como usar e evoluir]] — comandos, onde fica cada coisa e o ciclo para melhorar o diálogo
-2. [[Tony - Briefing v1]] — o plano da v1: decisões, estrutura, etapas e roadmap
-3. [[Tony - Diário de bordo]] — o que foi feito, travou e aprendi em cada sessão
-4. [[Tony - Conceito inicial (GPT)]] — histórico: a primeira ideia, substituída pelo briefing
+2. [[Tony - Próximas atualizações]] — roadmap vivo: a próxima versão detalhada, dúvidas e ideias soltas
+3. [[Tony - Briefing v1]] — o plano da v1: decisões, estrutura e etapas
+4. [[Tony - Diário de bordo]] — o que foi feito, travou e aprendi em cada sessão
+5. [[Tony - Conceito inicial (GPT)]] — histórico: a primeira ideia, substituída pelo briefing
 
-No repositório: `DECISOES.md` (cada decisão com o porquê) e `CHANGELOG.md` (o que mudou em cada versão).
+No repositório: `DECISOES.md` (cada decisão com o porquê), `CHANGELOG.md` (o que mudou em cada versão)
+e `ROADMAP.md` (resumo público das próximas versões).
 
 ## Inteligência — o que o Tony lê
 
