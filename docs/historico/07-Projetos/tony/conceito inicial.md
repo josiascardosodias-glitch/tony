@@ -390,6 +390,4 @@ O objetivo imediato não é construir um modelo de IA do zero, mas criar uma apl
 
 Próximo passo: transformar este contexto em um planejamento técnico do Tony, definindo o primeiro protótipo, a estrutura do projeto Python, o modelo local e o fluxo inicial de execução.
 
-
-
 repositório: (ainda não existe).
