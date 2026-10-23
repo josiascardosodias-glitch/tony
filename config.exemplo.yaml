@@ -1,0 +1,24 @@
+# Configuração padrão do Tony (vai para o git).
+# Para mudar algo, crie um config.local.yaml só com as chaves que quer trocar.
+# O config.local.yaml fica fora do git: é lá que vão caminhos e dados seus.
+
+modelo: "gemma4:31b-cloud"     # qualquer modelo do Ollama, local (ex.: gemma4:e4b) ou de nuvem (sufixo -cloud)
+
+ollama:
+  host: "http://localhost:11434"
+  keep_alive: "30m"            # quanto tempo um modelo local fica carregado na memória
+
+geracao:
+  temperatura: 0.7             # 0 = sempre igual, 1 = mais solto; conversa pede um meio-termo
+  pensar: null                 # null = não envia; true/false ou "low"/"medium"/"high", conforme o modelo
+
+contexto:
+  limite: 8192                 # tokens; passando de 80% disso, o começo da conversa vira resumo
+  num_ctx: 8192                # janela de contexto de modelo local (modelo de nuvem ignora)
+
+memoria:
+  inteligencia: ""             # pasta de notas .md que o Tony lê no início de cada conversa (vazio = nenhuma)
+  resumos: "dados/resumos"     # onde ficam os resumos das conversas
+
+personalidade: "personalidade"
+logs: "logs"

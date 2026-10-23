@@ -1,0 +1,9 @@
+# Dados pessoais: nunca vão para o repositório público
+config.local.yaml
+logs/
+dados/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
