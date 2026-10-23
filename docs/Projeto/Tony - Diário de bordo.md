@@ -15,10 +15,20 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
 **Feito**
 - A v1 deixou de ser "perguntas sobre o vault" e virou **só diálogo**: o Tony não precisa ser útil
   logo, precisa conversar bem e evoluir. Ferramentas e busca foram para a v2 ([[Tony - Briefing v1]]).
-- Começou a construção do esqueleto em `~/projetos/tony` com `uv`.
+- Etapa 1 do briefing pronta em `~/projetos/tony`: personalidade em 3 arquivos, conversa com streaming,
+  memória (Inteligência + resumo da última conversa), resumo automático quando o contexto enche,
+  log `.jsonl` com `/bom` e `/ruim`, comandos `/nova` e `/prompt`. Testado sem o modelo (com um modelo falso).
+
+**Pendente**
+- Etapa 2: instalar o Ollama (`curl -fsSL https://ollama.com/install.sh | sh`), `ollama signin` e escolher o modelo de nuvem.
+- Primeiro commit do repositório.
 
 **Aprendi**
 - O Python do sistema (Ubuntu) vem sem `venv` e `pip`; o `uv` cria o ambiente sem precisar de `sudo`.
+- Com `stream=True`, a lib `ollama` não converte falha de rede em `ConnectionError`: o erro do `httpx`
+  escapa direto. Só apareceu porque testei com o Ollama desligado — testar o caminho de erro vale a pena.
+- Um gerador (função com `yield`) pode desfazer o próprio estado num `except`: se a resposta falha no
+  meio, a fala do usuário sai do histórico e a conversa não fica com pergunta sem resposta.
 
 ## 2026-10-23 — Definição da v1
 
