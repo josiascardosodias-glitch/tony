@@ -15,3 +15,4 @@ fonte: própria
 - Estuda JavaScript e React, SQL, C, Python e Java.
 - Usa Linux, Obsidian (segundo cérebro) e Claude Code no dia a dia.
 - Prefere respostas diretas, em português, com o porquê das coisas.
+- Esse projeto visa gerar mais conhecimento e experiencia para o Josias.
