@@ -72,3 +72,19 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
     exemplo (`exemplos/inteligencia/`). *Por quê:* o placar só deve mudar quando mudam a personalidade
     ou o modelo — e qualquer pessoa consegue rodar.
 25. **Placares privados por enquanto** (`dados/testes/`, fora do git). Publicar depois é fácil; o contrário não.
+
+## 2026-10-23 — v0.2: revisão
+
+26. **Uma mudança por rodada na revisão.** *Por quê:* se o placar piorar, sabe-se exatamente o que
+    causou. *Fora:* várias mudanças de uma vez.
+27. **O revisor também é outro modelo (`gpt-oss:120b-cloud`, temperatura 0,3)**, pelo mesmo motivo do
+    juiz. Proposta = trocar um trecho exato de um arquivo; se o trecho não existir exatamente uma vez,
+    o erro volta ao revisor (até 3 tentativas). Só `personalidade/` pode mudar; commit é manual.
+28. **Aceitar não é manter.** Aceitar aplica e testa; depois de ver o placar e as falas marcadas, você
+    decide se a mudança fica. Desfeita, as marcações continuam pendentes e o placar daquela versão é
+    apagado (não serve de comparação).
+29. **As falas marcadas são testadas no contexto delas** (as duas trocas anteriores), com o motivo do
+    `/ruim` como critério. *Por quê:* no teste da revisão, "valeu, era isso" fora de contexto não era a
+    mesma situação. Daí veio o campo `antes` nas falas de teste.
+30. **Comparação fala por fala:** o "antes" de cada fala é o resultado mais recente dela, juntando todas
+    as rodadas. *Por quê:* uma rodada parcial (`tony testar ambiguo`) apagava a comparação das outras.

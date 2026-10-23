@@ -53,25 +53,36 @@ def julgar(juiz: Cliente, fala: str, resposta: str, espera: str) -> dict:
     )
 
 
-def rodada_anterior(pasta: Path) -> dict:
-    """Placar da última rodada salva, por id da fala: {"tamanho": "3/4", ...}."""
-    rodadas = sorted(pasta.glob("*.json")) if pasta.is_dir() else []
-    if not rodadas:
-        return {}
-    dados = json.loads(rodadas[-1].read_text(encoding="utf-8"))
-    return {r["id"]: f"{r['acertos']}/{r['vezes']}" for r in dados["resultados"]}
+def ultimos_placares(cfg: dict) -> dict:
+    """O placar mais recente de cada fala, juntando todas as rodadas salvas.
+
+    Devolve {id: {"placar": "3/4", "personalidade": "68c6d83"}}. Fala por fala, para que uma rodada
+    parcial (`tony testar ambiguo`) não apague a comparação das outras.
+    """
+    pasta = config.caminho(cfg["testes"]["resultados"])
+    placares = {}
+    for rodada in sorted(pasta.glob("*.json")) if pasta.is_dir() else []:
+        dados = json.loads(rodada.read_text(encoding="utf-8"))
+        for r in dados["resultados"]:
+            placares[r["id"]] = {"placar": f"{r['acertos']}/{r['vezes']}", "personalidade": dados["personalidade"]}
+    return placares
 
 
-def rodar(cfg: dict, ids: list[str], vezes: int | None) -> None:
+def rodar(cfg: dict, ids: list[str] = (), vezes: int | None = None,
+          falas: list[dict] | None = None, salvar: bool = True) -> dict:
+    """Roda as falas, mostra o placar e devolve {"resultados", "total", "possivel", "arquivo"}.
+
+    `falas` troca as do falas.yaml (a revisão usa isso para testar as falas marcadas com /ruim).
+    """
     tony = Cliente(cfg)
     juiz = Cliente(cfg, modelo=cfg["testes"]["juiz"], temperatura=0)
     pasta_personalidade = config.caminho(cfg["personalidade"])
     personalidade = carregar_personalidade(pasta_personalidade)
     versao = versao_personalidade(pasta_personalidade)
     inteligencia = ler_inteligencia(config.caminho(cfg["testes"]["inteligencia"]))
-    falas = carregar_falas(config.caminho(cfg["testes"]["falas"]), ids)
-    pasta_resultados = config.caminho(cfg["testes"]["resultados"])
-    anterior = rodada_anterior(pasta_resultados)
+    if falas is None:
+        falas = carregar_falas(config.caminho(cfg["testes"]["falas"]), ids)
+    anteriores = ultimos_placares(cfg) if salvar else {}
 
     print(f"Personalidade {versao} · Tony: {tony.modelo} · juiz: {juiz.modelo}\n")
     resultados = []
@@ -81,12 +92,15 @@ def rodar(cfg: dict, ids: list[str], vezes: int | None) -> None:
         respostas = []
         for _ in range(n):
             conversa = Conversa(tony, cfg["contexto"]["limite"], personalidade, inteligencia, ultima_conversa="")
+            for troca in item.get("antes", []):  # conversa que veio antes da fala testada
+                conversa.mensagens += [{"role": "user", "content": troca["pessoa"]},
+                                       {"role": "assistant", "content": troca["tony"]}]
             resposta = "".join(conversa.responder(item["fala"]))
             veredito = julgar(juiz, item["fala"], resposta, item["espera"])
             respostas.append({"resposta": resposta, "cumpre": bool(veredito["cumpre"]), "motivo": veredito["motivo"]})
             print("✓" if veredito["cumpre"] else "✗", end="", flush=True)
         acertos = sum(r["cumpre"] for r in respostas)
-        antes = f"   (antes: {anterior[item['id']]})" if item["id"] in anterior else ""
+        antes = f"   (antes: {anteriores[item['id']]['placar']})" if item["id"] in anteriores else ""
         print(f"  {acertos}/{n}{antes}")
         for falha in [r for r in respostas if not r["cumpre"]][:2]:
             print(f"{'':17}✗ {falha['motivo']}")
@@ -95,10 +109,14 @@ def rodar(cfg: dict, ids: list[str], vezes: int | None) -> None:
 
     total, possivel = sum(r["acertos"] for r in resultados), sum(r["vezes"] for r in resultados)
     print(f"\nTotal: {total}/{possivel}")
-    pasta_resultados.mkdir(parents=True, exist_ok=True)
-    arquivo = pasta_resultados / f"{datetime.now():%Y-%m-%d_%H%M%S}_{versao.replace('*', '-editada')}.json"
-    arquivo.write_text(json.dumps(
-        {"personalidade": versao, "modelo": tony.modelo, "juiz": juiz.modelo, "resultados": resultados},
-        ensure_ascii=False, indent=2,
-    ), encoding="utf-8")
-    print(f"Respostas e motivos completos em {arquivo.relative_to(config.RAIZ)}")
+    arquivo = None
+    if salvar:
+        pasta_resultados = config.caminho(cfg["testes"]["resultados"])
+        pasta_resultados.mkdir(parents=True, exist_ok=True)
+        arquivo = pasta_resultados / f"{datetime.now():%Y-%m-%d_%H%M%S}_{versao.replace('*', '-editada')}.json"
+        arquivo.write_text(json.dumps(
+            {"personalidade": versao, "modelo": tony.modelo, "juiz": juiz.modelo, "resultados": resultados},
+            ensure_ascii=False, indent=2,
+        ), encoding="utf-8")
+        print(f"Respostas e motivos completos em {arquivo.relative_to(config.RAIZ)}")
+    return {"resultados": resultados, "total": total, "possivel": possivel, "arquivo": arquivo}

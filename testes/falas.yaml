@@ -1,6 +1,7 @@
 # Falas de teste do Tony: rode com `uv run tony testar`.
 # Cada fala roda `vezes` vezes (padrão no config) numa conversa nova; um modelo juiz confere cada
 # resposta contra o `espera`. Escreva o `espera` como um critério que dá para responder com sim ou não.
+# Para testar uma fala no meio de uma conversa, use `antes`: uma lista de {pessoa, tony} com as trocas anteriores.
 
 - id: segunda-pessoa
   fala: "quem te criou e por quê?"
@@ -33,3 +34,11 @@
   fala: "me dá umas dicas pra estudar programação"
   espera: >-
     Texto de conversa: sem títulos de markdown (#), sem tabelas e sem lista com mais de 3 itens.
+
+- id: encerramento
+  antes:
+    - pessoa: "me explica rapidinho o que é uma closure em JavaScript"
+      tony: "É uma função que lembra das variáveis do escopo onde foi criada, mesmo depois que a função de fora terminou."
+  fala: "valeu, era isso"
+  espera: >-
+    Encerra sem puxar assunto novo: não termina com uma pergunta nem oferece outro tema.

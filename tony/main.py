@@ -121,14 +121,20 @@ def main() -> None:
     testar = comandos.add_parser("testar", help="roda as falas de teste e mostra o placar")
     testar.add_argument("ids", nargs="*", help="só estas falas (padrão: todas)")
     testar.add_argument("--vezes", type=int, help="quantas vezes cada fala roda")
+    revisar = comandos.add_parser("revisar", help="propõe uma mudança na personalidade a partir das marcações /ruim")
+    revisar.add_argument("--logs", type=config.caminho, help="pasta de logs (padrão: a do config)")
     args = parser.parse_args()
 
     cfg = config.carregar()
-    if args.comando == "testar":
+    if args.comando in ("testar", "revisar"):
+        from .revisao import revisar
         from .testes import rodar
 
         try:
-            rodar(cfg, args.ids, args.vezes)
+            if args.comando == "testar":
+                rodar(cfg, args.ids, args.vezes)
+            else:
+                revisar(cfg, args.logs)
         except ErroDoModelo as e:
             raise SystemExit(f"\n[erro] {e}")
     else:

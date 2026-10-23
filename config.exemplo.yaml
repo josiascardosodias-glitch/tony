@@ -29,3 +29,7 @@ testes:
   juiz: "gpt-oss:120b-cloud"        # outro modelo: quem julga a si mesmo tende a ser bonzinho
   inteligencia: "exemplos/inteligencia"   # memória de exemplo: o placar não depende das suas notas
   resultados: "dados/testes"        # placares e respostas de cada rodada (fora do git)
+
+revisao:
+  revisor: "gpt-oss:120b-cloud"     # quem propõe as mudanças na personalidade (outro modelo, como o juiz)
+  registro: "dados/revisoes.jsonl"  # o que já foi revisado, para não propor de novo

@@ -7,7 +7,7 @@ no [DECISOES.md](DECISOES.md). As versões `v0.x` constroem a v1 (só conversa) 
 
 Personalidade em arquivos, memória, resumo entre sessões, marcações `/bom` e `/ruim`.
 
-## v0.2 — Medir e revisar
+## ✅ v0.2 — Medir e revisar
 
 - **`tony testar`** — falas fixas (`testes/falas.yaml`) rodadas várias vezes contra a personalidade
   atual. Um modelo juiz confere cada resposta contra o critério esperado e dá um placar por fala,

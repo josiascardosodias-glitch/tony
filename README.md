@@ -2,7 +2,7 @@
 
 Um agente de IA pessoal construído do zero em Python, para aprender como agentes funcionam por dentro.
 
-**Versão 1: só conversa.** O foco desta versão não é ser útil, é conversar bem e melhorar com o uso:
+**v0.2: só conversa.** O foco desta versão não é ser útil, é conversar bem e melhorar com o uso:
 a personalidade fica em arquivos de texto versionados, o Tony lembra da conversa anterior, e cada
 resposta pode ser marcada como boa ou ruim para guiar os próximos ajustes.
 
@@ -59,6 +59,22 @@ segunda-pessoa   ✓✓✓✓  4/4   (antes: 0/4)
 
 As respostas e os motivos do juiz ficam em `dados/testes/` (fora do git).
 
+## Revisar
+
+```bash
+uv run tony revisar
+```
+
+Lê as respostas marcadas com `/ruim` nos logs e pede a um segundo modelo, o revisor (`revisao.revisor`
+no config), **uma** mudança na personalidade, mostrada como diff:
+
+- **aceitar** — a mudança é aplicada e testada: placar completo antes e depois, mais as próprias falas
+  marcadas (com a conversa que veio antes delas). No fim, você decide se ela fica;
+- **outra proposta** — o revisor tenta algo diferente;
+- **descartar** — as marcações não eram problema e não serão propostas de novo.
+
+Só arquivos de `personalidade/` são alterados, e o commit fica com você.
+
 ## Como o Tony evolui
 
 1. **Personalidade** — `personalidade/*.md`. Edite o texto e faça commit: o log de cada sessão
@@ -67,6 +83,7 @@ As respostas e os motivos do juiz ficam em `dados/testes/` (fora do git).
    um resumo em `dados/resumos/`, lido no início da próxima.
 3. **Retorno** — `logs/*.jsonl` guarda cada fala, resposta e marcação `/bom`/`/ruim`.
 4. **Medida** — `tony testar` antes e depois de cada mudança: só fica a mudança que não piora o placar.
+5. **Revisão** — `tony revisar` junta tudo: das marcações a uma mudança testada, uma por rodada.
 
 ## Estrutura
 
@@ -83,6 +100,7 @@ tony/
     ├── memoria.py        personalidade, notas e resumos
     ├── registro.py       log da sessão
     ├── testes.py         falas de teste e juiz
+    ├── revisao.py        propostas de mudança a partir das marcações
     └── config.py         leitura da configuração
 ```
 
