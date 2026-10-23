@@ -1,3 +1,14 @@
+---
+criado: 2026-10-23
+tags: [tony, projeto, historico]
+fonte: conversa com o GPT
+---
+
+> [!info] Mapa: [[Mapa - Tony]]
+
+> [!warning] Histórico
+> Primeira ideia do Tony, escrita pelo GPT. Substituída pelo [[Tony - Briefing v1]] em 2026-10-23:
+> várias premissas daqui (modelo local, VM, e-mail como primeira funcionalidade) foram revistas.
 
 Tony — Documento de contexto e planejamento inicial
 
