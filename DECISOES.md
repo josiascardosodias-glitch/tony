@@ -52,6 +52,6 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
     *Por quê:* tom mais próximo da personalidade, respostas em ~1 s, plano gratuito, e a família Gemma 4
     tem versões pequenas (`e2b`, `e4b`) para a troca futura por um modelo local.
 
-## Pendentes
-
-- Licença do repositório (sugestão: MIT).
+19. **Licença MIT.** Qualquer pessoa pode usar e modificar, mantendo o crédito.
+20. **Personalidade fala com o criador em segunda pessoa.** No teste, 8 de 8 respostas diziam "o projeto
+    do Josias" para o próprio Josias; a identidade agora diz que quem conversa é o criador. Depois: 8 de 8 certas.

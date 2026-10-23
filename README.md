@@ -11,7 +11,7 @@ resposta pode ser marcada como boa ou ruim para guiar os próximos ajustes.
 Requisitos: [uv](https://docs.astral.sh/uv/) e [Ollama](https://ollama.com).
 
 ```bash
-git clone <este repositório> && cd tony
+git clone https://github.com/josiascardosodias-glitch/tony.git && cd tony
 uv sync
 ollama signin            # só para modelos de nuvem (sufixo -cloud)
 ```
@@ -64,4 +64,8 @@ tony/
     └── config.py         leitura da configuração
 ```
 
-As decisões de projeto, com o motivo de cada uma, estão em [DECISOES.md](DECISOES.md).
+As decisões de projeto, com o motivo de cada uma, estão em [DECISOES.md](DECISOES.md); o que mudou em cada versão, em [CHANGELOG.md](CHANGELOG.md).
+
+## Licença
+
+[MIT](LICENSE)
