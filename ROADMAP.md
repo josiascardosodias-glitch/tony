@@ -15,9 +15,10 @@ Personalidade em arquivos, memória, resumo entre sessões, marcações `/bom` e
 - **`tony revisar`** — lê as respostas marcadas com `/ruim`, propõe mudanças na personalidade
   (como diff), aplica só as aceitas e roda os testes antes e depois.
 
-## v0.3 — Memória
+## ✅ v0.3 — Memória
 
-Testar e ajustar o resumo entre sessões; lembrar além da última conversa.
+Memória das conversas antigas (os resumos consolidados), `/lembrar` com confirmação e falas de teste
+de memória: lembra, não inventa, não puxa assunto velho do nada, guarda datas certas.
 
 ## v1.0 — A v1 completa
 

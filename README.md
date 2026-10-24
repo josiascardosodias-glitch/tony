@@ -2,9 +2,9 @@
 
 Um agente de IA pessoal construído do zero em Python, para aprender como agentes funcionam por dentro.
 
-**v0.2: só conversa.** O foco desta versão não é ser útil, é conversar bem e melhorar com o uso:
-a personalidade fica em arquivos de texto versionados, o Tony lembra da conversa anterior, e cada
-resposta pode ser marcada como boa ou ruim para guiar os próximos ajustes.
+**v0.3: só conversa.** O foco desta versão não é ser útil, é conversar bem e melhorar com o uso:
+a personalidade fica em arquivos de texto versionados, o Tony lembra da última conversa e das mais
+antigas, e cada resposta pode ser marcada como boa ou ruim para guiar os próximos ajustes.
 
 ## Instalar
 
@@ -37,6 +37,7 @@ uv run tony
 |---|---|
 | `/bom` | marca a última resposta como boa |
 | `/ruim <motivo>` | marca a última resposta como ruim |
+| `/lembrar <fato>` | guarda um fato numa nota da pasta `memoria.inteligencia` (pede confirmação) |
 | `/nova` | encerra a conversa (com resumo) e começa outra |
 | `/prompt` | mostra o prompt de sistema montado |
 | `/sair` | encerra, guardando um resumo para a próxima vez |
@@ -50,7 +51,9 @@ uv run tony testar --vezes 8       # mais repetições, placar mais confiável
 ```
 
 Cada fala roda várias vezes (a resposta varia) numa conversa nova, com a memória de exemplo de
-`exemplos/inteligencia/`. Um segundo modelo, o juiz (`testes.juiz` no config), confere cada resposta
+`exemplos/inteligencia/`. Uma fala pode trazer a sua própria memória (`ultima_conversa`, `memoria`), e
+`tarefa: resumo` ou `tarefa: memoria` julgam o resumo da conversa ou a memória depois dele, em vez de
+uma resposta. Um segundo modelo, o juiz (`testes.juiz` no config), confere cada resposta
 contra o critério `espera` e o placar sai por fala, comparado com a rodada anterior:
 
 ```
@@ -80,7 +83,9 @@ Só arquivos de `personalidade/` são alterados, e o commit fica com você.
 1. **Personalidade** — `personalidade/*.md`. Edite o texto e faça commit: o log de cada sessão
    registra a versão da personalidade que estava em uso.
 2. **Memória** — as notas da pasta `memoria.inteligencia` entram no prompt; ao sair, a conversa vira
-   um resumo em `dados/resumos/`, lido no início da próxima.
+   um resumo em `dados/resumos/`, lido inteiro no início da próxima. O resumo anterior, que deixa de
+   ser o último, é consolidado em `dados/memoria.md`: uma lista de até 40 fatos com data, que também
+   entra no prompt. `/lembrar` grava um fato na pasta da Inteligência, com a sua confirmação.
 3. **Retorno** — `logs/*.jsonl` guarda cada fala, resposta e marcação `/bom`/`/ruim`.
 4. **Medida** — `tony testar` antes e depois de cada mudança: só fica a mudança que não piora o placar.
 5. **Revisão** — `tony revisar` junta tudo: das marcações a uma mudança testada, uma por rodada.
@@ -96,8 +101,8 @@ tony/
 └── tony/
     ├── main.py           loop do terminal e comandos
     ├── cliente.py        único arquivo que conhece o Ollama
-    ├── conversa.py       histórico, prompt de sistema e resumo quando o contexto enche
-    ├── memoria.py        personalidade, notas e resumos
+    ├── conversa.py       histórico, prompt de sistema, resumos e consolidação da memória
+    ├── memoria.py        personalidade, notas, resumos, memória e lembretes
     ├── registro.py       log da sessão
     ├── testes.py         falas de teste e juiz
     ├── revisao.py        propostas de mudança a partir das marcações

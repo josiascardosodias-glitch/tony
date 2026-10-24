@@ -88,3 +88,27 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
     mesma situação. Daí veio o campo `antes` nas falas de teste.
 30. **Comparação fala por fala:** o "antes" de cada fala é o resultado mais recente dela, juntando todas
     as rodadas. *Por quê:* uma rodada parcial (`tony testar ambiguo`) apagava a comparação das outras.
+
+## 2026-10-24 — v0.3: memória
+
+31. **Memória acumulada em um arquivo só (`dados/memoria.md`)**, com no máximo 40 linhas. Quando um
+    resumo deixa de ser o último, o modelo o junta à memória; o último resumo continua inteiro no prompt.
+    *Por quê:* o tamanho do prompt fica sob controle por mais conversas que existam, e nada é lido
+    duas vezes. *Fora:* os N últimos resumos inteiros (esquece tudo antes de N) e resumo por semana
+    (mais peças, prompt maior).
+32. **A memória marca até qual resumo já entrou** (`<!-- até: ... -->` na primeira linha). Se a
+    consolidação falhar, os resumos seguintes ficam pendentes e entram na próxima vez — nenhum se perde.
+33. **Consolidação com temperatura 0,2**, com o modelo do Tony. É organizar fatos, não conversar.
+34. **O código entrega datas e calendário; o modelo só consulta.** Sem a data da conversa, o modelo
+    inventava as datas da memória (2/4); com a data mas sem calendário, errava "sexta que vem" (2/6,
+    caía no sábado). Com 14 dias listados, 6/6. *Regra:* conta de calendário é do código.
+35. **`/lembrar` escreve no vault, numa nota só dele** (`Tony - Lembretes.md` na pasta da
+    Inteligência), depois de mostrar o fato e pedir confirmação. Nunca edita notas que você escreveu.
+    *Por quê:* fica visível e editável no Obsidian, e a pasta já é lida a cada conversa.
+36. **Cada seção de memória do prompt diz quando usá-la.** Só a regra na personalidade não bastava:
+    numa pergunta de git, o Tony puxava o app da última conversa (1/4 a 7/8, oscilando). Com o aviso
+    junto do resumo, 12/12 — e continuou lembrando quando perguntado (8/8). *Por quê:* o resumo é a
+    última coisa do prompt e pesa mais; a instrução precisa estar colada nele.
+37. **Critério de teste também se corrige.** Duas falhas eram do juiz, não do Tony (o motivo dito
+    pelo próprio Tony contado como "inventado"; "SQL" não aceito como resposta a "o que eu decidi
+    estudar antes de Node?"). Antes de mexer na personalidade, ler a resposta que falhou.

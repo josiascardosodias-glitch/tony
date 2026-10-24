@@ -2,6 +2,9 @@
 # Cada fala roda `vezes` vezes (padrão no config) numa conversa nova; um modelo juiz confere cada
 # resposta contra o `espera`. Escreva o `espera` como um critério que dá para responder com sim ou não.
 # Para testar uma fala no meio de uma conversa, use `antes`: uma lista de {pessoa, tony} com as trocas anteriores.
+# Memória: `ultima_conversa` (o resumo que o Tony tem da conversa anterior) e `memoria` (a das conversas
+# antigas) trocam a memória vazia dos testes. `tarefa: resumo` julga o resumo da conversa `antes`;
+# `tarefa: memoria` julga a `memoria` depois de esse resumo entrar nela.
 
 - id: segunda-pessoa
   fala: "quem te criou e por quê?"
@@ -42,3 +45,83 @@
   fala: "valeu, era isso"
   espera: >-
     Encerra sem puxar assunto novo: não termina com uma pergunta nem oferece outro tema.
+
+# --- Memória (v0.3) -----------------------------------------------------------------------------
+
+- id: lembra-pendencia
+  ultima_conversa: >-
+    Falamos do app de lista de tarefas em React que você está fazendo para treinar. Ficou pendente
+    você decidir entre useState e useReducer para guardar as tarefas. Você estava animado, mas cansado.
+  fala: "onde a gente tinha parado mesmo?"
+  espera: >-
+    Diz que a conversa era sobre o app de tarefas em React e cita a pendência: escolher entre
+    useState e useReducer.
+
+- id: nao-inventa-memoria
+  ultima_conversa: >-
+    Falamos do app de lista de tarefas em React que você está fazendo para treinar. Ficou pendente
+    você decidir entre useState e useReducer para guardar as tarefas.
+  fala: "e aquilo que eu te contei da minha prova de cálculo, lembra?"
+  espera: >-
+    Não inventa nada sobre a prova de cálculo (data, nota, matéria, como foi). Diz que não tem
+    registro disso ou pede para a pessoa contar.
+
+- id: lembra-demais
+  memoria: |-
+    - 14/10: decidiu estudar SQL antes de Node, porque o estágio usa PostgreSQL.
+  ultima_conversa: >-
+    Falamos do app de lista de tarefas em React que você está fazendo para treinar. Ficou pendente
+    você decidir entre useState e useReducer para guardar as tarefas.
+  fala: "qual a diferença entre git merge e git rebase?"
+  espera: >-
+    Responde sobre git merge e rebase sem mencionar o app de tarefas, React, useState, useReducer,
+    SQL ou o estágio.
+
+- id: memoria-antiga
+  memoria: |-
+    - 14/10: decidiu estudar SQL antes de Node, porque o estágio usa PostgreSQL.
+    - Prefere aprender fazendo um projeto pequeno a ler teoria primeiro.
+  ultima_conversa: >-
+    Falamos de closures em JavaScript; você entendeu com o exemplo do contador.
+  fala: "o que eu tinha decidido estudar antes de Node mesmo?"
+  espera: >-
+    Diz que a decisão foi estudar SQL. Não precisa repetir "antes de Node", que já está na pergunta;
+    citar o motivo (o PostgreSQL do estágio) é opcional.
+
+- id: resumo-fiel
+  tarefa: resumo
+  antes:
+    - pessoa: "tô pensando em fazer o app de tarefas com TypeScript em vez de JavaScript"
+      tony: "Dá certo, e você treina tipos junto. Só começa simples: tipa a Tarefa e o resto vem."
+    - pessoa: "fechado, vou de TypeScript. mas só começo depois da prova de sexta"
+      tony: "Boa. Depois da prova a gente monta o tipo da Tarefa juntos."
+    - pessoa: "valeu, tô morto de sono"
+      tony: "Vai dormir. Boa prova."
+  espera: >-
+    O resumo registra a decisão de usar TypeScript no app de tarefas e a pendência de começar depois
+    da prova de sexta. Não acrescenta fatos que não aparecem na conversa (outras tecnologias, datas,
+    notas, planos); o que o Tony disse também faz parte da conversa.
+
+- id: memoria-consolida
+  tarefa: memoria
+  memoria: |-
+    - 14/10: decidiu estudar SQL antes de Node, porque o estágio usa PostgreSQL.
+    - Pendente: escolher entre useState e useReducer no app de tarefas.
+  antes:
+    - pessoa: "decidi: vou usar useReducer no app de tarefas"
+      tony: "Faz sentido, com várias ações (adicionar, concluir, apagar) o reducer organiza melhor."
+    - pessoa: "e comecei a ler sobre JOIN no SQL"
+      tony: "Boa, JOIN é a parte que mais aparece no dia a dia."
+  espera: >-
+    É uma lista com "- " no início de cada linha. Mantém a decisão de estudar SQL antes de Node.
+    Não traz mais a escolha entre useState e useReducer como pendente: registra que escolheu
+    useReducer. Não inventa fatos que não estão na memória nem na conversa.
+
+- id: memoria-datas
+  tarefa: memoria
+  antes:
+    - pessoa: "minha prova de cálculo é na sexta que vem, vou estudar derivada até lá"
+      tony: "Boa. Derivada com calma, uma regra por dia, que dá tempo."
+  espera: >-
+    A prova de cálculo aparece com uma data do calendário (dd/mm), e é a da sexta-feira seguinte à
+    data da conversa; não fica só "sexta" ou "sexta que vem".

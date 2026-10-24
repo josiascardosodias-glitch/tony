@@ -6,13 +6,15 @@ import time
 
 from . import config
 from .cliente import Cliente, ErroDoModelo
-from .conversa import Conversa
-from .memoria import carregar_personalidade, ler_inteligencia, salvar_resumo, ultimo_resumo, versao_personalidade
+from .conversa import TEMPERATURA_MEMORIA, Conversa, consolidar_memoria
+from .memoria import (carregar_personalidade, data_do_resumo, lembrar, ler_inteligencia, ler_memoria, resumos_pendentes,
+                      salvar_memoria, salvar_resumo, ultimo_resumo, versao_personalidade)
 from .registro import Registro
 
 AJUDA = """Comandos:
   /bom              marca a última resposta como boa
   /ruim <motivo>    marca a última resposta como ruim (o motivo é o que mais ajuda a corrigir)
+  /lembrar <fato>   guarda um fato na nota de lembretes da Inteligência (pede confirmação)
   /nova             encerra esta conversa (com resumo) e começa outra
   /prompt           mostra o prompt de sistema que o Tony está usando agora
   /sair             encerra (Ctrl+D também)"""
@@ -25,6 +27,9 @@ class Sessao:
         self.cfg = cfg
         self.cliente = Cliente(cfg)
         self.pasta_resumos = config.caminho(cfg["memoria"]["resumos"])
+        self.arquivo_memoria = config.caminho(cfg["memoria"]["memoria"])
+        self.pasta_inteligencia = config.caminho(cfg["memoria"]["inteligencia"])
+        self.organizador = Cliente(cfg, temperatura=TEMPERATURA_MEMORIA)
         pasta_personalidade = config.caminho(cfg["personalidade"])
         self.personalidade = carregar_personalidade(pasta_personalidade)
         self.registro = Registro(
@@ -39,8 +44,9 @@ class Sessao:
             self.cliente,
             limite=self.cfg["contexto"]["limite"],
             personalidade=self.personalidade,
-            inteligencia=ler_inteligencia(config.caminho(self.cfg["memoria"]["inteligencia"])),
+            inteligencia=ler_inteligencia(self.pasta_inteligencia),
             ultima_conversa=ultimo_resumo(self.pasta_resumos),
+            memoria=ler_memoria(self.arquivo_memoria)[0],
         )
 
     def encerrar_conversa(self) -> None:
@@ -54,6 +60,42 @@ class Sessao:
             return
         salvar_resumo(self.pasta_resumos, resumo)
         self.registro.anotar("resumo", texto=resumo)
+        self.atualizar_memoria()
+
+    def atualizar_memoria(self) -> None:
+        """O resumo que deixou de ser o último entra na memória das conversas antigas."""
+        memoria, ate = ler_memoria(self.arquivo_memoria)
+        for resumo in resumos_pendentes(self.pasta_resumos, ate):
+            try:
+                memoria = consolidar_memoria(self.organizador, memoria, resumo.read_text(encoding="utf-8"),
+                                             data_do_resumo(resumo))
+            except ErroDoModelo as e:
+                print(f"[aviso] não consegui atualizar a memória ({e}); tento de novo na próxima conversa.")
+                return
+            salvar_memoria(self.arquivo_memoria, memoria, resumo.stem)
+            self.registro.anotar("memoria", resumo=resumo.stem, texto=memoria)
+
+    def lembrar(self, fato: str) -> None:
+        if not fato:
+            print("uso: /lembrar <fato>  (ex.: /lembrar minha prova de cálculo é dia 12/11)")
+            return
+        if not self.pasta_inteligencia or not self.pasta_inteligencia.is_dir():
+            print("não há pasta de Inteligência configurada (memoria.inteligencia no config.local.yaml).")
+            return
+        arquivo = self.pasta_inteligencia / self.cfg["memoria"]["lembretes"]
+        print(f"vou guardar em {arquivo.name} (essa pasta vai para o modelo na nuvem):\n  - {fato}")
+        try:
+            confirma = input("confirma? [s/N] ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            confirma = ""
+            print()
+        if confirma != "s":
+            print("não guardei.")
+            return
+        lembrar(arquivo, fato)
+        self.conversa.lembrados.append(fato)
+        self.registro.anotar("lembrete", fato=fato)
+        print("guardado.")
 
     def comando(self, texto: str) -> bool:
         """Executa um comando /. Devolve False quando é hora de sair."""
@@ -63,6 +105,8 @@ class Sessao:
         if nome in ("/bom", "/ruim"):
             marcou = self.registro.marcar(nome[1:], resto.strip())
             print("marcado." if marcou else "ainda não há resposta para marcar.")
+        elif nome == "/lembrar":
+            self.lembrar(resto.strip())
         elif nome == "/nova":
             self.encerrar_conversa()
             self.conversa = self._nova_conversa()

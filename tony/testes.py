@@ -1,8 +1,11 @@
 """Falas de teste: roda falas fixas contra a personalidade atual e um modelo juiz dá o placar.
 
-Cada fala roda várias vezes (a resposta varia a cada vez), sempre numa conversa nova, sem o resumo
-da última conversa e com a memória de exemplo — assim o placar só muda quando a personalidade ou o
-modelo mudam.
+Cada fala roda várias vezes (a resposta varia a cada vez), sempre numa conversa nova e com a
+Inteligência de exemplo; resumo da última conversa e memória antiga só entram quando a fala traz os
+seus (`ultima_conversa`, `memoria`) — assim o placar só muda quando a personalidade ou o modelo mudam.
+
+Além de respostas, dá para testar a memória: `tarefa: resumo` julga o resumo que o Tony faz da
+conversa `antes`, e `tarefa: memoria` julga a memória depois de esse resumo entrar nela.
 """
 
 import json
@@ -13,7 +16,7 @@ import yaml
 
 from . import config
 from .cliente import Cliente
-from .conversa import Conversa
+from .conversa import DIAS, TEMPERATURA_MEMORIA, Conversa, consolidar_memoria
 from .memoria import carregar_personalidade, ler_inteligencia, versao_personalidade
 
 ESQUEMA_VEREDITO = {
@@ -26,8 +29,9 @@ ESQUEMA_VEREDITO = {
 }
 
 PEDIDO_JUIZ = (
-    "Você avalia respostas de um assistente chamado Tony. Você recebe a fala da pessoa, a resposta "
-    "do Tony e um critério. Decida se a resposta cumpre o critério — só o critério, não a qualidade "
+    "Você avalia um assistente chamado Tony. Você recebe a situação (a fala da pessoa, às vezes com "
+    "o que o Tony lembrava de antes, ou uma conversa que ele resumiu), o que o Tony produziu e um "
+    "critério. Decida se o que ele produziu cumpre o critério — só o critério, não a qualidade "
     "geral. Seja rigoroso: na dúvida, não cumpre. Explique o motivo em uma frase, em português. "
     "Entregue o veredito chamando a função responder."
 )
@@ -43,14 +47,38 @@ def carregar_falas(arquivo: Path, ids: list[str]) -> list[dict]:
     return [f for f in falas if f["id"] in ids]
 
 
-def julgar(juiz: Cliente, fala: str, resposta: str, espera: str) -> dict:
+def julgar(juiz: Cliente, situacao: str, resposta: str, espera: str) -> dict:
     return juiz.estruturado(
         [
             {"role": "system", "content": PEDIDO_JUIZ},
-            {"role": "user", "content": f"Fala da pessoa:\n{fala}\n\nResposta do Tony:\n{resposta}\n\nCritério:\n{espera}"},
+            {"role": "user", "content": f"{situacao}\n\nO que o Tony produziu:\n{resposta}\n\nCritério:\n{espera}"},
         ],
         ESQUEMA_VEREDITO,
     )
+
+
+def produzir(item: dict, conversa: Conversa, organizador: Cliente) -> tuple[str, str]:
+    """Faz o Tony produzir o que a fala testa. Devolve (situação para o juiz, o que ele produziu)."""
+    for troca in item.get("antes", []):  # conversa que veio antes da fala testada
+        conversa.mensagens += [{"role": "user", "content": troca["pessoa"]},
+                               {"role": "assistant", "content": troca["tony"]}]
+    contexto = ""
+    if item.get("memoria"):
+        contexto += f"Memória antiga do Tony:\n{item['memoria']}\n\n"
+    if item.get("ultima_conversa"):
+        contexto += f"Resumo da última conversa, que o Tony tinha:\n{item['ultima_conversa']}\n\n"
+    tarefa = item.get("tarefa", "fala")
+    if tarefa == "fala":
+        return f"{contexto}Fala da pessoa:\n{item['fala']}", "".join(conversa.responder(item["fala"]))
+    situacao = f"{contexto}Conversa:\n{conversa.transcricao(conversa.mensagens)}"
+    resumo = conversa.resumir_para_proxima()
+    if tarefa == "resumo":
+        return situacao, resumo
+    if tarefa == "memoria":
+        hoje = datetime.now()
+        return (f"{situacao}\n\nA conversa foi em {DIAS[hoje.weekday()]}, {hoje:%d/%m/%Y}. Resumo que o Tony fez dela:\n{resumo}",
+                consolidar_memoria(organizador, item.get("memoria", ""), resumo, hoje))
+    raise SystemExit(f"tarefa desconhecida na fala {item['id']}: {tarefa} (use fala, resumo ou memoria)")
 
 
 def ultimos_placares(cfg: dict) -> dict:
@@ -76,6 +104,7 @@ def rodar(cfg: dict, ids: list[str] = (), vezes: int | None = None,
     """
     tony = Cliente(cfg)
     juiz = Cliente(cfg, modelo=cfg["testes"]["juiz"], temperatura=0)
+    organizador = Cliente(cfg, temperatura=TEMPERATURA_MEMORIA)
     pasta_personalidade = config.caminho(cfg["personalidade"])
     personalidade = carregar_personalidade(pasta_personalidade)
     versao = versao_personalidade(pasta_personalidade)
@@ -88,23 +117,21 @@ def rodar(cfg: dict, ids: list[str] = (), vezes: int | None = None,
     resultados = []
     for item in falas:
         n = vezes or item.get("vezes") or cfg["testes"]["vezes"]
-        print(f"{item['id']:<16} ", end="", flush=True)
+        print(f"{item['id']:<20} ", end="", flush=True)
         respostas = []
         for _ in range(n):
-            conversa = Conversa(tony, cfg["contexto"]["limite"], personalidade, inteligencia, ultima_conversa="")
-            for troca in item.get("antes", []):  # conversa que veio antes da fala testada
-                conversa.mensagens += [{"role": "user", "content": troca["pessoa"]},
-                                       {"role": "assistant", "content": troca["tony"]}]
-            resposta = "".join(conversa.responder(item["fala"]))
-            veredito = julgar(juiz, item["fala"], resposta, item["espera"])
+            conversa = Conversa(tony, cfg["contexto"]["limite"], personalidade, inteligencia,
+                                ultima_conversa=item.get("ultima_conversa", ""), memoria=item.get("memoria", ""))
+            situacao, resposta = produzir(item, conversa, organizador)
+            veredito = julgar(juiz, situacao, resposta, item["espera"])
             respostas.append({"resposta": resposta, "cumpre": bool(veredito["cumpre"]), "motivo": veredito["motivo"]})
             print("✓" if veredito["cumpre"] else "✗", end="", flush=True)
         acertos = sum(r["cumpre"] for r in respostas)
         antes = f"   (antes: {anteriores[item['id']]['placar']})" if item["id"] in anteriores else ""
         print(f"  {acertos}/{n}{antes}")
         for falha in [r for r in respostas if not r["cumpre"]][:2]:
-            print(f"{'':17}✗ {falha['motivo']}")
-        resultados.append({"id": item["id"], "fala": item["fala"], "espera": item["espera"],
+            print(f"{'':21}✗ {falha['motivo']}")
+        resultados.append({"id": item["id"], "fala": item.get("fala") or f"({item['tarefa']})", "espera": item["espera"],
                            "acertos": acertos, "vezes": n, "respostas": respostas})
 
     total, possivel = sum(r["acertos"] for r in resultados), sum(r["vezes"] for r in resultados)

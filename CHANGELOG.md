@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.3.0 — 2026-10-24
+
+Memória: lembrar além da última conversa, sem inventar e sem puxar assunto velho do nada.
+
+- Memória das conversas antigas em `dados/memoria.md`: quando um resumo deixa de ser o último, o
+  modelo o consolida numa lista de até 40 fatos, com a data do calendário de cada decisão e
+  pendência. Entra no prompt junto com o resumo inteiro da última conversa. Se a consolidação falhar,
+  o resumo fica pendente e entra na próxima vez.
+- `/lembrar <fato>`: grava o fato na nota `Tony - Lembretes.md` da pasta da Inteligência, só depois
+  da confirmação. Vale já na conversa atual.
+- Os resumos agora pedem só o que foi dito, e as seções de memória do prompt dizem quando usá-las.
+- Falas de teste de memória: `ultima_conversa` e `memoria` nas falas; `tarefa: resumo` e
+  `tarefa: memoria` julgam o resumo e a consolidação. Sete falas novas.
+- Placar da versão: 55/56 na primeira rodada completa (14 falas × 4), depois de ajustes.
+
 ## v0.2.0 — 2026-10-23
 
 Medir e revisar: o ciclo de evolução da personalidade virou comando.

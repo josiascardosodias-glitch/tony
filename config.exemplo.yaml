@@ -19,6 +19,8 @@ contexto:
 memoria:
   inteligencia: ""             # pasta de notas .md que o Tony lê no início de cada conversa (vazio = nenhuma)
   resumos: "dados/resumos"     # onde ficam os resumos das conversas
+  memoria: "dados/memoria.md"  # o que ele lembra das conversas antigas (os resumos, consolidados)
+  lembretes: "Tony - Lembretes.md"   # nota dentro da pasta inteligencia onde o /lembrar escreve
 
 personalidade: "personalidade"
 logs: "logs"
