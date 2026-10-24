@@ -12,14 +12,14 @@ O roadmap vivo do Tony: o que vem em cada versão, com detalhe suficiente para d
 construir. O resumo público fica no `ROADMAP.md` do repositório; aqui ficam o detalhe, as dúvidas e
 as ideias soltas. Quando uma versão sai, ela vai para o `CHANGELOG.md` e some daqui.
 
-| Versão | Tema | Estado |
-|---|---|---|
-| v0.1.0 | Conversa, personalidade, memória, `/bom` e `/ruim` | ✅ publicada |
-| v0.2.0 | Falas de teste e revisão | ✅ publicada (28/28) |
-| **v0.3** | **Memória testada e ajustada** | ⬜ próxima |
-| v1.0 | O [[Tony - Briefing v1]] completo | ⬜ |
-| v2 | Ferramentas | ⬜ |
-| v3 | O mundo de fora | ⬜ |
+| Versão   | Tema                                               | Estado              |
+| -------- | -------------------------------------------------- | ------------------- |
+| v0.1.0   | Conversa, personalidade, memória, `/bom` e `/ruim` | ✅ publicada         |
+| v0.2.0   | Falas de teste e revisão                           | ✅ publicada (28/28) |
+| **v0.3** | **Memória testada e ajustada**                     | ⬜ próxima           |
+| v1.0     | O [[Tony - Briefing v1]] completo                  | ⬜                   |
+| v2       | Ferramentas                                        | ⬜                   |
+| v3       | O mundo de fora                                    | ⬜                   |
 
 ## v0.2 — Falas de teste e revisão ✅
 
