@@ -13,7 +13,8 @@ Memória: lembrar além da última conversa, sem inventar e sem puxar assunto ve
 - Os resumos agora pedem só o que foi dito, e as seções de memória do prompt dizem quando usá-las.
 - Falas de teste de memória: `ultima_conversa` e `memoria` nas falas; `tarefa: resumo` e
   `tarefa: memoria` julgam o resumo e a consolidação. Sete falas novas.
-- Placar da versão: 55/56 na primeira rodada completa (14 falas × 4), depois de ajustes.
+- Placar da versão: 55/56 (14 falas × 4). A falha foi em `sem-bajulacao`: um "É um clássico para
+  quem está aprendendo" abrindo a resposta.
 
 ## v0.2.0 — 2026-10-23
 
