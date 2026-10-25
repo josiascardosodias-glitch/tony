@@ -7,9 +7,10 @@ tags: [mapa, tony, projeto, ia]
 O Tony é o meu agente de IA próprio, construído do zero em Python para aprender como agentes funcionam.
 Esta pasta (`08-Tony/`) é escrita à mão — o vault-sync não mexe aqui.
 
-> [!success] Estado atual: v0.2.0 (2026-10-23)
-> Só conversa: personalidade versionada, memória, resumo entre sessões e `/bom`/`/ruim`;
-> `tony testar` (placar 28/28) e `tony revisar` (uma mudança na personalidade por rodada).
+> [!success] Estado atual: v0.3.0 (2026-10-24)
+> Só conversa: personalidade versionada, memória (última conversa + conversas antigas consolidadas),
+> `/lembrar`, `/bom`/`/ruim`; `tony testar` (placar 55/56) e `tony revisar` (uma mudança por rodada).
+> Próximo passo: usar de verdade antes de fechar a v1.0.
 > Modelo: `gemma4:31b-cloud` (Ollama, plano gratuito).
 > Código: [github.com/josiascardosodias-glitch/tony](https://github.com/josiascardosodias-glitch/tony) (público, MIT) ·
 > local em `~/projetos/tony` · rodar com `uv run tony`.
@@ -32,6 +33,9 @@ entram no prompt no início de cada conversa: é a memória dele sobre mim. Tudo
 na nuvem: só entra o que pode sair da máquina. Uma nota = um assunto, com o prefixo `Tony - `.
 
 1. [[Tony - Sobre o Josias]] — quem eu sou e como prefiro as respostas
+
+A nota `Tony - Lembretes` aparece aqui no primeiro `/lembrar`: é escrita pelo Tony, uma linha por
+fato que você confirmou (pode editar ou apagar).
 
 ## Conexões com outros mapas
 

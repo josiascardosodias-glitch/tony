@@ -10,6 +10,35 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-10-24 — v0.3.0 publicada: memória
+
+**Feito**
+- Decidido: **memória acumulada** (`dados/memoria.md`, até 40 fatos com data) em vez dos N últimos
+  resumos ou de um resumo por semana; e **`/lembrar` com confirmação**, gravando em
+  `Tony - Lembretes.md` na Inteligência (a primeira escrita do Tony no vault).
+- Quando um resumo deixa de ser o último, ele é consolidado na memória. A memória marca até qual
+  resumo já entrou: se a consolidação falhar, nada se perde.
+- Sete falas de teste de memória: lembra a pendência, não inventa, não puxa assunto velho, lembra a
+  memória antiga, resumo fiel, consolidação e datas. Placar: **55/56** (14 falas × 4).
+- Simulei três conversas seguidas numa pasta temporária: a terceira lembrou o que foi decidido na
+  primeira, com a data certa da prova.
+- Publicado: tag e release `v0.3.0` (commit `5338cec`).
+
+**Pendente**
+- **Conversar de verdade** por alguns dias, marcando `/bom` e `/ruim`, e rodar o `tony revisar`
+  com marcações reais. Só depois disso sai a v1.0 (decidido hoje: não lançar "completa" sem uso real).
+- A falha que sobrou: `sem-bajulacao` abriu uma vez com "É um clássico para quem está aprendendo".
+
+**Aprendi**
+- **O modelo erra conta de calendário.** Sem a data da conversa, ele inventava datas (2/4). Com a data,
+  "sexta que vem" caía no sábado (2/6). Com o código entregando uma lista dos próximos 14 dias, 6/6.
+  Conta é trabalho do código; o modelo só consulta.
+- **A posição no prompt pesa.** A regra "não puxe assunto antigo" na personalidade oscilava entre 1/4
+  e 7/8. A mesma instrução colada no resumo da última conversa (a última coisa do prompt) deu 12/12.
+- **Ler a resposta antes de culpar o Tony.** Duas falhas eram do juiz: ele contou como "inventado" o
+  que o próprio Tony tinha dito e não aceitou "SQL" como resposta a "o que eu decidi estudar antes de Node?".
+- Placar com 4 repetições oscila: um 3/4 isolado pode ser ruído. Antes de mudar algo, `--vezes 8` ou 12.
+
 ## 2026-10-23 — v0.2.0 publicada: revisão
 
 **Feito**
