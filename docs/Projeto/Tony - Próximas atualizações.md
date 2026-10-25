@@ -168,6 +168,10 @@ Qualquer ideia entra aqui primeiro, sem compromisso; na hora de planejar uma ver
 - Calendário dos próximos dias também no `# Agora` da conversa (hoje só a consolidação recebe), para
   ele não errar "que dia cai a sexta que vem" conversando.
 
+## Decisões
+
+- 2026-10-24: a v1.0 saiu antes do meu uso pessoal; valeu como uso real a conversa conduzida pelo Claude ([[2026-10-24]])
+
 ## Relacionado
 
 - [[Tony - Briefing v1]] — o plano da v1, de onde saem as etapas 4 e 5
