@@ -1,6 +1,6 @@
 [project]
 name = "tony"
-version = "0.3.0"
+version = "1.0.0"
 description = "Tony: um agente de IA pessoal, construído do zero em Python."
 readme = "README.md"
 license = "MIT"

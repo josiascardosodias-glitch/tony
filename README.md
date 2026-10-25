@@ -2,9 +2,10 @@
 
 Um agente de IA pessoal construído do zero em Python, para aprender como agentes funcionam por dentro.
 
-**v0.3: só conversa.** O foco desta versão não é ser útil, é conversar bem e melhorar com o uso:
+**v1.0: só conversa.** O foco desta versão não é ser útil, é conversar bem e melhorar com o uso:
 a personalidade fica em arquivos de texto versionados, o Tony lembra da última conversa e das mais
-antigas, e cada resposta pode ser marcada como boa ou ruim para guiar os próximos ajustes.
+antigas, e cada resposta pode ser marcada como boa ou ruim para guiar os próximos ajustes. Falas de
+teste medem cada mudança (placar da v1.0: 76/76). Ferramentas vêm na v2 ([ROADMAP.md](ROADMAP.md)).
 
 ## Instalar
 

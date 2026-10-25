@@ -20,12 +20,16 @@ Personalidade em arquivos, memória, resumo entre sessões, marcações `/bom` e
 Memória das conversas antigas (os resumos consolidados), `/lembrar` com confirmação e falas de teste
 de memória: lembra, não inventa, não puxa assunto velho do nada, guarda datas certas.
 
-## v1.0 — A v1 completa
+## ✅ v1.0 — A v1 completa
 
-Conversa, memória, testes e revisão prontos, com placar estável.
+Conversa, memória, testes e revisão prontos, com placar estável (76/76 em duas rodadas). Ajustada
+com a primeira conversa real.
+
+## Próxima: v2 — Ferramentas
+
+Laço de tool calling, ferramentas descobertas automaticamente, busca em notas.
 
 ## Depois
 
-- **v2 — Ferramentas:** laço de tool calling, ferramentas descobertas automaticamente, busca em notas.
 - **v3 — O mundo de fora:** e-mail, agendamento.
 - **Horizonte:** rodar com um modelo local; fine-tuning, se o texto não bastar.

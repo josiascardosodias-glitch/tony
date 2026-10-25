@@ -1,8 +1,9 @@
 # Changelog
 
-## Não publicado
+## v1.0.0 — 2026-10-24
 
-Da primeira conversa real (com o Claude) e do primeiro `tony revisar` com marcações reais.
+A v1 completa: o Tony conversa, lembra, é medido e revisado. Esta versão fecha com a primeira
+conversa real (com o Claude) e o primeiro `tony revisar` com marcações reais.
 
 - Memória: a consolidação diz de quem é cada fato (o "eu" do resumo é o Tony). Testes de memória
   aceitam um `resumo` fixo.
@@ -11,6 +12,7 @@ Da primeira conversa real (com o Claude) e do primeiro `tony revisar` com marca�
 - Cinco falas novas: `memoria-quem`, `outra-pessoa`, `discorda`, `concorda-quando-faz-sentido`,
   `sem-pergunta-de-praxe`.
 - Placar: 76/76 (19 falas × 4), em duas rodadas seguidas.
+- Etapas 1 a 6 do briefing da v1 prontas: conversa, motor, memória, revisão, falas de teste e publicação.
 
 ## v0.3.0 — 2026-10-24
 
