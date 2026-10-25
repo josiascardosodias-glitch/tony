@@ -16,8 +16,8 @@ as ideias soltas. Quando uma versão sai, ela vai para o `CHANGELOG.md` e some d
 | -------- | -------------------------------------------------- | ------------------- |
 | v0.1.0   | Conversa, personalidade, memória, `/bom` e `/ruim` | ✅ publicada         |
 | v0.2.0   | Falas de teste e revisão                           | ✅ publicada (28/28) |
-| **v0.3** | **Memória testada e ajustada**                     | ⬜ próxima           |
-| v1.0     | O [[Tony - Briefing v1]] completo                  | ⬜                   |
+| v0.3.0   | Memória testada e ajustada                         | ✅ publicada (55/56) |
+| **v1.0** | **O [[Tony - Briefing v1]] completo**              | ⬜ próxima           |
 | v2       | Ferramentas                                        | ⬜                   |
 | v3       | O mundo de fora                                    | ⬜                   |
 
@@ -87,17 +87,23 @@ antiga aparece avisada ("talvez já corrigido").
 - [x] Uma mudança por rodada ou várias? **Uma por rodada.**
 - [x] Placares públicos ou privados? **Privados por enquanto** (`dados/testes/`); publicar depois é fácil, o contrário não.
 
-## v0.3 — Memória testada e ajustada ⬜ próxima
+## v0.3 — Memória testada e ajustada ✅
 
-- Testar o resumo entre sessões com o modelo real: ele lembra? lembra demais? inventa?
-- Juntar resumos: hoje só o último é lido. Ideia: um resumo dos resumos, para lembrar de semanas atrás.
-- Falas de teste de memória (a v0.2 já dá a ferramenta para medir).
-- *Ideia a discutir:* `/lembrar <fato>` — você pede, ele guarda o fato numa nota da Inteligência (seria
-  a primeira escrita no vault, com confirmação).
+> [!success] Publicada em 2026-10-24 como v0.3.0 (commit `5338cec`). Detalhes no `CHANGELOG.md` e no
+> [[Tony - Diário de bordo]].
 
-## v1.0 — Briefing completo
+- [x] Juntar resumos: **memória acumulada** (`dados/memoria.md`, até 40 fatos), em vez dos N últimos ou semanal.
+- [x] `/lembrar <fato>` **com confirmação**, gravando em `Tony - Lembretes` na Inteligência.
+- [x] Falas de teste de memória: lembra, não inventa, não lembra demais, resumo fiel, consolidação, datas.
+
+## v1.0 — Briefing completo ⬜ próxima
 
 Etapas 1 a 6 do [[Tony - Briefing v1]] prontas e testadas, README revisado, placar estável nas falas de teste.
+
+> [!important] Decidido em 2026-10-24: a v1.0 espera uso real
+> Antes de fechar: conversar alguns dias marcando `/bom` e `/ruim`, rodar o `tony revisar` com as
+> marcações reais e virar em fala de teste o que aparecer. Depois, README revisado e duas rodadas
+> completas estáveis.
 
 ## v2 — Ferramentas
 
@@ -122,6 +128,8 @@ Qualquer ideia entra aqui primeiro, sem compromisso; na hora de planejar uma ver
 
 - `/desfazer` — apagar a última troca da conversa (quando a pergunta saiu errada).
 - Mostrar no início da sessão quantas marcações `/ruim` estão esperando revisão.
+- Calendário dos próximos dias também no `# Agora` da conversa (hoje só a consolidação recebe), para
+  ele não errar "que dia cai a sexta que vem" conversando.
 
 ## Relacionado
 

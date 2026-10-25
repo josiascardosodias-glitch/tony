@@ -8,7 +8,7 @@ fonte: própria
 
 # Tony — Como usar e evoluir
 
-Guia rápido do Tony v0.2: como conversar, onde fica cada coisa e o ciclo para melhorar o diálogo.
+Guia rápido do Tony v0.3: como conversar, onde fica cada coisa e o ciclo para melhorar o diálogo.
 
 ## Conversar
 
@@ -22,6 +22,7 @@ cd ~/projetos/tony && uv run tony
 |---|---|
 | `/bom` | a última resposta acertou o tom |
 | `/ruim <motivo>` | a última resposta errou; o motivo é o que mais ajuda a corrigir |
+| `/lembrar <fato>` | guarda o fato em `Tony - Lembretes` na Inteligência (mostra e pede confirmação) |
 | `/nova` | fecha a conversa (com resumo) e começa outra |
 | `/prompt` | mostra exatamente o que o modelo está recebendo |
 | `/sair` ou Ctrl+D | encerra e guarda um resumo para a próxima vez |
@@ -57,6 +58,8 @@ marcações (não eram problema) ou **sair**. Mudança mantida → o comando mos
 | Seus valores (caminho do vault) | `config.local.yaml` | **não** |
 | O que ele sabe sobre você | `My-Brain/08-Tony/Inteligência/` (este vault) | **não** |
 | Resumos das conversas | `~/projetos/tony/dados/resumos/` | **não** |
+| Memória das conversas antigas | `~/projetos/tony/dados/memoria.md` (até 40 fatos, pode editar) | **não** |
+| Lembretes do `/lembrar` | `My-Brain/08-Tony/Inteligência/Tony - Lembretes.md` | **não** |
 | Logs com `/bom` e `/ruim` | `~/projetos/tony/logs/*.jsonl` | **não** |
 | Falas de teste | `~/projetos/tony/testes/falas.yaml` | sim |
 | Placares e respostas dos testes | `~/projetos/tony/dados/testes/` | **não** |
@@ -82,6 +85,11 @@ em segunda pessoa (commit `68c6d83`).
 
 Crie notas em `08-Tony/Inteligência/` (prefixo `Tony - `). Todas entram no prompt no início de cada
 conversa. Tudo ali vai para o modelo na nuvem: só o que pode sair da máquina.
+
+O resto ele faz sozinho: ao sair, a conversa vira um resumo (lido inteiro na próxima), e o resumo
+anterior é consolidado em `dados/memoria.md`, uma lista de fatos com data. Para algo que ele não pode
+esquecer, use `/lembrar`. Se a memória guardar algo errado, edite o arquivo; a primeira linha
+(`<!-- até: ... -->`) precisa ficar.
 
 ## Relacionado
 
