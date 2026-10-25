@@ -25,6 +25,9 @@ TEMPERATURA_MEMORIA = 0.2  # consolidar é organizar fatos, não conversar: baix
 PEDIDO_CONSOLIDAR = (
     "Você mantém a memória de longo prazo de um assistente chamado Tony: uma lista de fatos sobre "
     "as conversas dele com a pessoa. Você recebe a memória atual e o resumo de uma conversa. "
+    "O resumo foi escrito pelo Tony: nele, 'eu' é o Tony e 'você' é a pessoa. Na memória, diga de "
+    "quem é cada fato pelo nome ('o Tony', o nome da pessoa se aparecer, ou 'a pessoa'), nunca 'eu', "
+    "e não troque um pelo outro. "
     "Devolva a memória atualizada, em português, como uma lista com '- ' no início de cada linha, "
     f"com no máximo {LINHAS_MEMORIA} linhas. Regras: inclua o que do resumo vale lembrar depois "
     "(decisões, planos, pendências, preferências, fatos da vida da pessoa); mantenha o que já estava "

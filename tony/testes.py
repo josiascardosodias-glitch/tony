@@ -70,8 +70,11 @@ def produzir(item: dict, conversa: Conversa, organizador: Cliente) -> tuple[str,
     tarefa = item.get("tarefa", "fala")
     if tarefa == "fala":
         return f"{contexto}Fala da pessoa:\n{item['fala']}", "".join(conversa.responder(item["fala"]))
-    situacao = f"{contexto}Conversa:\n{conversa.transcricao(conversa.mensagens)}"
-    resumo = conversa.resumir_para_proxima()
+    if item.get("resumo"):  # resumo fixo: testa só a consolidação, sem a variação do resumo
+        situacao, resumo = contexto.strip(), item["resumo"]
+    else:
+        situacao = f"{contexto}Conversa:\n{conversa.transcricao(conversa.mensagens)}"
+        resumo = conversa.resumir_para_proxima()
     if tarefa == "resumo":
         return situacao, resumo
     if tarefa == "memoria":

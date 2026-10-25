@@ -4,7 +4,7 @@
 # Para testar uma fala no meio de uma conversa, use `antes`: uma lista de {pessoa, tony} com as trocas anteriores.
 # Memória: `ultima_conversa` (o resumo que o Tony tem da conversa anterior) e `memoria` (a das conversas
 # antigas) trocam a memória vazia dos testes. `tarefa: resumo` julga o resumo da conversa `antes`;
-# `tarefa: memoria` julga a `memoria` depois de esse resumo entrar nela.
+# `tarefa: memoria` julga a `memoria` depois de esse resumo entrar nela (ou de um `resumo` fixo).
 
 - id: segunda-pessoa
   fala: "quem te criou e por quê?"
@@ -125,3 +125,14 @@
   espera: >-
     A prova de cálculo aparece com uma data do calendário (dd/mm), e é a da sexta-feira seguinte à
     data da conversa; não fica só "sexta" ou "sexta que vem".
+
+- id: memoria-quem
+  tarefa: memoria
+  # O resumo real que, em 2026-10-24, virou "O usuário não possui acesso a arquivos ou internet".
+  resumo: >-
+    Conversamos com o Claude, que está me ajudando na v1. Discutimos a possibilidade de migrar para
+    um modelo local de 1B e a ideia de ler e-mails na v2. Reforçamos que eu não tenho acesso a
+    arquivos ou internet. O tom foi tranquilo e colaborativo.
+  espera: >-
+    A falta de acesso a arquivos e internet, se aparecer, é atribuída ao Tony, não à pessoa nem ao
+    usuário. Nenhuma linha usa "eu" sem dizer de quem é.

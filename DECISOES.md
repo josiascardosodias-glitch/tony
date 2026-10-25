@@ -112,3 +112,11 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
 37. **Critério de teste também se corrige.** Duas falhas eram do juiz, não do Tony (o motivo dito
     pelo próprio Tony contado como "inventado"; "SQL" não aceito como resposta a "o que eu decidi
     estudar antes de Node?"). Antes de mexer na personalidade, ler a resposta que falhou.
+
+## 2026-10-24 — Primeira conversa real (com o Claude)
+
+38. **A consolidação diz de quem é cada fato.** O resumo é escrito pelo Tony em primeira pessoa; a
+    consolidação, num pedido à parte, transformou "eu não tenho acesso a arquivos" em "o usuário não
+    possui acesso". Agora o pedido explica que "eu" é o Tony e manda nomear o sujeito. Fala de teste
+    com o resumo real que causou o erro: 2/6 antes, 6/6 depois. Testes de memória podem trazer um
+    `resumo` fixo, para testar só a consolidação.
