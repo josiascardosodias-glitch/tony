@@ -10,6 +10,17 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-10-24 — v1.0.0 publicada
+
+**Feito**
+- A seu pedido, a v1.0 fechou sem esperar o seu uso: valeu como uso real a conversa conduzida pelo Claude.
+- README revisado (versão, placar, ponteiro para a v2), `CHANGELOG.md` com a v1.0.0, roadmap com a v2 como próxima.
+- Push dos commits da conversa real, tag e release `v1.0.0` (commit `f7b28ff`). Conferido que nenhum dado pessoal foi para o git.
+
+**Pendente**
+- Você conversar com o Tony e marcar `/bom` e `/ruim`: o que aparecer vira fala de teste na v1.0.x ou na v2.
+- Planejar a v2 (ferramentas) em [[Tony - Próximas atualizações]].
+
 ## 2026-10-24 — Primeira conversa real: o Claude treinou o Tony
 
 **Feito**
@@ -27,8 +38,7 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
     antigo. Regra no `tom.md`: 8/8 nas cinco falas ligadas.
 - Placar: **76/76** (19 falas × 4), duas rodadas seguidas. Conversa de verificação no fim: lembrou as
   duas conversas, discordou de cara de "pular os testes", explicou callback sem pergunta no fim.
-- Commits `a710386`, `68f0230`, `9ef433d`, `444261d` — **locais, ainda sem push** (no `CHANGELOG.md`
-  como "Não publicado").
+- Commits `a710386`, `68f0230`, `9ef433d`, `444261d` — publicados na v1.0.0.
 
 **Pendente**
 - **Você** conversar com ele — até agora só o Claude conversou. A memória atual registra que "o Tony

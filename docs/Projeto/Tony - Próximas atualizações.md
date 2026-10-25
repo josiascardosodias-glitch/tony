@@ -17,8 +17,8 @@ as ideias soltas. Quando uma versão sai, ela vai para o `CHANGELOG.md` e some d
 | v0.1.0   | Conversa, personalidade, memória, `/bom` e `/ruim` | ✅ publicada         |
 | v0.2.0   | Falas de teste e revisão                           | ✅ publicada (28/28) |
 | v0.3.0   | Memória testada e ajustada                         | ✅ publicada (55/56) |
-| **v1.0** | **O [[Tony - Briefing v1]] completo**              | ⬜ próxima           |
-| v2       | Ferramentas                                        | ⬜                   |
+| v1.0.0   | O [[Tony - Briefing v1]] completo                  | ✅ publicada (76/76) |
+| **v2**   | **Ferramentas**                                    | ⬜ próxima           |
 | v3       | O mundo de fora                                    | ⬜                   |
 
 ## v0.2 — Falas de teste e revisão ✅
@@ -96,7 +96,10 @@ antiga aparece avisada ("talvez já corrigido").
 - [x] `/lembrar <fato>` **com confirmação**, gravando em `Tony - Lembretes` na Inteligência.
 - [x] Falas de teste de memória: lembra, não inventa, não lembra demais, resumo fiel, consolidação, datas.
 
-## v1.0 — Briefing completo ⬜ próxima
+## v1.0 — Briefing completo ✅
+
+> [!success] Publicada em 2026-10-24 como v1.0.0 (commit `f7b28ff`), a seu pedido, antes do seu uso real:
+> o uso real que valeu foi a conversa conduzida pelo Claude.
 
 Etapas 1 a 6 do [[Tony - Briefing v1]] prontas e testadas, README revisado, placar estável nas falas de teste.
 
@@ -108,10 +111,10 @@ Etapas 1 a 6 do [[Tony - Briefing v1]] prontas e testadas, README revisado, plac
 - [x] Primeira conversa real e `tony revisar` com marcações reais (2026-10-24, conduzida pelo Claude):
   4 problemas achados, corrigidos e virados em falas de teste.
 - [x] Duas rodadas completas estáveis: **76/76** e 76/76.
-- [ ] Conversa sua com o Tony (até agora só o Claude conversou).
-- [ ] README revisado e release `v1.0.0`.
+- [ ] Conversa sua com o Tony — segue valendo, agora como primeiro uso da v1.0.
+- [x] README revisado e release `v1.0.0`.
 
-## v2 — Ferramentas
+## v2 — Ferramentas ⬜ próxima
 
 - Laço de tool calling e ferramentas descobertas automaticamente (uma função por arquivo).
 - Primeira ferramenta: ler a Inteligência sob demanda, em vez de tudo no prompt.

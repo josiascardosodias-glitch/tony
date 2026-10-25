@@ -7,10 +7,10 @@ tags: [mapa, tony, projeto, ia]
 O Tony é o meu agente de IA próprio, construído do zero em Python para aprender como agentes funcionam.
 Esta pasta (`08-Tony/`) é escrita à mão — o vault-sync não mexe aqui.
 
-> [!success] Estado atual: v0.3.0 (2026-10-24)
+> [!success] Estado atual: v1.0.0 (2026-10-24) — a v1 completa
 > Só conversa: personalidade versionada, memória (última conversa + conversas antigas consolidadas),
-> `/lembrar`, `/bom`/`/ruim`; `tony testar` (placar 55/56) e `tony revisar` (uma mudança por rodada).
-> Próximo passo: usar de verdade antes de fechar a v1.0.
+> `/lembrar`, `/bom`/`/ruim`; `tony testar` (placar 76/76) e `tony revisar` (uma mudança por rodada).
+> Próxima versão: v2 — ferramentas.
 > Modelo: `gemma4:31b-cloud` (Ollama, plano gratuito).
 > Código: [github.com/josiascardosodias-glitch/tony](https://github.com/josiascardosodias-glitch/tony) (público, MIT) ·
 > local em `~/projetos/tony` · rodar com `uv run tony`.

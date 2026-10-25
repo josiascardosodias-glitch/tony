@@ -8,7 +8,7 @@ fonte: própria
 
 # Tony — Como usar e evoluir
 
-Guia rápido do Tony v0.3: como conversar, onde fica cada coisa e o ciclo para melhorar o diálogo.
+Guia rápido do Tony v1.0: como conversar, onde fica cada coisa e o ciclo para melhorar o diálogo.
 
 ## Conversar
 
