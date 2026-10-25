@@ -120,3 +120,15 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
     possui acesso". Agora o pedido explica que "eu" é o Tony e manda nomear o sujeito. Fala de teste
     com o resumo real que causou o erro: 2/6 antes, 6/6 depois. Testes de memória podem trazer um
     `resumo` fixo, para testar só a consolidação.
+39. **Com quem não é o Josias, o Tony fala dele na terceira pessoa.** Proposta do `tony revisar`;
+    fala `outra-pessoa`: 0/6 antes, 6/6 depois, sem piorar `segunda-pessoa`.
+40. **Ter opinião.** "Quando discordar, diga" não bastava: diante de uma ideia ruim ele listava riscos
+    e devolvia a decisão (`discorda` 0/8). A regra agora manda começar dizendo que não acha boa ideia.
+    Contra-teste `concorda-quando-faz-sentido` para ele não discordar de tudo. A proposta do revisor
+    (acrescentar outra linha sobre "depende") foi testada e desfeita: 0/4 na fala marcada.
+41. **Pergunta só quando precisa da resposta.** A pergunta de praxe no fim era a raiz de três falhas:
+    `sem-pergunta-de-praxe`, `encerramento` e `lembra-demais` (a opinião nova vinha com "você usa isso
+    no seu projeto de tarefas?", e o placar caiu de 12/12 para 10/12). Com a regra no `tom.md`: 8/8
+    nas cinco falas ligadas a isso, e 76/76 em duas rodadas seguidas.
+42. **Cada problema achado em conversa real vira fala de teste**, conferida contra a personalidade
+    antiga (tem que falhar) e a nova (tem que passar).

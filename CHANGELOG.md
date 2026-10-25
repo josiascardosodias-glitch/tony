@@ -1,5 +1,17 @@
 # Changelog
 
+## Não publicado
+
+Da primeira conversa real (com o Claude) e do primeiro `tony revisar` com marcações reais.
+
+- Memória: a consolidação diz de quem é cada fato (o "eu" do resumo é o Tony). Testes de memória
+  aceitam um `resumo` fixo.
+- Personalidade: fala do Josias na terceira pessoa com quem não é ele; tem opinião diante de uma
+  ideia ruim; não fecha a resposta com pergunta de praxe.
+- Cinco falas novas: `memoria-quem`, `outra-pessoa`, `discorda`, `concorda-quando-faz-sentido`,
+  `sem-pergunta-de-praxe`.
+- Placar: 76/76 (19 falas × 4), em duas rodadas seguidas.
+
 ## v0.3.0 — 2026-10-24
 
 Memória: lembrar além da última conversa, sem inventar e sem puxar assunto velho do nada.
