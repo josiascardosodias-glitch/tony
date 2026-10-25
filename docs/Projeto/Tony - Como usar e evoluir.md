@@ -8,7 +8,7 @@ fonte: própria
 
 # Tony — Como usar e evoluir
 
-Guia rápido do Tony v1.0: como conversar, onde fica cada coisa e o ciclo para melhorar o diálogo.
+Guia rápido do Tony v2 (com o começo da v3): como conversar, onde fica cada coisa e o ciclo para melhorar o diálogo.
 
 ## Conversar
 
@@ -26,6 +26,16 @@ cd ~/projetos/tony && uv run tony
 | `/nova` | fecha a conversa (com resumo) e começa outra |
 | `/prompt` | mostra exatamente o que o modelo está recebendo |
 | `/sair` ou Ctrl+D | encerra e guarda um resumo para a próxima vez |
+
+## Ferramentas e resumo do dia
+
+Na conversa, o Tony usa sozinho as ferramentas quando precisa; cada chamada aparece como
+`· ler_nota(nome='...')`. Elas só enxergam `08-Tony/Inteligência/`: `listar_notas`, `ler_nota`,
+`buscar_notas`, `lembrar` (sempre pergunta antes de gravar) e, com o e-mail configurado, `ler_emails`.
+
+Todo dia às 08:00 chega uma notificação com o resumo do dia (`tony dia`). Para mudar a hora:
+`uv run tony agendar --hora 07:30`; para desligar: `systemctl --user disable --now tony-dia.timer`.
+O passo a passo do e-mail (senha de app do Google) está no README do repositório.
 
 ## Testar
 

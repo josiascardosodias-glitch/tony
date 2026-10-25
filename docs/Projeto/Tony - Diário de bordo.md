@@ -10,6 +10,29 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-10-24 — v2 (ferramentas) e começo da v3
+
+**Feito**
+- Analisada a ideia do n8n (vinda de outra conversa): fica fora da v2; na v3 você escolheu Python.
+- **v2.0.0** publicada (tag e release, commit `f74e21b`): laço de ferramentas em streaming, `tony/ferramentas/` com
+  `listar_notas`, `ler_nota` (nome aproximado), `buscar_notas`, `lembrar`. Placar 108/108.
+- **v3** (commit `712f7bc`, só local): `ler_emails` (IMAP, só leitura, filtro), `tony dia`, `tony agendar` —
+  timer instalado para 08:00 e testado pelo systemd (a notificação chegou). Placar 128/128.
+
+**Pendente**
+- Criar a senha de app do Gmail e configurar o e-mail (passo a passo no README); depois testamos com
+  a caixa real e fechamos a v3.
+- Publicar a v3 depois do teste com a caixa real.
+
+**Aprendi**
+- O `gemma4:31b-cloud` decide bem quando chamar uma ferramenta, mas erra o nome exato do argumento:
+  a ferramenta tem que aceitar o aproximado e devolver o erro como texto, para ele se corrigir.
+- "Não confirmou" ele leu como "ainda não confirmou" e pediu de novo (0/6); "disse não, não pergunte
+  de novo" resolveu (6/6). O texto que a ferramenta devolve também é prompt.
+- O juiz não vê o prompt do Tony: o fato de que ele precisa para julgar vai no critério.
+- Fato de teste numa sessão real vaza: recusado na confirmação, ainda entrou no resumo e apareceu no
+  resumo do dia. Testes de escrita, só com dados de exemplo.
+
 ## 2026-10-24 — v1.0.0 publicada
 
 **Feito**

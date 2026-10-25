@@ -18,8 +18,8 @@ as ideias soltas. Quando uma versão sai, ela vai para o `CHANGELOG.md` e some d
 | v0.2.0   | Falas de teste e revisão                           | ✅ publicada (28/28) |
 | v0.3.0   | Memória testada e ajustada                         | ✅ publicada (55/56) |
 | v1.0.0   | O [[Tony - Briefing v1]] completo                  | ✅ publicada (76/76) |
-| **v2**   | **Ferramentas**                                    | ⬜ próxima           |
-| v3       | O mundo de fora                                    | ⬜                   |
+| v2.0.0   | Ferramentas                                        | ✅ publicada (108/108) |
+| **v3**   | **O mundo de fora**                                | 🟡 em andamento      |
 
 ## v0.2 — Falas de teste e revisão ✅
 
@@ -114,7 +114,10 @@ Etapas 1 a 6 do [[Tony - Briefing v1]] prontas e testadas, README revisado, plac
 - [ ] Conversa sua com o Tony — segue valendo, agora como primeiro uso da v1.0.
 - [x] README revisado e release `v1.0.0`.
 
-## v2 — Ferramentas ⬜ próxima
+## v2 — Ferramentas ✅
+
+> [!success] Publicada em 2026-10-24 como v2.0.0 (commit `f74e21b`): `listar_notas`, `ler_nota`,
+> `buscar_notas` e `lembrar`, placar 108/108. Embeddings e especialistas em `.yaml` ficam para uma v2.x.
 
 - Laço de tool calling e ferramentas descobertas automaticamente (uma função por arquivo).
 - Primeira ferramenta: ler a Inteligência sob demanda, em vez de tudo no prompt.
@@ -139,7 +142,11 @@ Etapas 1 a 6 do [[Tony - Briefing v1]] prontas e testadas, README revisado, plac
 **Limite:** as ferramentas só enxergam a pasta `Inteligência` (a única que pode ir para a nuvem).
 Buscar no vault inteiro é decisão sua, para depois.
 
-## v3 — O mundo de fora
+## v3 — O mundo de fora 🟡 em andamento
+
+> [!check] Decidido em 2026-10-24: Gmail por IMAP (senha de app), notificação na área de trabalho, Python (sem n8n).
+> Feito (commit `712f7bc`): `ler_emails` só leitura com filtro, `tony dia --notificar`, `tony agendar`
+> (timer instalado, 08:00). **Falta:** a senha de app e o teste com a caixa real.
 
 - E-mail da escola (datas de provas e entregas).
 - Agendamento: o Tony fala primeiro (ex.: resumo do dia).
