@@ -10,6 +10,39 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-10-24 — Primeira conversa real: o Claude treinou o Tony
+
+**Feito**
+- O Claude conversou com o Tony de verdade (`uv run tony`, dados reais), apresentando-se como Claude,
+  e marcou 10 respostas: 6 `/bom`, 4 `/ruim`. Usou `/lembrar` com um fato do seu Planejamento de
+  Estudos (NotebookLM + exercícios gerados por LLM) e testou continuidade com `/nova`.
+- Achados e correções, cada um virando fala de teste conferida antes (falha) e depois (passa):
+  - **Memória trocava quem disse o quê**: "eu não tenho acesso a arquivos" (o Tony) virou "o usuário
+    não possui acesso". Consolidação corrigida; `memoria-quem` 2/6 → 6/6. Memória real refeita.
+  - **"Você me criou" para quem disse que não é o Josias.** Primeira proposta real do `tony revisar`,
+    aceita: `outra-pessoa` 0/6 → 6/6.
+  - **Em cima do muro** diante de ideia ruim: `discorda` 0/8 → 8/8 com a regra "tenha opinião". A
+    proposta do revisor para isso foi testada e **desfeita** (0/4 na fala marcada).
+  - **Pergunta de praxe no fim** ("ficou claro?"): era a raiz de três falhas, inclusive puxar o projeto
+    antigo. Regra no `tom.md`: 8/8 nas cinco falas ligadas.
+- Placar: **76/76** (19 falas × 4), duas rodadas seguidas. Conversa de verificação no fim: lembrou as
+  duas conversas, discordou de cara de "pular os testes", explicou callback sem pergunta no fim.
+- Commits `a710386`, `68f0230`, `9ef433d`, `444261d` — **locais, ainda sem push** (no `CHANGELOG.md`
+  como "Não publicado").
+
+**Pendente**
+- **Você** conversar com ele — até agora só o Claude conversou. A memória atual registra que "o Tony
+  está sendo ajudado pelo Claude"; edite `dados/memoria.md` se não quiser isso lá.
+- Decidir se fecha a v1.0 agora ou depois do seu uso.
+
+**Aprendi**
+- O revisor acerta o diagnóstico mais do que a mudança: das três propostas, uma ficou, uma repetia uma
+  regra existente e uma não resolveu. "Aceitar não é manter" pagou a conta.
+- O motivo do `/ruim` vira o critério do teste: "depois pergunte se quiser" fez o juiz exigir uma
+  pergunta. Escreva o motivo como o defeito, não como a receita.
+- Uma regra nova pode piorar outra fala por um caminho indireto (a opinião trouxe uma pergunta que
+  puxava assunto velho). Rodar a bateria inteira, não só a fala da mudança.
+
 ## 2026-10-24 — v0.3.0 publicada: memória
 
 **Feito**

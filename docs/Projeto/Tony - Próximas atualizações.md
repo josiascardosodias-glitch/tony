@@ -105,6 +105,12 @@ Etapas 1 a 6 do [[Tony - Briefing v1]] prontas e testadas, README revisado, plac
 > marcações reais e virar em fala de teste o que aparecer. Depois, README revisado e duas rodadas
 > completas estáveis.
 
+- [x] Primeira conversa real e `tony revisar` com marcações reais (2026-10-24, conduzida pelo Claude):
+  4 problemas achados, corrigidos e virados em falas de teste.
+- [x] Duas rodadas completas estáveis: **76/76** e 76/76.
+- [ ] Conversa sua com o Tony (até agora só o Claude conversou).
+- [ ] README revisado e release `v1.0.0`.
+
 ## v2 — Ferramentas
 
 - Laço de tool calling e ferramentas descobertas automaticamente (uma função por arquivo).
