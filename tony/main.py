@@ -5,10 +5,11 @@ import readline  # noqa: F401 — só importar já dá setas e histórico ao inp
 import time
 
 from . import config
-from .cliente import Cliente, ErroDoModelo
+from . import ferramentas
+from .cliente import Chamada, Cliente, ErroDoModelo
 from .conversa import TEMPERATURA_MEMORIA, Conversa, consolidar_memoria
-from .memoria import (carregar_personalidade, data_do_resumo, lembrar, ler_inteligencia, ler_memoria, resumos_pendentes,
-                      salvar_memoria, salvar_resumo, ultimo_resumo, versao_personalidade)
+from .memoria import (carregar_personalidade, data_do_resumo, inteligencia_para_prompt, lembrar, ler_memoria,
+                      resumos_pendentes, salvar_memoria, salvar_resumo, ultimo_resumo, versao_personalidade)
 from .registro import Registro
 
 AJUDA = """Comandos:
@@ -30,6 +31,10 @@ class Sessao:
         self.arquivo_memoria = config.caminho(cfg["memoria"]["memoria"])
         self.pasta_inteligencia = config.caminho(cfg["memoria"]["inteligencia"])
         self.organizador = Cliente(cfg, temperatura=TEMPERATURA_MEMORIA)
+        self.ferramentas = ferramentas.descobrir()
+        ferramentas.ambiente.inteligencia = self.pasta_inteligencia
+        ferramentas.ambiente.lembretes = self.pasta_inteligencia / cfg["memoria"]["lembretes"] if self.pasta_inteligencia else None
+        ferramentas.ambiente.confirmar = self._confirmar
         pasta_personalidade = config.caminho(cfg["personalidade"])
         self.personalidade = carregar_personalidade(pasta_personalidade)
         self.registro = Registro(
@@ -44,10 +49,21 @@ class Sessao:
             self.cliente,
             limite=self.cfg["contexto"]["limite"],
             personalidade=self.personalidade,
-            inteligencia=ler_inteligencia(self.pasta_inteligencia),
+            inteligencia=inteligencia_para_prompt(self.pasta_inteligencia, self.cfg["memoria"]["inteligencia_inteira_ate"]),
             ultima_conversa=ultimo_resumo(self.pasta_resumos),
             memoria=ler_memoria(self.arquivo_memoria)[0],
+            ferramentas=self.ferramentas,
         )
+
+    @staticmethod
+    def _confirmar(pergunta: str) -> bool:
+        """Pergunta de uma ferramenta que escreve: só um "s" explícito autoriza."""
+        print(f"\n{pergunta}\n(essa pasta vai para o modelo na nuvem)")
+        try:
+            return input("confirma? [s/N] ").strip().lower() == "s"
+        except (EOFError, KeyboardInterrupt):
+            print()
+            return False
 
     def encerrar_conversa(self) -> None:
         if not self.conversa.mensagens:
@@ -82,14 +98,8 @@ class Sessao:
         if not self.pasta_inteligencia or not self.pasta_inteligencia.is_dir():
             print("não há pasta de Inteligência configurada (memoria.inteligencia no config.local.yaml).")
             return
-        arquivo = self.pasta_inteligencia / self.cfg["memoria"]["lembretes"]
-        print(f"vou guardar em {arquivo.name} (essa pasta vai para o modelo na nuvem):\n  - {fato}")
-        try:
-            confirma = input("confirma? [s/N] ").strip().lower()
-        except (EOFError, KeyboardInterrupt):
-            confirma = ""
-            print()
-        if confirma != "s":
+        arquivo = ferramentas.ambiente.lembretes
+        if not self._confirmar(f"vou guardar em {arquivo.name}:\n  - {fato}"):
             print("não guardei.")
             return
         lembrar(arquivo, fato)
@@ -124,11 +134,16 @@ class Sessao:
     def falar(self, texto: str) -> None:
         print("tony > ", end="", flush=True)
         inicio = time.monotonic()
-        pedacos = []
+        pedacos, chamadas = [], []
         try:
-            for pedaco in self.conversa.responder(texto):
-                print(pedaco, end="", flush=True)
-                pedacos.append(pedaco)
+            for item in self.conversa.responder(texto):
+                if isinstance(item, Chamada):  # aparece antes de rodar: a confirmação vem logo depois
+                    argumentos = ", ".join(f"{k}={v!r}" for k, v in item.argumentos.items())
+                    print(f"\n  · {item.nome}({argumentos})", flush=True)
+                    chamadas.append(item)
+                    continue
+                print(item, end="", flush=True)
+                pedacos.append(item)
         except ErroDoModelo as e:
             print(f"\n[erro] {e}\n")
             self.registro.anotar("erro", mensagem=str(e))
@@ -137,7 +152,9 @@ class Sessao:
             print("\n[interrompido — essa fala foi descartada]\n")
             return
         print("\n")
-        self.registro.turno_completo(texto, "".join(pedacos), time.monotonic() - inicio)
+        self.registro.turno_completo(texto, "".join(pedacos), time.monotonic() - inicio,
+                                     ferramentas=[{"nome": c.nome, "argumentos": c.argumentos, "resultado": c.resultado[:500]}
+                                                  for c in chamadas])
 
 
 def conversar(cfg: dict) -> None:

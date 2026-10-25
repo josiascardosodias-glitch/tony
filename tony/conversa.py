@@ -6,7 +6,8 @@ das conversas antigas (`consolidar_memoria`).
 
 from datetime import datetime, timedelta
 
-from .cliente import Cliente, ErroDoModelo
+from .cliente import Chamada, Cliente, ErroDoModelo
+from .ferramentas import executar
 
 DIAS = ["segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado", "domingo"]
 
@@ -42,13 +43,15 @@ PEDIDO_CONSOLIDAR = (
 # Estimativa grosseira (≈ 4 caracteres por token). Serve para decidir quando resumir,
 # sem depender de contagem do provedor.
 CARACTERES_POR_TOKEN = 4
-MENSAGENS_MANTIDAS = 4  # ao resumir, as últimas 2 trocas ficam inteiras
+TROCAS_MANTIDAS = 2  # ao resumir, as últimas 2 trocas ficam inteiras
+RODADAS_DE_FERRAMENTA = 5  # numa resposta, no máximo 5 idas e voltas com ferramentas
 
 
 class Conversa:
     def __init__(self, cliente: Cliente, limite: int, personalidade: str, inteligencia: str,
-                 ultima_conversa: str, memoria: str = ""):
+                 ultima_conversa: str, memoria: str = "", ferramentas: dict | None = None):
         self.cliente = cliente
+        self.ferramentas = ferramentas or {}  # {nome: função}; vazio = só conversa
         self.limite = limite
         self.mensagens: list[dict] = []  # só usuário e Tony; o prompt de sistema é montado à parte
         self.resumo = ""                 # o começo desta conversa, quando ela fica longa
@@ -86,15 +89,35 @@ class Conversa:
         return len(texto) // CARACTERES_POR_TOKEN
 
     def responder(self, texto: str):
-        """Envia a fala e devolve a resposta em pedaços. Se algo falhar no meio, a fala é desfeita."""
+        """Envia a fala e devolve a resposta: pedaços de texto e, antes de rodar cada ferramenta que o
+        modelo pedir, a `Chamada` (com o `resultado` preenchido depois). Se algo falhar no meio, a fala
+        e as chamadas dela são desfeitas."""
+        inicio = len(self.mensagens)
         self.mensagens.append({"role": "user", "content": texto})
-        pedacos = []
         try:
-            for pedaco in self.cliente.conversar(self._para_o_modelo()):
-                pedacos.append(pedaco)
-                yield pedaco
+            for _ in range(RODADAS_DE_FERRAMENTA):
+                pedacos, chamadas = [], []
+                for item in self.cliente.conversar(self._para_o_modelo(), list(self.ferramentas.values())):
+                    if isinstance(item, Chamada):
+                        chamadas.append(item)
+                    else:
+                        pedacos.append(item)
+                        yield item
+                if not chamadas:
+                    break
+                # O modelo pediu ferramentas: o pedido e cada resultado entram no histórico, e ele
+                # responde de novo, agora sabendo o resultado.
+                self.mensagens.append({"role": "assistant", "content": "".join(pedacos), "tool_calls": [
+                    {"function": {"name": c.nome, "arguments": c.argumentos}} for c in chamadas]})
+                for chamada in chamadas:
+                    yield chamada
+                    chamada.resultado = executar(self.ferramentas, chamada.nome, chamada.argumentos)
+                    self.mensagens.append({"role": "tool", "content": chamada.resultado, "tool_name": chamada.nome})
+            else:
+                pedacos = ["(parei: foram ferramentas demais para uma resposta só.)"]
+                yield pedacos[0]
         except BaseException:  # erro do modelo ou Ctrl+C: a conversa volta a como estava
-            self.mensagens.pop()
+            del self.mensagens[inicio:]
             raise
         self.mensagens.append({"role": "assistant", "content": "".join(pedacos)})
         if self.tokens_estimados() > 0.8 * self.limite:
@@ -104,20 +127,23 @@ class Conversa:
                 pass  # a resposta já saiu; tenta resumir de novo no próximo turno
 
     def transcricao(self, mensagens: list[dict]) -> str:
-        nomes = {"user": "Pessoa", "assistant": "Tony"}
-        return "\n".join(f"{nomes[m['role']]}: {m['content']}" for m in mensagens)
+        nomes = {"user": "Pessoa", "assistant": "Tony", "tool": "Ferramenta"}
+        return "\n".join(f"{nomes[m['role']]}: {m['content']}" for m in mensagens if m["content"])
 
     def _resumir_comeco(self) -> None:
         """Troca as mensagens antigas por um resumo, em vez de deixá-las cair em silêncio."""
-        antigas = self.mensagens[:-MENSAGENS_MANTIDAS]
-        if not antigas:
+        # O corte é sempre numa fala da pessoa: um resultado de ferramenta sem o pedido dele confunde o modelo.
+        falas = [i for i, m in enumerate(self.mensagens) if m["role"] == "user"]
+        if len(falas) <= TROCAS_MANTIDAS:
             return
+        corte = falas[-TROCAS_MANTIDAS]
+        antigas = self.mensagens[:corte]
         trecho = f"Resumo anterior:\n{self.resumo}\n\n" if self.resumo else ""
         self.resumo = self.cliente.completar([
             {"role": "system", "content": PEDIDO_RESUMO_PARCIAL},
             {"role": "user", "content": trecho + self.transcricao(antigas)},
         ])
-        self.mensagens = self.mensagens[-MENSAGENS_MANTIDAS:]
+        self.mensagens = self.mensagens[corte:]
 
     def resumir_para_proxima(self) -> str:
         """Resumo da conversa inteira, para a próxima sessão começar de onde esta parou."""

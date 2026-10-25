@@ -132,3 +132,31 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
     nas cinco falas ligadas a isso, e 76/76 em duas rodadas seguidas.
 42. **Cada problema achado em conversa real vira fala de teste**, conferida contra a personalidade
     antiga (tem que falhar) e a nova (tem que passar).
+
+## 2026-10-24 — v2: ferramentas
+
+43. **n8n fora da v2.** A ideia (vinda de outra conversa) era começar as ferramentas em workflows do
+    n8n e trocar por código nativo aos poucos. As ferramentas da v2 são locais e simples, o projeto
+    existe para aprender o laço no código, e os testes dependeriam do n8n no ar. Medido: 1,4 GB livres
+    de 7,5 GB, Docker nativo. Fica como pergunta da v3 (e-mail, agendamento).
+44. **Uma ferramenta = um arquivo com uma função do mesmo nome** em `tony/ferramentas/`, descoberta
+    automaticamente; a lib `ollama` monta o esquema da docstring e dos tipos. O corpo é livre (pode
+    até chamar um webhook) e troca sem mexer no laço. O que não vem do modelo (pastas, confirmação)
+    vem do `ambiente`, preenchido pela sessão ou pelo teste.
+45. **Argumentos validados antes de rodar, e todo erro volta ao modelo como texto** (`erro: ...`), para
+    ele corrigir a chamada. Visto na sessão real: chamou a nota pelo título, recebeu o erro e acertou.
+46. **Nome de nota aproximado.** Num teste, o `gemma4:31b-cloud` decidiu certo quando chamar (9/9),
+    mas pediu a nota "Josias" em vez de "Tony - Sobre o Josias". `achar` aceita sem prefixo, sem `.md`
+    e pedaço do nome, desde que só uma nota combine.
+47. **As ferramentas só enxergam a pasta `Inteligência`**, a única que pode ir para a nuvem. Buscar no
+    vault inteiro é uma decisão de privacidade, para depois.
+48. **Inteligência inteira no prompt até 6000 caracteres; acima, só a lista** e ele lê sob demanda.
+    *Por quê:* é a decisão 12 aplicada — com poucas notas, inteiras é melhor (ele não precisa decidir
+    ler); a lista é para quando não couber.
+49. **`lembrar` também é ferramenta**, com a mesma confirmação do `/lembrar`. O "não" vem explícito
+    no resultado ("não pergunte de novo"): com "não confirmou", ele pedia a confirmação de novo (0/6 → 6/6).
+50. **Testes de ferramenta sem juiz quando dá:** `chama` confere no código quais ferramentas foram
+    chamadas; `lista` confere o formato. O juiz errava formato ("a linha não começa com '- '" numa
+    linha que começava). A escrita vai para uma pasta temporária; `confirma: false` simula o "não".
+51. **Mudança sem efeito medido não fica.** Um aviso "não releia as notas" passou no teste também sem
+    ele; foi retirado.

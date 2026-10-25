@@ -2,10 +2,11 @@
 
 Um agente de IA pessoal construído do zero em Python, para aprender como agentes funcionam por dentro.
 
-**v1.0: só conversa.** O foco desta versão não é ser útil, é conversar bem e melhorar com o uso:
-a personalidade fica em arquivos de texto versionados, o Tony lembra da última conversa e das mais
-antigas, e cada resposta pode ser marcada como boa ou ruim para guiar os próximos ajustes. Falas de
-teste medem cada mudança (placar da v1.0: 76/76). Ferramentas vêm na v2 ([ROADMAP.md](ROADMAP.md)).
+**v2: conversa e ferramentas.** O foco não é ser útil, é conversar bem e melhorar com o uso: a
+personalidade fica em arquivos de texto versionados, o Tony lembra da última conversa e das mais
+antigas, e cada resposta pode ser marcada como boa ou ruim para guiar os próximos ajustes. Desde a
+v2 ele tem ferramentas para consultar as notas sobre você e guardar fatos (com sua confirmação).
+Falas de teste medem cada mudança (placar da v2: 108/108).
 
 ## Instalar
 
@@ -43,6 +44,22 @@ uv run tony
 | `/prompt` | mostra o prompt de sistema montado |
 | `/sair` | encerra, guardando um resumo para a próxima vez |
 
+## Ferramentas
+
+Ficam em `tony/ferramentas/`, uma função por arquivo, e são descobertas sozinhas: o modelo lê o nome,
+a docstring e os tipos para decidir quando usar.
+
+| Ferramenta | O que faz |
+|---|---|
+| `listar_notas` | lista as notas da pasta `memoria.inteligencia` |
+| `ler_nota` | lê uma nota (aceita o nome aproximado) |
+| `buscar_notas` | procura palavras nas notas |
+| `lembrar` | guarda um fato na nota de lembretes, depois da sua confirmação |
+
+Só a pasta `memoria.inteligencia` é acessível. Enquanto as notas cabem em
+`memoria.inteligencia_inteira_ate` caracteres, elas vão inteiras no prompt; acima disso, só a lista, e
+o Tony lê sob demanda. Para criar uma ferramenta, veja a docstring de `tony/ferramentas/__init__.py`.
+
 ## Testar
 
 ```bash
@@ -54,7 +71,8 @@ uv run tony testar --vezes 8       # mais repetições, placar mais confiável
 Cada fala roda várias vezes (a resposta varia) numa conversa nova, com a memória de exemplo de
 `exemplos/inteligencia/`. Uma fala pode trazer a sua própria memória (`ultima_conversa`, `memoria`), e
 `tarefa: resumo` ou `tarefa: memoria` julgam o resumo da conversa ou a memória depois dele, em vez de
-uma resposta. Um segundo modelo, o juiz (`testes.juiz` no config), confere cada resposta
+uma resposta. `chama: [ferramentas]` confere no código quais ferramentas ele chamou (`[]` = nenhuma);
+nos testes, elas rodam sobre a memória de exemplo e a escrita vai para uma pasta temporária. Um segundo modelo, o juiz (`testes.juiz` no config), confere cada resposta
 contra o critério `espera` e o placar sai por fala, comparado com a rodada anterior:
 
 ```
@@ -102,7 +120,8 @@ tony/
 └── tony/
     ├── main.py           loop do terminal e comandos
     ├── cliente.py        único arquivo que conhece o Ollama
-    ├── conversa.py       histórico, prompt de sistema, resumos e consolidação da memória
+    ├── conversa.py       histórico, prompt de sistema, laço de ferramentas, resumos e memória
+    ├── ferramentas/      uma ferramenta por arquivo, descobertas sozinhas
     ├── memoria.py        personalidade, notas, resumos, memória e lembretes
     ├── registro.py       log da sessão
     ├── testes.py         falas de teste e juiz

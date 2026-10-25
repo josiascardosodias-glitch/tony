@@ -28,10 +28,24 @@ def ler_inteligencia(pasta: Path | None) -> str:
     """Notas .md de uma pasta (no caso, a Inteligência do vault), sem o que é só do Obsidian."""
     if not pasta or not pasta.is_dir():
         return ""
-    return "\n\n".join(_limpar_nota(n.read_text(encoding="utf-8")) for n in sorted(pasta.glob("*.md")))
+    return "\n\n".join(limpar_nota(n.read_text(encoding="utf-8")) for n in sorted(pasta.glob("*.md")))
 
 
-def _limpar_nota(texto: str) -> str:
+def inteligencia_para_prompt(pasta: Path | None, inteira_ate: int) -> str:
+    """As notas inteiras, se couberem em `inteira_ate` caracteres; senão, só a lista delas.
+
+    Com a lista, o Tony lê a nota que o assunto pedir (ferramentas `ler_nota` e `buscar_notas`).
+    Enquanto as notas são poucas, inteiras no prompt é melhor: ele não precisa decidir ler.
+    """
+    inteira = ler_inteligencia(pasta)
+    if len(inteira) <= inteira_ate:
+        return inteira
+    nomes = "\n".join(f"- {n.stem}" for n in sorted(pasta.glob("*.md")))
+    return ("Suas notas sobre a pessoa são muitas para caber aqui. Estas existem; leia a que o assunto "
+            f"pedir com ler_nota, ou procure com buscar_notas:\n\n{nomes}")
+
+
+def limpar_nota(texto: str) -> str:
     """Tira o frontmatter (--- ... ---) e os callouts (linhas com >), que não interessam ao modelo."""
     texto = re.sub(r"\A---\n.*?\n---\n", "", texto, flags=re.S)
     return "\n".join(l for l in texto.splitlines() if not l.startswith(">")).strip()

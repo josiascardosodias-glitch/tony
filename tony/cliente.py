@@ -7,6 +7,8 @@ arquivo mantendo os métodos públicos: `conversar` (em pedaços), `completar` (
 
 import json
 from contextlib import contextmanager
+from dataclasses import dataclass
+from typing import Callable
 
 import httpx
 from ollama import Client, ResponseError
@@ -28,6 +30,14 @@ def _traduzir_erros():
         raise ErroDoModelo("não consegui falar com o Ollama. Ele está rodando? (ollama serve)") from e
 
 
+@dataclass
+class Chamada:
+    """O modelo pediu para rodar uma ferramenta. `resultado` é preenchido depois de rodar."""
+    nome: str
+    argumentos: dict
+    resultado: str = ""
+
+
 class Cliente:
     def __init__(self, cfg: dict, modelo: str | None = None, temperatura: float | None = None):
         """`modelo` e `temperatura` trocam os do config (ex.: o juiz dos testes usa outro modelo, com 0)."""
@@ -40,7 +50,7 @@ class Cliente:
             "num_ctx": cfg["contexto"]["num_ctx"],
         }
 
-    def _chat(self, mensagens: list[dict], stream: bool, ferramentas: list[dict] | None = None):
+    def _chat(self, mensagens: list[dict], stream: bool, ferramentas: list | None = None):
         return self._ollama.chat(
             model=self.modelo,
             messages=mensagens,
@@ -51,12 +61,16 @@ class Cliente:
             keep_alive=self._keep_alive,
         )
 
-    def conversar(self, mensagens: list[dict]):
-        """Devolve a resposta em pedaços, para o texto aparecer enquanto é escrito."""
+    def conversar(self, mensagens: list[dict], ferramentas: list[Callable] | None = None):
+        """Devolve a resposta em pedaços (texto), para ele aparecer enquanto é escrito, e uma
+        `Chamada` para cada ferramenta que o modelo pedir. As funções em `ferramentas` viram esquema
+        pela própria lib, a partir da docstring e dos tipos."""
         with _traduzir_erros():
-            for pedaco in self._chat(mensagens, stream=True):
+            for pedaco in self._chat(mensagens, stream=True, ferramentas=ferramentas or None):
                 if pedaco.message.content:
                     yield pedaco.message.content
+                for chamada in pedaco.message.tool_calls or []:
+                    yield Chamada(chamada.function.name, dict(chamada.function.arguments))
 
     def completar(self, mensagens: list[dict]) -> str:
         """Devolve a resposta inteira de uma vez (usado nos resumos)."""

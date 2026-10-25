@@ -17,9 +17,10 @@ class Registro:
         with self.arquivo.open("a", encoding="utf-8") as f:
             f.write(json.dumps(evento, ensure_ascii=False) + "\n")
 
-    def turno_completo(self, fala: str, resposta: str, segundos: float) -> None:
+    def turno_completo(self, fala: str, resposta: str, segundos: float, ferramentas: list[dict] = ()) -> None:
         self.turno += 1
-        self.anotar("turno", turno=self.turno, usuario=fala, tony=resposta, segundos=round(segundos, 1))
+        extra = {"ferramentas": list(ferramentas)} if ferramentas else {}
+        self.anotar("turno", turno=self.turno, usuario=fala, tony=resposta, segundos=round(segundos, 1), **extra)
 
     def marcar(self, valor: str, motivo: str = "") -> bool:
         """Marca o último turno como 'bom' ou 'ruim'. Devolve False se ainda não houve turno."""

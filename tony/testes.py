@@ -6,18 +6,25 @@ seus (`ultima_conversa`, `memoria`) — assim o placar só muda quando a persona
 
 Além de respostas, dá para testar a memória: `tarefa: resumo` julga o resumo que o Tony faz da
 conversa `antes`, e `tarefa: memoria` julga a memória depois de esse resumo entrar nela.
+
+Ferramentas: rodam sobre a Inteligência de exemplo, e a escrita (`lembrar`) vai para uma pasta
+temporária, com a confirmação "sim" (ou "não", com `confirma: false`). `chama: [a, b]` exige que ele chame ao menos uma delas;
+`chama: []`, que não chame nenhuma; `lista: true`, que toda linha comece com "- " — conferidos no
+código, sem juiz. `indice: true` põe no prompt só a
+lista das notas (como quando elas não cabem), para testar a leitura sob demanda.
 """
 
 import json
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
 import yaml
 
-from . import config
-from .cliente import Cliente
+from . import config, ferramentas
+from .cliente import Chamada, Cliente
 from .conversa import DIAS, TEMPERATURA_MEMORIA, Conversa, consolidar_memoria
-from .memoria import carregar_personalidade, ler_inteligencia, versao_personalidade
+from .memoria import carregar_personalidade, inteligencia_para_prompt, versao_personalidade
 
 ESQUEMA_VEREDITO = {
     "type": "object",
@@ -57,8 +64,27 @@ def julgar(juiz: Cliente, situacao: str, resposta: str, espera: str) -> dict:
     )
 
 
-def produzir(item: dict, conversa: Conversa, organizador: Cliente) -> tuple[str, str]:
-    """Faz o Tony produzir o que a fala testa. Devolve (situação para o juiz, o que ele produziu)."""
+def conferir_no_codigo(item: dict, resposta: str, chamadas: list) -> str:
+    """O que dá para conferir sem juiz: as chamadas de ferramenta (`chama`) e o formato de lista
+    (`lista`). Vazio se está certo; senão, o motivo. Conferir caractere por caractere é do código —
+    o juiz erra nisso."""
+    if item.get("lista"):
+        fora = [l for l in resposta.splitlines() if l.strip() and not l.startswith("- ")]
+        if fora:
+            return f"linha fora do formato de lista: {fora[0][:60]!r}"
+    if "chama" not in item:
+        return ""
+    nomes = [c.nome for c in chamadas]
+    if not item["chama"]:
+        return f"chamou ferramenta sem precisar: {', '.join(nomes)}" if nomes else ""
+    if not set(nomes) & set(item["chama"]):
+        return f"não chamou {' nem '.join(item['chama'])} (chamou: {', '.join(nomes) or 'nada'})"
+    return ""
+
+
+def produzir(item: dict, conversa: Conversa, organizador: Cliente) -> tuple[str, str, list]:
+    """Faz o Tony produzir o que a fala testa. Devolve (situação para o juiz, o que ele produziu,
+    as chamadas de ferramenta que ele fez)."""
     for troca in item.get("antes", []):  # conversa que veio antes da fala testada
         conversa.mensagens += [{"role": "user", "content": troca["pessoa"]},
                                {"role": "assistant", "content": troca["tony"]}]
@@ -69,18 +95,22 @@ def produzir(item: dict, conversa: Conversa, organizador: Cliente) -> tuple[str,
         contexto += f"Resumo da última conversa, que o Tony tinha:\n{item['ultima_conversa']}\n\n"
     tarefa = item.get("tarefa", "fala")
     if tarefa == "fala":
-        return f"{contexto}Fala da pessoa:\n{item['fala']}", "".join(conversa.responder(item["fala"]))
+        pedacos, chamadas = [], []
+        for parte in conversa.responder(item["fala"]):
+            (chamadas if isinstance(parte, Chamada) else pedacos).append(parte)
+        consultas = "".join(f"O Tony chamou {c.nome}({c.argumentos}) e recebeu:\n{c.resultado}\n\n" for c in chamadas)
+        return f"{contexto}Fala da pessoa:\n{item['fala']}\n\n{consultas}".strip(), "".join(pedacos), chamadas
     if item.get("resumo"):  # resumo fixo: testa só a consolidação, sem a variação do resumo
         situacao, resumo = contexto.strip(), item["resumo"]
     else:
         situacao = f"{contexto}Conversa:\n{conversa.transcricao(conversa.mensagens)}"
         resumo = conversa.resumir_para_proxima()
     if tarefa == "resumo":
-        return situacao, resumo
+        return situacao, resumo, []
     if tarefa == "memoria":
         hoje = datetime.now()
         return (f"{situacao}\n\nA conversa foi em {DIAS[hoje.weekday()]}, {hoje:%d/%m/%Y}. Resumo que o Tony fez dela:\n{resumo}",
-                consolidar_memoria(organizador, item.get("memoria", ""), resumo, hoje))
+                consolidar_memoria(organizador, item.get("memoria", ""), resumo, hoje), [])
     raise SystemExit(f"tarefa desconhecida na fala {item['id']}: {tarefa} (use fala, resumo ou memoria)")
 
 
@@ -111,7 +141,13 @@ def rodar(cfg: dict, ids: list[str] = (), vezes: int | None = None,
     pasta_personalidade = config.caminho(cfg["personalidade"])
     personalidade = carregar_personalidade(pasta_personalidade)
     versao = versao_personalidade(pasta_personalidade)
-    inteligencia = ler_inteligencia(config.caminho(cfg["testes"]["inteligencia"]))
+    pasta_inteligencia = config.caminho(cfg["testes"]["inteligencia"])
+    inteiras = inteligencia_para_prompt(pasta_inteligencia, cfg["memoria"]["inteligencia_inteira_ate"])
+    so_lista = inteligencia_para_prompt(pasta_inteligencia, 0)
+    caixa = tempfile.TemporaryDirectory()  # onde o `lembrar` dos testes escreve; some no fim
+    ferramentas.ambiente.inteligencia = pasta_inteligencia
+    ferramentas.ambiente.lembretes = Path(caixa.name) / "Tony - Lembretes.md"
+    todas = ferramentas.descobrir()
     if falas is None:
         falas = carregar_falas(config.caminho(cfg["testes"]["falas"]), ids)
     anteriores = ultimos_placares(cfg) if salvar else {}
@@ -122,22 +158,31 @@ def rodar(cfg: dict, ids: list[str] = (), vezes: int | None = None,
         n = vezes or item.get("vezes") or cfg["testes"]["vezes"]
         print(f"{item['id']:<20} ", end="", flush=True)
         respostas = []
+        ferramentas.ambiente.confirmar = lambda pergunta, sim=item.get("confirma", True): sim
         for _ in range(n):
-            conversa = Conversa(tony, cfg["contexto"]["limite"], personalidade, inteligencia,
-                                ultima_conversa=item.get("ultima_conversa", ""), memoria=item.get("memoria", ""))
-            situacao, resposta = produzir(item, conversa, organizador)
-            veredito = julgar(juiz, situacao, resposta, item["espera"])
-            respostas.append({"resposta": resposta, "cumpre": bool(veredito["cumpre"]), "motivo": veredito["motivo"]})
+            conversa = Conversa(tony, cfg["contexto"]["limite"], personalidade,
+                                so_lista if item.get("indice") else inteiras,
+                                ultima_conversa=item.get("ultima_conversa", ""), memoria=item.get("memoria", ""),
+                                ferramentas=todas)
+            situacao, resposta, chamadas = produzir(item, conversa, organizador)
+            erro = conferir_no_codigo(item, resposta, chamadas)
+            if erro or "espera" not in item:  # chamada errada já reprova: não gasta o juiz
+                veredito = {"cumpre": not erro, "motivo": erro or "chamadas certas"}
+            else:
+                veredito = julgar(juiz, situacao, resposta, item["espera"])
+            respostas.append({"resposta": resposta, "cumpre": bool(veredito["cumpre"]), "motivo": veredito["motivo"],
+                              "ferramentas": [{"nome": c.nome, "argumentos": c.argumentos} for c in chamadas]})
             print("✓" if veredito["cumpre"] else "✗", end="", flush=True)
         acertos = sum(r["cumpre"] for r in respostas)
         antes = f"   (antes: {anteriores[item['id']]['placar']})" if item["id"] in anteriores else ""
         print(f"  {acertos}/{n}{antes}")
         for falha in [r for r in respostas if not r["cumpre"]][:2]:
             print(f"{'':21}✗ {falha['motivo']}")
-        resultados.append({"id": item["id"], "fala": item.get("fala") or f"({item['tarefa']})", "espera": item["espera"],
+        resultados.append({"id": item["id"], "fala": item.get("fala") or f"({item['tarefa']})", "espera": item.get("espera", ""),
                            "acertos": acertos, "vezes": n, "respostas": respostas})
 
     total, possivel = sum(r["acertos"] for r in resultados), sum(r["vezes"] for r in resultados)
+    caixa.cleanup()
     print(f"\nTotal: {total}/{possivel}")
     arquivo = None
     if salvar:

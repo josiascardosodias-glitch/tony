@@ -112,8 +112,9 @@
       tony: "Faz sentido, com várias ações (adicionar, concluir, apagar) o reducer organiza melhor."
     - pessoa: "e comecei a ler sobre JOIN no SQL"
       tony: "Boa, JOIN é a parte que mais aparece no dia a dia."
+  lista: true
   espera: >-
-    É uma lista com "- " no início de cada linha. Mantém a decisão de estudar SQL antes de Node.
+    Mantém a decisão de estudar SQL antes de Node.
     Não traz mais a escolha entre useState e useReducer como pendente: registra que escolheu
     useReducer. Não inventa fatos que não estão na memória nem na conversa.
 
@@ -165,3 +166,57 @@
   espera: >-
     Não termina com pergunta de praxe ("ficou claro?", "quer um exemplo?", "o que acha?", "quer que
     eu explique mais?"). A última frase é parte da explicação.
+
+# --- Ferramentas (v2) ---------------------------------------------------------------------------
+# `chama` e `lista` são conferidos no código (sem juiz). `indice: true` deixa no prompt só a lista das notas.
+
+- id: sem-ferramenta-a-toa
+  fala: "me explica o que é uma closure em JavaScript"
+  chama: []
+
+- id: le-sob-demanda
+  indice: true
+  fala: "o que eu estudo mesmo?"
+  chama: [ler_nota, buscar_notas]
+  espera: >-
+    Diz que estuda JavaScript, React e Python, como está na nota. Não acrescenta outras linguagens.
+
+- id: busca-nas-notas
+  indice: true
+  fala: "em que horário eu costumo estudar?"
+  chama: [buscar_notas, ler_nota]
+  espera: >-
+    Diz que estuda à noite, depois do estágio.
+
+- id: nota-que-nao-existe
+  indice: true
+  fala: "o que tem na minha nota sobre viagens?"
+  espera: >-
+    Diz que não tem nota sobre viagens (pode citar as que existem). Não inventa o conteúdo de uma nota.
+
+- id: lembrar-por-pedido
+  fala: "guarda aí que minha apresentação do TCC é dia 20/11"
+  chama: [lembrar]
+  espera: >-
+    Diz que guardou a data da apresentação do TCC (20/11). Não diz que não consegue guardar.
+
+- id: lista-as-notas
+  indice: true
+  fala: "quais notas você tem sobre mim?"
+  espera: >-
+    Diz que tem duas notas, e uma delas é sobre a rotina. Não inventa uma terceira nota nem o
+    assunto de uma nota que não existe.
+
+- id: lembrar-recusado
+  fala: "guarda aí que minha apresentação do TCC é dia 20/11"
+  confirma: false
+  chama: [lembrar]
+  espera: >-
+    Diz que não guardou (porque a pessoa não confirmou). Não pede a confirmação de novo e não diz
+    que guardou.
+
+- id: nao-rele-o-que-ja-sabe
+  fala: "o que eu estudo mesmo?"
+  chama: []
+  espera: >-
+    Diz que estuda JavaScript, React e Python.

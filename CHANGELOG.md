@@ -1,5 +1,19 @@
 # Changelog
 
+## v2.0.0 — 2026-10-24
+
+Ferramentas: o Tony consulta as notas e guarda fatos sozinho, quando a conversa pede.
+
+- Laço de tool calling na conversa (em streaming): o modelo pede, o código roda e devolve, até ele
+  responder. No máximo 5 rodadas por resposta; erro de ferramenta volta ao modelo como texto.
+- Ferramentas descobertas automaticamente em `tony/ferramentas/` (um arquivo, uma função):
+  `listar_notas`, `ler_nota` (aceita nome aproximado), `buscar_notas` e `lembrar` (pede confirmação).
+- Só enxergam a pasta da Inteligência. Notas inteiras no prompt até 6000 caracteres; acima, só a lista.
+- O terminal mostra cada chamada (`· ler_nota(nome='...')`), e o log guarda chamadas e resultados.
+- Testes: `chama` e `lista` conferidos no código, `indice` e `confirma` nas falas, escrita numa pasta
+  temporária. Oito falas novas.
+- Placar: 107/108 e 108/108 (27 falas × 4).
+
 ## v1.0.0 — 2026-10-24
 
 A v1 completa: o Tony conversa, lembra, é medido e revisado. Esta versão fecha com a primeira

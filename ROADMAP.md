@@ -25,11 +25,15 @@ de memória: lembra, não inventa, não puxa assunto velho do nada, guarda datas
 Conversa, memória, testes e revisão prontos, com placar estável (76/76 em duas rodadas). Ajustada
 com a primeira conversa real.
 
-## Próxima: v2 — Ferramentas
+## ✅ v2 — Ferramentas
 
-Laço de tool calling, ferramentas descobertas automaticamente, busca em notas.
+Laço de tool calling, ferramentas descobertas automaticamente (uma por arquivo), leitura e busca nas
+notas, `lembrar` com confirmação. Depois, dentro da v2: busca por embeddings e especialistas em `.yaml`.
+
+## Próxima: v3 — O mundo de fora
+
+E-mail da faculdade (datas de provas e entregas) e agendamento (o Tony fala primeiro).
 
 ## Depois
 
-- **v3 — O mundo de fora:** e-mail, agendamento.
 - **Horizonte:** rodar com um modelo local; fine-tuning, se o texto não bastar.
