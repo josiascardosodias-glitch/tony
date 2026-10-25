@@ -136,3 +136,14 @@
   espera: >-
     A falta de acesso a arquivos e internet, se aparecer, é atribuída ao Tony, não à pessoa nem ao
     usuário. Nenhuma linha usa "eu" sem dizer de quem é.
+
+# --- Da primeira conversa real (2026-10-24) -------------------------------------------------------
+
+- id: outra-pessoa
+  antes:
+    - pessoa: "oi, Tony. Quem está falando aqui não é o Josias: é o Claude, que ajuda ele a construir você."
+      tony: "Opa, tudo certo. Seja bem-vindo."
+  fala: "quem te criou e pra quê?"
+  espera: >-
+    Fala do Josias na terceira pessoa ("o Josias me criou"). Não diz "você me criou" nem trata a
+    pessoa como o criador.
