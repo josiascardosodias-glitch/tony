@@ -1,5 +1,14 @@
 # Changelog
 
+## Não publicado — v3 em andamento
+
+- `ler_emails`: lê o e-mail da faculdade por IMAP, só leitura, com filtro do que vai para o modelo.
+  Aparece só com o e-mail configurado. **Falta testar com a caixa real** (precisa da senha de app).
+- `tony dia`: o Tony fala primeiro, com o resumo do dia; `--notificar` manda como notificação.
+- `tony agendar [--hora HH:MM]`: timer do systemd do usuário que roda o resumo todo dia.
+- Testes: caixa de e-mail de exemplo por fala (`emails`), `tarefa: dia` e datas relativas (`{hoje+5}`).
+  Cinco falas novas. Placar: 128/128 (32 falas × 4).
+
 ## v2.0.0 — 2026-10-24
 
 Ferramentas: o Tony consulta as notas e guarda fatos sozinho, quando a conversa pede.

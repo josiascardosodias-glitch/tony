@@ -8,7 +8,8 @@ Para criar uma ferramenta, um arquivo `nome.py` com:
 - uma função pública com o mesmo nome do arquivo;
 - docstring com o que ela faz e a seção `Args:` (é o que o modelo lê para decidir usar);
 - retorno em texto; para avisar um problema ao modelo, levante `ErroDaFerramenta`;
-- se ela escreve ou muda algo, pergunte antes com `ambiente.confirmar(...)`.
+- se ela escreve ou muda algo, pergunte antes com `ambiente.confirmar(...)`;
+- se ela depende de configuração, um `disponivel()` no arquivo diz se ela aparece para o modelo.
 Arquivos que começam com `_` não são ferramentas.
 """
 
@@ -30,19 +31,21 @@ class Ambiente:
     inteligencia: Path | None = None              # a única pasta que as ferramentas enxergam
     lembretes: Path | None = None                 # onde `lembrar` escreve
     confirmar: Callable[[str], bool] = lambda pergunta: False  # quem conversa diz sim ou não
+    caixa_de_email: Callable[[int], list[dict]] | None = None   # e-mails dos últimos N dias; None = sem e-mail
 
 
 ambiente = Ambiente()
 
 
 def descobrir() -> dict[str, Callable]:
-    """{nome: função} de cada arquivo desta pasta."""
+    """{nome: função} de cada arquivo desta pasta que está disponível agora."""
     ferramentas = {}
     for modulo in pkgutil.iter_modules(__path__):
         if modulo.name.startswith("_"):
             continue
-        funcao = getattr(importlib.import_module(f"{__name__}.{modulo.name}"), modulo.name, None)
-        if callable(funcao):
+        arquivo = importlib.import_module(f"{__name__}.{modulo.name}")
+        funcao = getattr(arquivo, modulo.name, None)
+        if callable(funcao) and getattr(arquivo, "disponivel", lambda: True)():
             ferramentas[modulo.name] = funcao
     return ferramentas
 

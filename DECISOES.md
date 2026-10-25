@@ -160,3 +160,24 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
     linha que começava). A escrita vai para uma pasta temporária; `confirma: false` simula o "não".
 51. **Mudança sem efeito medido não fica.** Um aviso "não releia as notas" passou no teste também sem
     ele; foi retirado.
+
+## 2026-10-24 — v3: o mundo de fora (começo)
+
+52. **E-mail por IMAP, em Python, só leitura** (`imaplib`, caixa aberta em modo somente leitura,
+    mensagens com `BODY.PEEK`: nada é apagado nem marcado como lido). Gmail com senha de app guardada
+    em `~/.config/tony/senha-email`, fora do repositório. *Fora:* n8n (serviço extra numa máquina de
+    7,5 GB, lógica fora do código) e a API do Gmail com OAuth (burocracia demais para só ler).
+53. **`email.filtro` decide o que vai para a nuvem.** Só os e-mails que passam no critério IMAP (ex.:
+    remetente da faculdade) chegam ao modelo. A ferramenta `ler_emails` só aparece se o e-mail estiver
+    configurado (`disponivel()` no arquivo da ferramenta) — sem ela, o Tony diz que não vê e-mail.
+54. **O Tony fala primeiro por notificação.** `tony dia` escreve o resumo do dia (notas, lembretes,
+    memória, última conversa e os e-mails de 3 dias, com o calendário dado pelo código);
+    `tony agendar` instala um timer do systemd do usuário (sem sudo, `Persistent=true`: se o PC estava
+    desligado na hora, roda ao ligar). *Fora:* escrever na nota diária do vault; falar só ao abrir.
+55. **No resumo do dia, os e-mails vão direto no pedido**, não por ferramenta: é uma mensagem sem
+    conversa, e não há o que o modelo decidir.
+56. **Datas relativas nos testes** (`{hoje+5}`): com datas fixas, os testes de agenda venceriam.
+57. **O juiz precisa dos fatos que o Tony tinha.** Ele não vê o prompt; sem saber quais notas existem,
+    reprovava "Sobre o Josias" como inventada. Fato necessário para julgar vai no critério.
+58. **Testar ferramenta de escrita em dados reais só com fato verdadeiro.** Um fato de teste recusado
+    na confirmação ainda entrou no resumo da conversa e virou "lembrança" no resumo do dia; foi limpo à mão.

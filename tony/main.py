@@ -1,4 +1,4 @@
-"""Tony no terminal: `tony` conversa; `tony testar` roda as falas de teste."""
+"""Tony no terminal: `tony` conversa; `tony testar` roda as falas de teste; `tony dia` é o resumo do dia."""
 
 import argparse
 import readline  # noqa: F401 — só importar já dá setas e histórico ao input()
@@ -10,6 +10,7 @@ from .cliente import Chamada, Cliente, ErroDoModelo
 from .conversa import TEMPERATURA_MEMORIA, Conversa, consolidar_memoria
 from .memoria import (carregar_personalidade, data_do_resumo, inteligencia_para_prompt, lembrar, ler_memoria,
                       resumos_pendentes, salvar_memoria, salvar_resumo, ultimo_resumo, versao_personalidade)
+from .dia import caixa_de_email
 from .registro import Registro
 
 AJUDA = """Comandos:
@@ -31,10 +32,11 @@ class Sessao:
         self.arquivo_memoria = config.caminho(cfg["memoria"]["memoria"])
         self.pasta_inteligencia = config.caminho(cfg["memoria"]["inteligencia"])
         self.organizador = Cliente(cfg, temperatura=TEMPERATURA_MEMORIA)
-        self.ferramentas = ferramentas.descobrir()
         ferramentas.ambiente.inteligencia = self.pasta_inteligencia
         ferramentas.ambiente.lembretes = self.pasta_inteligencia / cfg["memoria"]["lembretes"] if self.pasta_inteligencia else None
         ferramentas.ambiente.confirmar = self._confirmar
+        ferramentas.ambiente.caixa_de_email = caixa_de_email(cfg)
+        self.ferramentas = ferramentas.descobrir()  # depois do ambiente: ler_emails só aparece com a caixa configurada
         pasta_personalidade = config.caminho(cfg["personalidade"])
         self.personalidade = carregar_personalidade(pasta_personalidade)
         self.registro = Registro(
@@ -184,10 +186,21 @@ def main() -> None:
     testar.add_argument("--vezes", type=int, help="quantas vezes cada fala roda")
     revisar = comandos.add_parser("revisar", help="propõe uma mudança na personalidade a partir das marcações /ruim")
     revisar.add_argument("--logs", type=config.caminho, help="pasta de logs (padrão: a do config)")
+    dia = comandos.add_parser("dia", help="o Tony fala primeiro: o resumo do dia")
+    dia.add_argument("--notificar", action="store_true", help="também mostra como notificação na área de trabalho")
+    agendar = comandos.add_parser("agendar", help="instala um timer do systemd que roda `tony dia --notificar` todo dia")
+    agendar.add_argument("--hora", default="08:00", help="HH:MM (padrão 08:00)")
     args = parser.parse_args()
 
     cfg = config.carregar()
-    if args.comando in ("testar", "revisar"):
+    if args.comando in ("dia", "agendar"):
+        from . import dia
+
+        try:
+            dia.dia(cfg, args.notificar) if args.comando == "dia" else dia.agendar(args.hora)
+        except ErroDoModelo as e:
+            raise SystemExit(f"\n[erro] {e}")
+    elif args.comando in ("testar", "revisar"):
         from .revisao import revisar
         from .testes import rodar
 

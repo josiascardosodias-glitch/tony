@@ -12,11 +12,16 @@ temporária, com a confirmação "sim" (ou "não", com `confirma: false`). `cham
 `chama: []`, que não chame nenhuma; `lista: true`, que toda linha comece com "- " — conferidos no
 código, sem juiz. `indice: true` põe no prompt só a
 lista das notas (como quando elas não cabem), para testar a leitura sob demanda.
+
+E-mail: `emails` (lista de {de, assunto, data, texto}) é a caixa de exemplo da fala; sem ela, o
+e-mail fica desligado. `tarefa: dia` julga o resumo do dia. Em qualquer texto, `{hoje+3}` vira a data
+de daqui a 3 dias (dd/mm/aaaa), para os testes não vencerem.
 """
 
 import json
+import re
 import tempfile
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import yaml
@@ -24,6 +29,7 @@ import yaml
 from . import config, ferramentas
 from .cliente import Chamada, Cliente
 from .conversa import DIAS, TEMPERATURA_MEMORIA, Conversa, consolidar_memoria
+from .dia import pedido_do_dia
 from .memoria import carregar_personalidade, inteligencia_para_prompt, versao_personalidade
 
 ESQUEMA_VEREDITO = {
@@ -44,8 +50,21 @@ PEDIDO_JUIZ = (
 )
 
 
+def _com_datas(valor):
+    """Troca {hoje}, {hoje+3}, {hoje-1} pela data (dd/mm/aaaa), em textos, listas e dicionários."""
+    if isinstance(valor, str):
+        def data(m):
+            return f"{datetime.now() + timedelta(days=int(m.group(1) or 0)):%d/%m/%Y}"
+        return re.sub(r"\{hoje([+-]\d+)?\}", data, valor)
+    if isinstance(valor, list):
+        return [_com_datas(v) for v in valor]
+    if isinstance(valor, dict):
+        return {k: _com_datas(v) for k, v in valor.items()}
+    return valor
+
+
 def carregar_falas(arquivo: Path, ids: list[str]) -> list[dict]:
-    falas = yaml.safe_load(arquivo.read_text(encoding="utf-8"))
+    falas = _com_datas(yaml.safe_load(arquivo.read_text(encoding="utf-8")))
     if not ids:
         return falas
     desconhecidas = set(ids) - {f["id"] for f in falas}
@@ -94,6 +113,13 @@ def produzir(item: dict, conversa: Conversa, organizador: Cliente) -> tuple[str,
     if item.get("ultima_conversa"):
         contexto += f"Resumo da última conversa, que o Tony tinha:\n{item['ultima_conversa']}\n\n"
     tarefa = item.get("tarefa", "fala")
+    if tarefa == "dia":
+        hoje = datetime.now()
+        emails = item.get("emails")
+        resumo = "".join(p for p in conversa.responder(pedido_do_dia(emails, hoje)) if isinstance(p, str))
+        caixa = "\n".join(f"- [{m['data']}] {m['assunto']}: {m['texto']}" for m in emails or []) or "(nenhum)"
+        return (f"{contexto}Hoje é {DIAS[hoje.weekday()]}, {hoje:%d/%m/%Y}. O Tony escreveu sozinho a notificação "
+                f"que abre o dia da pessoa. E-mails que ele tinha:\n{caixa}").strip(), resumo.strip(), []
     if tarefa == "fala":
         pedacos, chamadas = [], []
         for parte in conversa.responder(item["fala"]):
@@ -111,7 +137,7 @@ def produzir(item: dict, conversa: Conversa, organizador: Cliente) -> tuple[str,
         hoje = datetime.now()
         return (f"{situacao}\n\nA conversa foi em {DIAS[hoje.weekday()]}, {hoje:%d/%m/%Y}. Resumo que o Tony fez dela:\n{resumo}",
                 consolidar_memoria(organizador, item.get("memoria", ""), resumo, hoje), [])
-    raise SystemExit(f"tarefa desconhecida na fala {item['id']}: {tarefa} (use fala, resumo ou memoria)")
+    raise SystemExit(f"tarefa desconhecida na fala {item['id']}: {tarefa} (use fala, resumo, memoria ou dia)")
 
 
 def ultimos_placares(cfg: dict) -> dict:
@@ -147,7 +173,6 @@ def rodar(cfg: dict, ids: list[str] = (), vezes: int | None = None,
     caixa = tempfile.TemporaryDirectory()  # onde o `lembrar` dos testes escreve; some no fim
     ferramentas.ambiente.inteligencia = pasta_inteligencia
     ferramentas.ambiente.lembretes = Path(caixa.name) / "Tony - Lembretes.md"
-    todas = ferramentas.descobrir()
     if falas is None:
         falas = carregar_falas(config.caminho(cfg["testes"]["falas"]), ids)
     anteriores = ultimos_placares(cfg) if salvar else {}
@@ -159,6 +184,8 @@ def rodar(cfg: dict, ids: list[str] = (), vezes: int | None = None,
         print(f"{item['id']:<20} ", end="", flush=True)
         respostas = []
         ferramentas.ambiente.confirmar = lambda pergunta, sim=item.get("confirma", True): sim
+        ferramentas.ambiente.caixa_de_email = (lambda dias, caixa=item["emails"]: caixa) if "emails" in item else None
+        todas = ferramentas.descobrir()
         for _ in range(n):
             conversa = Conversa(tony, cfg["contexto"]["limite"], personalidade,
                                 so_lista if item.get("indice") else inteiras,

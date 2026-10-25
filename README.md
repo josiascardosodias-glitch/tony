@@ -55,10 +55,38 @@ a docstring e os tipos para decidir quando usar.
 | `ler_nota` | lê uma nota (aceita o nome aproximado) |
 | `buscar_notas` | procura palavras nas notas |
 | `lembrar` | guarda um fato na nota de lembretes, depois da sua confirmação |
+| `ler_emails` | lê os e-mails recentes (só aparece com o e-mail configurado) |
 
 Só a pasta `memoria.inteligencia` é acessível. Enquanto as notas cabem em
 `memoria.inteligencia_inteira_ate` caracteres, elas vão inteiras no prompt; acima disso, só a lista, e
 o Tony lê sob demanda. Para criar uma ferramenta, veja a docstring de `tony/ferramentas/__init__.py`.
+
+## O Tony fala primeiro
+
+```bash
+uv run tony dia               # o resumo do dia: provas, entregas e pendências dos próximos 7 dias
+uv run tony dia --notificar   # o mesmo, como notificação na área de trabalho
+uv run tony agendar --hora 08:00   # todo dia nesse horário (timer do systemd do seu usuário)
+```
+
+Para desligar: `systemctl --user disable --now tony-dia.timer`.
+
+## E-mail (opcional)
+
+Só leitura, por IMAP: nada é apagado nem marcado como lido. Com o Gmail:
+
+1. Ative a verificação em duas etapas e crie uma senha de app em <https://myaccount.google.com/apppasswords>.
+2. Guarde a senha fora do repositório:
+   `mkdir -p ~/.config/tony && read -rs s && printf '%s' "$s" > ~/.config/tony/senha-email && chmod 600 ~/.config/tony/senha-email`
+3. No `config.local.yaml`:
+   ```yaml
+   email:
+     usuario: "voce@gmail.com"
+     filtro: 'FROM "faculdade.edu.br"'   # só esses e-mails vão para o modelo
+   ```
+
+Com o e-mail configurado, aparece a ferramenta `ler_emails`, e o `tony dia` passa a olhar os e-mails
+dos últimos 3 dias. O conteúdo desses e-mails vai para o modelo: use o `filtro`.
 
 ## Testar
 
@@ -123,6 +151,7 @@ tony/
     ├── conversa.py       histórico, prompt de sistema, laço de ferramentas, resumos e memória
     ├── ferramentas/      uma ferramenta por arquivo, descobertas sozinhas
     ├── memoria.py        personalidade, notas, resumos, memória e lembretes
+    ├── dia.py            resumo do dia e o timer que o agenda
     ├── registro.py       log da sessão
     ├── testes.py         falas de teste e juiz
     ├── revisao.py        propostas de mudança a partir das marcações

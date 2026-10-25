@@ -23,6 +23,12 @@ memoria:
   memoria: "dados/memoria.md"  # o que ele lembra das conversas antigas (os resumos, consolidados)
   lembretes: "Tony - Lembretes.md"   # nota dentro da pasta inteligencia onde o /lembrar escreve
 
+email:                         # e-mail da faculdade, só leitura (IMAP); o conteúdo vai para o modelo na nuvem
+  servidor: "imap.gmail.com"
+  usuario: ""                  # vazio = sem e-mail (a ferramenta ler_emails nem aparece)
+  senha_arquivo: "~/.config/tony/senha-email"   # senha de app do Google, fora do repositório (chmod 600)
+  filtro: ""                   # critério IMAP extra, ex.: 'FROM "faculdade.edu.br"': só esses e-mails vão para o modelo
+
 personalidade: "personalidade"
 logs: "logs"
 

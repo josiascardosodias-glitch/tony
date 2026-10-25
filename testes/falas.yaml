@@ -204,8 +204,8 @@
   indice: true
   fala: "quais notas você tem sobre mim?"
   espera: >-
-    Diz que tem duas notas, e uma delas é sobre a rotina. Não inventa uma terceira nota nem o
-    assunto de uma nota que não existe.
+    As notas que existem são exatamente duas: "Tony - Sobre o Josias" e "Tony - Rotina". A resposta
+    diz que são duas (pelo nome ou descritas) e não inventa uma terceira.
 
 - id: lembrar-recusado
   fala: "guarda aí que minha apresentação do TCC é dia 20/11"
@@ -220,3 +220,54 @@
   chama: []
   espera: >-
     Diz que estuda JavaScript, React e Python.
+
+# --- O mundo de fora (v3) -----------------------------------------------------------------------
+# `emails` é a caixa de exemplo da fala; `{hoje+N}` vira a data de daqui a N dias.
+
+- id: email-prova
+  emails:
+    - de: "Secretaria Acadêmica <secretaria@faculdade.edu.br>"
+      assunto: "Prova de Cálculo I remarcada"
+      data: "{hoje-1} 14:05"
+      texto: "A prova de Cálculo I foi remarcada para {hoje+5}, às 19h, na sala 204."
+    - de: "Biblioteca <biblioteca@faculdade.edu.br>"
+      assunto: "Horário de funcionamento"
+      data: "{hoje-2} 09:00"
+      texto: "A biblioteca abrirá das 8h às 22h durante a semana de provas."
+  fala: "tem alguma prova marcada no meu e-mail da faculdade?"
+  chama: [ler_emails]
+  espera: >-
+    Diz que a prova de Cálculo I foi remarcada para {hoje+5} (com ou sem o ano), às 19h; a sala é
+    opcional. Não inventa outras provas.
+
+- id: email-vazio
+  emails: []
+  fala: "chegou algum aviso de entrega de trabalho no e-mail?"
+  chama: [ler_emails]
+  espera: >-
+    Diz que não encontrou nenhum aviso (ou nenhum e-mail). Não inventa trabalho, data nem remetente.
+
+- id: email-nao-e-pra-tudo
+  emails: []
+  fala: "me explica o que é uma API REST"
+  chama: []
+
+- id: dia-com-prova
+  tarefa: dia
+  emails:
+    - de: "Coordenação <coordenacao@faculdade.edu.br>"
+      assunto: "Entrega do TCC parcial"
+      data: "{hoje-1} 10:00"
+      texto: "Lembrete: a entrega parcial do TCC é dia {hoje+2}, até 23h59, pelo portal."
+  memoria: |-
+    - {hoje-3}: a pessoa decidiu estudar SQL antes de Node.
+  espera: >-
+    Cita a entrega parcial do TCC em {hoje+2} (com ou sem o ano, ou "depois de amanhã"). Tem no máximo
+    3 frases e não termina com pergunta. Não inventa outros compromissos.
+
+- id: dia-sem-nada
+  tarefa: dia
+  emails: []
+  espera: >-
+    Diz, em poucas palavras, que não há nada marcado para os próximos dias. Não inventa provas,
+    entregas nem compromissos.

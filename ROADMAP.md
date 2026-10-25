@@ -30,9 +30,10 @@ com a primeira conversa real.
 Laço de tool calling, ferramentas descobertas automaticamente (uma por arquivo), leitura e busca nas
 notas, `lembrar` com confirmação. Depois, dentro da v2: busca por embeddings e especialistas em `.yaml`.
 
-## Próxima: v3 — O mundo de fora
+## 🟡 v3 — O mundo de fora (em andamento)
 
-E-mail da faculdade (datas de provas e entregas) e agendamento (o Tony fala primeiro).
+E-mail da faculdade por IMAP, só leitura (falta o teste com a caixa real) e o resumo do dia como
+notificação, agendado pelo systemd.
 
 ## Depois
 
