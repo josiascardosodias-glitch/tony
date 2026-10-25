@@ -83,6 +83,8 @@ Comandos no chat: `/sair`, `/nova`, `/bom`, `/ruim <motivo>`, `/prompt` (mostra 
 "v1" é o plano deste briefing inteiro. As entregas no GitHub vão subindo em `v0.x` até ele estar
 completo, que vira a `v1.0`.
 
+> [!success] Briefing completo: v1.0.0 publicada em 2026-10-24 (placar 76/76).
+
 | # | Etapa | Estado |
 |---|---|---|
 | 1 | **Esqueleto que conversa** — estrutura, config, personalidade inicial, streaming, logs, `/bom` e `/ruim` | ✅ v0.1.0 |
