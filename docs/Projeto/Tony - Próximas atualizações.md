@@ -121,10 +121,31 @@ Etapas 1 a 6 do [[Tony - Briefing v1]] prontas e testadas, README revisado, plac
 - Busca no vault (textual, depois embeddings) e primeira ferramenta de escrita com confirmação.
 - Especialistas como `.yaml` (outro prompt, mesmo modelo).
 
+> [!check] n8n fica fora da v2 (decidido em 2026-10-24)
+> Ideia vinda de outra conversa: começar as ferramentas no n8n e trocar aos poucos por código nativo.
+> As ferramentas da v2 são locais e simples (Python direto é mais fácil), o projeto é para aprender o
+> laço no código, e os testes dependeriam do n8n no ar. Medido: 1,4 GB livres, Docker nativo, e o
+> `gemma4:31b-cloud` acertou 9/9 decisões de chamar ou não uma ferramenta (mas usou o nome "Josias"
+> em vez do nome do arquivo). O n8n volta como pergunta da v3.
+
+**O que a v2 traz da conversa do n8n:**
+- **A ferramenta é uma emenda:** nome, docstring e tipos fixos; o corpo pode fazer qualquer coisa
+  (até chamar um webhook do n8n) e ser trocado sem mexer no laço.
+- **Validar argumentos antes de executar**, e aceitar nomes aproximados (ou oferecer `listar_notas`).
+- **Poucas ferramentas no começo:** `listar_notas`, `ler_nota`, `buscar_notas` e `lembrar` (escrita, com confirmação).
+- **Testes que conferem a chamada**, não só o texto (`chama:` nas falas), com as ferramentas rodando
+  sobre a Inteligência de exemplo e a escrita sem gravar de verdade.
+
+**Limite:** as ferramentas só enxergam a pasta `Inteligência` (a única que pode ir para a nuvem).
+Buscar no vault inteiro é decisão sua, para depois.
+
 ## v3 — O mundo de fora
 
 - E-mail da escola (datas de provas e entregas).
 - Agendamento: o Tony fala primeiro (ex.: resumo do dia).
+- *Pergunta:* n8n ou Python? O n8n poupa o OAuth do Google e os gatilhos de horário; IMAP e um
+  `systemd timer` resolvem em Python sem serviço extra. Medir a RAM com o n8n antes; credenciais
+  nunca no repositório; autenticar o webhook.
 
 ## Horizonte
 
