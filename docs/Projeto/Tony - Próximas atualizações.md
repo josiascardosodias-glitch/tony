@@ -152,7 +152,19 @@ Buscar no vault inteiro é decisão sua, para depois.
 - Agendamento: o Tony fala primeiro (ex.: resumo do dia).
 - *Pergunta:* n8n ou Python? O n8n poupa o OAuth do Google e os gatilhos de horário; IMAP e um
   `systemd timer` resolvem em Python sem serviço extra. Medir a RAM com o n8n antes; credenciais
-  nunca no repositório; autenticar o webhook.
+  nunca no repositório; autenticar o webhook. As formas de ligar o n8n a um agente estão em
+  [[Claude Code - Integração com o n8n]].
+
+### Para fechar a v3
+
+O que falta é meu: a senha de app do Gmail e o filtro do domínio da faculdade (capturado em 2026-10-24).
+
+1. Ativar a verificação em duas etapas e criar a senha em <https://myaccount.google.com/apppasswords>.
+2. Guardar fora do repositório:
+   ```bash
+   mkdir -p ~/.config/tony && read -rs s && printf '%s' "$s" > ~/.config/tony/senha-email && chmod 600 ~/.config/tony/senha-email
+   ```
+3. Passar ao Claude o e-mail e o domínio da faculdade (para o `email.filtro`) e testar com a caixa real.
 
 ## Horizonte
 
