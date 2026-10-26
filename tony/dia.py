@@ -16,8 +16,8 @@ DIAS_DE_EMAIL = 3
 PEDIDO_DIA = (
     "[Mensagem agendada: a pessoa não falou nada; você é quem começa.] Escreva a notificação que abre "
     "o dia dela: em até 3 frases, o que importa hoje e nos próximos 7 dias (provas, entregas, "
-    "pendências), tirado só do que está nas suas notas, lembretes, memória, última conversa e nos "
-    "e-mails abaixo. Use o calendário abaixo para as datas; não calcule de cabeça. Se não houver "
+    "pendências), tirado só do que está {fontes}. "
+    "Use o calendário abaixo para as datas; não calcule de cabeça. Se não houver "
     "nada marcado, diga isso em uma frase curta. Sem saudação longa e sem pergunta no fim."
 )
 
@@ -35,13 +35,16 @@ def caixa_de_email(cfg: dict):
 
 
 def pedido_do_dia(emails: list[dict] | None, hoje: datetime) -> str:
-    if emails is None:
-        trecho = "(e-mail não configurado)"
-    elif not emails:
+    datas = f"Calendário:\n{calendario(hoje, 8)}"
+    if emails is None:  # sem dizer isso, ele escrevia "não achei nada nas notas e e-mails" (5/8)
+        pedido = PEDIDO_DIA.format(fontes="nas suas notas, lembretes, memória e última conversa")
+        return f"{pedido} Você não tem acesso a e-mail (não está configurado): não diga que olhou e-mails.\n\n{datas}"
+    if not emails:
         trecho = f"(nenhum e-mail nos últimos {DIAS_DE_EMAIL} dias)"
     else:
         trecho = "\n\n".join(f"[{m['data']}] de {m['de']}\nAssunto: {m['assunto']}\n{m['texto']}" for m in emails)
-    return f"{PEDIDO_DIA}\n\nCalendário:\n{calendario(hoje, 8)}\n\nE-mails recentes:\n{trecho}"
+    pedido = PEDIDO_DIA.format(fontes="nas suas notas, lembretes, memória, última conversa e nos e-mails abaixo")
+    return f"{pedido}\n\n{datas}\n\nE-mails recentes:\n{trecho}"
 
 
 def resumo_do_dia(cfg: dict) -> str:
@@ -70,11 +73,17 @@ def dia(cfg: dict, notificar: bool) -> None:
         subprocess.run(["notify-send", "--app-name=Tony", "Tony", texto], check=False)
 
 
+# Restart: ao ligar o PC (Persistent=true), o timer dispara antes de a rede subir e o modelo na nuvem
+# não responde. O systemd tenta de novo a cada 2 minutos, até 6 vezes na hora.
 SERVICO = """[Unit]
 Description=Tony: resumo do dia
+StartLimitIntervalSec=1h
+StartLimitBurst=6
 
 [Service]
 Type=oneshot
+Restart=on-failure
+RestartSec=2min
 WorkingDirectory={raiz}
 ExecStart={uv} run tony dia --notificar
 """

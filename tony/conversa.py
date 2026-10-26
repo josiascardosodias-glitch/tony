@@ -164,10 +164,20 @@ def consolidar_memoria(cliente: Cliente, memoria: str, resumo: str, data: dateti
         {"role": "system", "content": PEDIDO_CONSOLIDAR},
         {"role": "user", "content": f"Memória atual:\n{memoria or '(vazia)'}\n\n"
                                     f"Resumo da conversa de {DIAS[data.weekday()]}, {data:%d/%m/%Y}:\n{resumo}\n\n"
-                                    f"Calendário a partir do dia da conversa:\n{calendario(data)}"},
+                                    f"Calendário a partir do dia da conversa:\n{calendario(data, proximas=True)}"},
     ]).strip()
 
 
-def calendario(inicio: datetime, dias: int = 14) -> str:
-    """Os próximos dias com o dia da semana. Modelo erra conta de calendário; consultar uma lista, não."""
-    return "\n".join(f"{DIAS[d.weekday()]}, {d:%d/%m/%Y}" for d in (inicio + timedelta(n) for n in range(dias)))
+def calendario(inicio: datetime, dias: int = 14, proximas: bool = False) -> str:
+    """Os próximos dias com o dia da semana. Modelo erra conta de calendário; consultar uma lista, não.
+
+    `proximas` marca qual é a "sexta que vem" de cada dia da semana: numa segunda, sem a marca, ele
+    punha a "próxima sexta" ora no dia 4, ora no 11 (memoria-datas 4/8).
+    """
+    linhas = []
+    for n in range(dias):
+        d = inicio + timedelta(n)
+        marca = (" (o dia da conversa)" if n == 0 else f" ('{DIAS[d.weekday()].split('-')[0]} que vem')"
+                 ) if proximas and n < 8 else ""
+        linhas.append(f"{DIAS[d.weekday()]}, {d:%d/%m/%Y}{marca}")
+    return "\n".join(linhas)

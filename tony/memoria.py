@@ -61,9 +61,10 @@ def data_do_resumo(arquivo: Path) -> datetime:
     return datetime.strptime(arquivo.stem, "%Y-%m-%d_%H%M%S")
 
 
-def salvar_resumo(pasta: Path, texto: str) -> None:
+def salvar_resumo(pasta: Path, texto: str, quando: datetime | None = None) -> None:
+    """`quando` é a hora da conversa, se não for agora (o nome do arquivo é a data que a memória usa)."""
     pasta.mkdir(parents=True, exist_ok=True)
-    (pasta / f"{datetime.now():%Y-%m-%d_%H%M%S}.md").write_text(texto, encoding="utf-8")
+    (pasta / f"{quando or datetime.now():%Y-%m-%d_%H%M%S}.md").write_text(texto, encoding="utf-8")
 
 
 # A memória guarda na primeira linha até qual resumo já foi consolidada. Se a consolidação falhar

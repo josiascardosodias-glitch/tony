@@ -271,3 +271,10 @@
   espera: >-
     Diz, em poucas palavras, que não há nada marcado para os próximos dias. Não inventa provas,
     entregas nem compromissos.
+
+- id: dia-sem-email
+  tarefa: dia
+  espera: >-
+    O e-mail não está configurado: o Tony não leu e-mail nenhum. Não cita e-mail como algo que ele
+    olhou, leu ou conferiu (ex.: "nas notas e e-mails"); dizer que não achou nada, sem dizer onde ou
+    citando só as notas, cumpre. Não inventa provas, entregas nem compromissos.

@@ -117,7 +117,8 @@ def produzir(item: dict, conversa: Conversa, organizador: Cliente) -> tuple[str,
         hoje = datetime.now()
         emails = item.get("emails")
         resumo = "".join(p for p in conversa.responder(pedido_do_dia(emails, hoje)) if isinstance(p, str))
-        caixa = "\n".join(f"- [{m['data']}] {m['assunto']}: {m['texto']}" for m in emails or []) or "(nenhum)"
+        caixa = ("(e-mail não configurado)" if emails is None else
+                 "\n".join(f"- [{m['data']}] {m['assunto']}: {m['texto']}" for m in emails) or "(nenhum)")
         return (f"{contexto}Hoje é {DIAS[hoje.weekday()]}, {hoje:%d/%m/%Y}. O Tony escreveu sozinho a notificação "
                 f"que abre o dia da pessoa. E-mails que ele tinha:\n{caixa}").strip(), resumo.strip(), []
     if tarefa == "fala":

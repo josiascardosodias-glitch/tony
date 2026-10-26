@@ -2,11 +2,12 @@
 
 Um agente de IA pessoal construído do zero em Python, para aprender como agentes funcionam por dentro.
 
-**v2: conversa e ferramentas.** O foco não é ser útil, é conversar bem e melhorar com o uso: a
-personalidade fica em arquivos de texto versionados, o Tony lembra da última conversa e das mais
-antigas, e cada resposta pode ser marcada como boa ou ruim para guiar os próximos ajustes. Desde a
-v2 ele tem ferramentas para consultar as notas sobre você e guardar fatos (com sua confirmação).
-Falas de teste medem cada mudança (placar da v2: 108/108).
+**v3: conversa, ferramentas e o mundo de fora.** O foco não é ser útil, é conversar bem e melhorar
+com o uso: a personalidade fica em arquivos de texto versionados, o Tony lembra da última conversa e
+das mais antigas, e cada resposta pode ser marcada como boa ou ruim para guiar os próximos ajustes.
+Desde a v2 ele tem ferramentas para consultar as notas sobre você e guardar fatos (com sua
+confirmação); desde a v3, lê o e-mail da faculdade (só leitura) e fala primeiro, com o resumo do dia.
+Falas de teste medem cada mudança (placar da v3: 131/132).
 
 ## Instalar
 
@@ -44,6 +45,9 @@ uv run tony
 | `/prompt` | mostra o prompt de sistema montado |
 | `/sair` | encerra, guardando um resumo para a próxima vez |
 
+Se a conversa acabar sem `/sair` (o terminal fechou, a rede caiu), o Tony resume ela pelo log na
+próxima vez que abrir.
+
 ## Ferramentas
 
 Ficam em `tony/ferramentas/`, uma função por arquivo, e são descobertas sozinhas: o modelo lê o nome,
@@ -69,6 +73,8 @@ uv run tony dia --notificar   # o mesmo, como notificação na área de trabalho
 uv run tony agendar --hora 08:00   # todo dia nesse horário (timer do systemd do seu usuário)
 ```
 
+Se o PC estava desligado na hora, o resumo roda ao ligar; se a rede ainda não subiu, o systemd tenta
+de novo a cada 2 minutos (até 6 vezes). Para ver o que aconteceu: `journalctl --user -u tony-dia`.
 Para desligar: `systemctl --user disable --now tony-dia.timer`.
 
 ## E-mail (opcional)
@@ -109,6 +115,13 @@ segunda-pessoa   ✓✓✓✓  4/4   (antes: 0/4)
 
 As respostas e os motivos do juiz ficam em `dados/testes/` (fora do git).
 
+O que não depende do modelo tem testes de código, sem rede e em poucos segundos — a leitura do
+e-mail contra um servidor IMAP falso (só leitura, filtro, e-mails tortos) e a recuperação de conversa:
+
+```bash
+uv run python -m unittest discover testes
+```
+
 ## Revisar
 
 ```bash
@@ -143,7 +156,7 @@ Só arquivos de `personalidade/` são alterados, e o commit fica com você.
 tony/
 ├── config.exemplo.yaml   padrões (config.local.yaml sobrescreve)
 ├── personalidade/        quem o Tony é, como fala, regras
-├── testes/falas.yaml     falas de teste e o critério de cada uma
+├── testes/              falas de teste (falas.yaml) e testes de código (test_*.py)
 ├── exemplos/             memória de exemplo usada nos testes
 └── tony/
     ├── main.py           loop do terminal e comandos

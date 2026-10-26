@@ -6,6 +6,7 @@ caixa de exemplo — a ferramenta não sabe a diferença.
 """
 
 import email
+import html
 import imaplib
 import re
 from datetime import datetime, timedelta
@@ -17,6 +18,7 @@ from typing import Callable
 MESES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 MAX_MENSAGENS = 30
 CARACTERES_POR_MENSAGEM = 800
+ESPERA = 30  # segundos; sem isso, um servidor mudo prende o resumo do dia para sempre
 
 
 def caixa_imap(servidor: str, usuario: str, senha: str, filtro: str = "") -> Callable[[int], list[dict]]:
@@ -27,7 +29,7 @@ def caixa_imap(servidor: str, usuario: str, senha: str, filtro: str = "") -> Cal
     def buscar(dias: int) -> list[dict]:
         desde = datetime.now() - timedelta(days=dias)
         criterio = f"(SINCE {desde.day:02d}-{MESES[desde.month - 1]}-{desde.year}{' ' + filtro if filtro else ''})"
-        with imaplib.IMAP4_SSL(servidor) as imap:
+        with imaplib.IMAP4_SSL(servidor, timeout=ESPERA) as imap:
             imap.login(usuario, senha)
             imap.select("INBOX", readonly=True)
             _, encontrados = imap.search(None, criterio)
@@ -41,11 +43,27 @@ def caixa_imap(servidor: str, usuario: str, senha: str, filtro: str = "") -> Cal
 
 def _resumir(mensagem: email.message.Message) -> dict:
     return {
-        "data": parsedate_to_datetime(mensagem["Date"]).strftime("%d/%m/%Y %H:%M") if mensagem["Date"] else "",
-        "de": str(make_header(decode_header(mensagem["From"] or ""))),
-        "assunto": str(make_header(decode_header(mensagem["Subject"] or ""))),
+        "data": _data(mensagem["Date"]),
+        "de": _cabecalho(mensagem["From"]),
+        "assunto": _cabecalho(mensagem["Subject"]),
         "texto": _texto(mensagem)[:CARACTERES_POR_MENSAGEM],
     }
+
+
+def _cabecalho(valor: str | None) -> str:
+    """Remetente ou assunto legível (`=?utf-8?q?Aula_de_C=C3=A1lculo?=` vira "Aula de Cálculo")."""
+    try:
+        return str(make_header(decode_header(valor or "")))
+    except (LookupError, ValueError, UnicodeError):  # charset desconhecido: fica o texto como veio
+        return str(valor or "")
+
+
+def _data(cabecalho: str | None) -> str:
+    """A data do cabeçalho; vazia se ele faltar ou vier quebrado (um e-mail torto não derruba a caixa)."""
+    try:
+        return parsedate_to_datetime(cabecalho).strftime("%d/%m/%Y %H:%M") if cabecalho else ""
+    except (TypeError, ValueError):
+        return ""
 
 
 def _texto(mensagem: email.message.Message) -> str:
@@ -54,8 +72,12 @@ def _texto(mensagem: email.message.Message) -> str:
     for tipo in ("text/plain", "text/html"):
         for parte in partes:
             if parte.get_content_type() == tipo and not parte.get_filename():
-                texto = parte.get_payload(decode=True).decode(parte.get_content_charset() or "utf-8", "replace")
+                bruto = parte.get_payload(decode=True) or b""
+                try:
+                    texto = bruto.decode(parte.get_content_charset() or "utf-8", "replace")
+                except LookupError:  # charset que o Python não conhece
+                    texto = bruto.decode("utf-8", "replace")
                 if tipo == "text/html":
-                    texto = re.sub(r"<(script|style).*?</\1>|<[^>]+>", " ", texto, flags=re.S)
+                    texto = html.unescape(re.sub(r"<(script|style).*?</\1>|<[^>]+>", " ", texto, flags=re.S))
                 return re.sub(r"\s+", " ", texto).strip()
     return ""

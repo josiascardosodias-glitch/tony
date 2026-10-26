@@ -1,13 +1,27 @@
 # Changelog
 
-## Não publicado — v3 em andamento
+## v3.0.0 — 2026-10-26
 
-- `ler_emails`: lê o e-mail da faculdade por IMAP, só leitura, com filtro do que vai para o modelo.
-  Aparece só com o e-mail configurado. **Falta testar com a caixa real** (precisa da senha de app).
-- `tony dia`: o Tony fala primeiro, com o resumo do dia; `--notificar` manda como notificação.
-- `tony agendar [--hora HH:MM]`: timer do systemd do usuário que roda o resumo todo dia.
-- Testes: caixa de e-mail de exemplo por fala (`emails`), `tarefa: dia` e datas relativas (`{hoje+5}`).
-  Cinco falas novas. Placar: 128/128 (32 falas × 4).
+O mundo de fora: o Tony lê o e-mail da faculdade e fala primeiro, com o resumo do dia.
+
+- `ler_emails`: lê o e-mail por IMAP, só leitura (`EXAMINE` e `BODY.PEEK`: nada é marcado como lido),
+  com `email.filtro` decidindo o que vai para o modelo. Aparece só com o e-mail configurado. Espera
+  no máximo 30 s pelo servidor; um e-mail com data, charset ou cabeçalho quebrado não derruba a caixa;
+  HTML chega sem tags e sem entidades (`&ccedil;` vira "ç"). **Ainda não testado com uma caixa real**
+  (falta a senha de app); testado contra um servidor IMAP falso.
+- `tony dia`: o Tony fala primeiro, com o resumo do dia; `--notificar` manda como notificação. Sem
+  e-mail configurado, ele não diz mais que olhou e-mails.
+- `tony agendar [--hora HH:MM]`: timer do systemd do usuário. Se a rede não subiu ainda (ao ligar o
+  PC), tenta de novo a cada 2 minutos, até 6 vezes. Quem já agendou: rode `tony agendar` de novo.
+- Conversa que acaba sem `/sair` (terminal fechado, rede caída) é resumida pelo log na próxima vez.
+- Memória: "sexta que vem" vira a data certa em qualquer dia da semana (o calendário da consolidação
+  marca o "que vem" de cada dia; numa segunda, ele errava metade das vezes).
+- Testes de código (`uv run python -m unittest discover testes`): 15 testes, do IMAP e da recuperação.
+- Falas de teste: caixa de e-mail de exemplo por fala (`emails`), `tarefa: dia` e datas relativas
+  (`{hoje+5}`). Seis falas novas, a última `dia-sem-email`.
+- Placar: 128/128 (32 falas × 4) antes das mudanças; 131/132 (33 falas × 4) com elas. A falha foi
+  do juiz em `dia-sem-email` (reprovou uma resposta que não falava de e-mail); com o critério
+  corrigido, 8/8 (e 3/8 com o pedido antigo, então o teste ainda pega o defeito).
 
 ## v2.0.0 — 2026-10-24
 

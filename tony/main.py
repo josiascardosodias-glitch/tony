@@ -3,6 +3,7 @@
 import argparse
 import readline  # noqa: F401 — só importar já dá setas e histórico ao input()
 import time
+from datetime import datetime
 
 from . import config
 from . import ferramentas
@@ -11,7 +12,7 @@ from .conversa import TEMPERATURA_MEMORIA, Conversa, consolidar_memoria
 from .memoria import (carregar_personalidade, data_do_resumo, inteligencia_para_prompt, lembrar, ler_memoria,
                       resumos_pendentes, salvar_memoria, salvar_resumo, ultimo_resumo, versao_personalidade)
 from .dia import caixa_de_email
-from .registro import Registro
+from .registro import Registro, anotar, conversa_sem_resumo
 
 AJUDA = """Comandos:
   /bom              marca a última resposta como boa
@@ -44,6 +45,7 @@ class Sessao:
             modelo=self.cliente.modelo,
             personalidade=versao_personalidade(pasta_personalidade),
         )
+        self.recuperar_conversa()
         self.conversa = self._nova_conversa()
 
     def _nova_conversa(self) -> Conversa:
@@ -78,6 +80,27 @@ class Sessao:
             return
         salvar_resumo(self.pasta_resumos, resumo)
         self.registro.anotar("resumo", texto=resumo)
+        self.atualizar_memoria()
+
+    def recuperar_conversa(self) -> None:
+        """Se a conversa anterior acabou sem resumo (o terminal fechou, por exemplo), resume agora, pelo log."""
+        perdida = conversa_sem_resumo(self.registro.arquivo.parent)
+        if not perdida:
+            return
+        log, turnos = perdida
+        quando = datetime.fromisoformat(turnos[-1]["hora"])
+        print(f"(a conversa de {quando:%d/%m às %H:%M} terminou sem resumo; guardando agora...)")
+        conversa = self._nova_conversa()
+        for turno in turnos:
+            conversa.mensagens += [{"role": "user", "content": turno["usuario"]},
+                                   {"role": "assistant", "content": turno["tony"]}]
+        try:
+            resumo = conversa.resumir_para_proxima()
+        except ErroDoModelo as e:
+            print(f"[aviso] não consegui resumir a conversa anterior: {e}")
+            return
+        salvar_resumo(self.pasta_resumos, resumo, quando)
+        anotar(log, "resumo", texto=resumo, recuperado=True)
         self.atualizar_memoria()
 
     def atualizar_memoria(self) -> None:

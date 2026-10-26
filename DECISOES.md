@@ -181,3 +181,30 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
     reprovava "Sobre o Josias" como inventada. Fato necessário para julgar vai no critério.
 58. **Testar ferramenta de escrita em dados reais só com fato verdadeiro.** Um fato de teste recusado
     na confirmação ainda entrou no resumo da conversa e virou "lembrança" no resumo do dia; foi limpo à mão.
+
+## 2026-10-26 — v3: fechamento
+
+59. **A v3 sai sem o teste com a caixa real.** A decisão foi sua: falta a senha de app do Gmail. No
+    lugar, `testes/test_email.py` põe o `caixa_imap` de verdade para conversar com um servidor IMAP
+    falso (o protocolo inteiro, sem TLS): o filtro, a ordem, o corte, o "só leitura" (`EXAMINE`,
+    `BODY.PEEK`, nenhum `STORE`/`EXPUNGE`) e e-mails tortos. Contra o código antigo, dois falharam:
+    uma data quebrada derrubava a caixa inteira e o HTML chegava com `&ccedil;`. O teste com o Gmail
+    fica para uma v3.0.x, quando houver a senha.
+60. **Testes de código ao lado das falas de teste**, com `unittest` (sem dependência nova): para o que
+    não depende do modelo, conferir no código é exato e roda em segundos. As falas continuam para o
+    que só o juiz decide.
+61. **O timer tenta de novo.** As duas primeiras execuções reais (ao ligar o PC, em 25 e 26/10)
+    falharam caladas: o `Persistent=true` dispara antes de a rede subir. `Restart=on-failure` a cada
+    2 minutos, até 6 vezes por hora. *Fora:* esperar a rede no código (o systemd já faz isso) e
+    notificar cada falha (seriam até seis avisos).
+62. **Sem e-mail configurado, o pedido do dia não fala de e-mail.** Ele escrevia "não achei nada nas
+    notas e e-mails" sem ter e-mail (`dia-sem-email` 5/8); o pedido agora muda conforme a caixa
+    existe (8/8).
+63. **Conversa sem `/sair` é resumida na próxima abertura**, pelo log. A primeira conversa sua com o
+    Tony (26/10) acabou com o terminal fechado e não virou resumo. *Fora:* tratar o SIGHUP (com o
+    terminal fechado não há onde mostrar nada, e a rede pode nem estar lá); o log já tem tudo.
+64. **O calendário da consolidação marca o "que vem" de cada dia da semana.** Numa segunda, "prova na
+    sexta que vem" virava ora o dia 30, ora o 6 (`memoria-datas` 4/8; 5/8 no código antigo, então o
+    defeito já existia e só aparecia em alguns dias da semana). Uma regra em texto ("sexta que vem é a
+    primeira sexta depois da conversa") não mudou nada (4/8) e saiu; a marca calculada pelo código
+    deu 8/8. Mesma lição da decisão 34: conta de calendário é do código.
