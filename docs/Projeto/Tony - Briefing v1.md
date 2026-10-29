@@ -30,7 +30,7 @@ componente trocável; o que é do Tony é a personalidade, a memória e a forma 
 | Peça | Como funciona |
 |---|---|
 | **Personalidade em arquivos** | `personalidade/*.md` (identidade, tom, regras) no repositório. Mudar o jeito do Tony é editar texto, e o git guarda a história de cada mudança. |
-| **Memória sobre mim** | As notas de `My-Brain/08-Tony/Inteligência/` entram no prompt no início de cada conversa (sem busca: são poucas). |
+| **Memória sobre mim** | As notas de `08-Tony/Inteligência/` entram no prompt no início de cada conversa (sem busca: são poucas). |
 | **Continuidade** | Ao sair, o Tony resume a conversa; a próxima começa sabendo onde a anterior parou. |
 | **Conversa longa** | Quando o contexto enche, as mensagens antigas viram um resumo — nunca são cortadas em silêncio. |
 | **Feedback** | `/bom` e `/ruim <motivo>` marcam a última resposta no log. |
