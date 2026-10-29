@@ -11,8 +11,8 @@ fonte: própria
 
 # Sobre o Josias
 
-- Desenvolvedor júnior, estudante de programação.
-- Estuda JavaScript e React, SQL, C, Python e Java.
+- Desenvolvedor estagiario, estudante de programação.
+- Estuda ts, React, SQL, C e Desenvolvimento de agentes de IA.
 - Usa Linux, Obsidian (segundo cérebro) e Claude Code no dia a dia.
 - Prefere respostas diretas, em português, com o porquê das coisas.
 - Esse projeto visa gerar mais conhecimento e experiencia para o Josias.

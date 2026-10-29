@@ -19,7 +19,8 @@ as ideias soltas. Quando uma versão sai, ela vai para o `CHANGELOG.md` e some d
 | v0.3.0   | Memória testada e ajustada                         | ✅ publicada (55/56) |
 | v1.0.0   | O [[Tony - Briefing v1]] completo                  | ✅ publicada (76/76) |
 | v2.0.0   | Ferramentas                                        | ✅ publicada (108/108) |
-| **v3**   | **O mundo de fora**                                | 🟡 em andamento      |
+| v3.0.0   | O mundo de fora                                    | ✅ publicada (131/132) |
+| **v3.0.x** | **E-mail testado com a caixa real**              | ⏳ espera a senha    |
 
 ## v0.2 — Falas de teste e revisão ✅
 
@@ -142,25 +143,23 @@ Etapas 1 a 6 do [[Tony - Briefing v1]] prontas e testadas, README revisado, plac
 **Limite:** as ferramentas só enxergam a pasta `Inteligência` (a única que pode ir para a nuvem).
 Buscar no vault inteiro é decisão sua, para depois.
 
-## v3 — O mundo de fora 🟡 em andamento
+## v3 — O mundo de fora ✅
 
-> [!check] Decidido em 2026-10-24: Gmail por IMAP (senha de app), notificação na área de trabalho, Python (sem n8n).
-> Feito (commit `712f7bc`): `ler_emails` só leitura com filtro, `tony dia --notificar`, `tony agendar`
-> (timer instalado, 08:00). **Falta:** a senha de app e o teste com a caixa real.
+> [!success] Publicada em 2026-10-26 como v3.0.0, a seu pedido, **sem** o teste com a caixa real.
+> `ler_emails` (só leitura, com filtro), `tony dia --notificar` e `tony agendar`; testes de código com
+> um servidor IMAP falso. Placar 131/132. Detalhes no `CHANGELOG.md` e no [[Tony - Diário de bordo]].
 
-- E-mail da escola (datas de provas e entregas).
-- Agendamento: o Tony fala primeiro (ex.: resumo do dia).
-- *Pergunta:* n8n ou Python? O n8n poupa o OAuth do Google e os gatilhos de horário; IMAP e um
-  `systemd timer` resolvem em Python sem serviço extra. Medir a RAM com o n8n antes; credenciais
-  nunca no repositório; autenticar o webhook. As formas de ligar o n8n a um agente estão em
-  [[Claude Code - Integração com o n8n]].
+- [x] Gmail por IMAP (senha de app), notificação na área de trabalho, Python (sem n8n).
+- [x] Timer que tenta de novo quando a rede ainda não subiu (as duas primeiras execuções falharam caladas).
+- [x] Conversa fechada sem `/sair` resumida na próxima abertura.
+- [ ] Teste com a caixa real → v3.0.x.
 
-### Para fechar a v3
+### Para a v3.0.x: conferir com a caixa real
 
-O que falta é meu: a senha de app do Gmail e o filtro do domínio da faculdade (capturado em 2026-10-24).
+O que falta é seu: a senha de app do Gmail e o filtro do domínio da faculdade (capturado em 2026-10-24).
 
 1. Ativar a verificação em duas etapas e criar a senha em <https://myaccount.google.com/apppasswords>.
-2. Guardar fora do repositório:
+2. Guardar fora do repositório (num terminal à parte):
    ```bash
    mkdir -p ~/.config/tony && read -rs s && printf '%s' "$s" > ~/.config/tony/senha-email && chmod 600 ~/.config/tony/senha-email
    ```
@@ -177,6 +176,7 @@ Qualquer ideia entra aqui primeiro, sem compromisso; na hora de planejar uma ver
 
 - `/desfazer` — apagar a última troca da conversa (quando a pergunta saiu errada).
 - Mostrar no início da sessão quantas marcações `/ruim` estão esperando revisão.
+- Notificar quando o resumo do dia falhar em todas as tentativas (hoje só aparece no `journalctl`).
 - Calendário dos próximos dias também no `# Agora` da conversa (hoje só a consolidação recebe), para
   ele não errar "que dia cai a sexta que vem" conversando.
 

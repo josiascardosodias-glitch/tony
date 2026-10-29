@@ -8,7 +8,7 @@ fonte: própria
 
 # Tony — Como usar e evoluir
 
-Guia rápido do Tony v2 (com o começo da v3): como conversar, onde fica cada coisa e o ciclo para melhorar o diálogo.
+Guia rápido do Tony v3: como conversar, onde fica cada coisa e o ciclo para melhorar o diálogo.
 
 ## Conversar
 
@@ -27,6 +27,9 @@ cd ~/projetos/tony && uv run tony
 | `/prompt` | mostra exatamente o que o modelo está recebendo |
 | `/sair` ou Ctrl+D | encerra e guarda um resumo para a próxima vez |
 
+Se fechar o terminal sem `/sair`, nada se perde: na próxima vez que abrir, o Tony resume a conversa
+anterior pelo log (aparece "terminou sem resumo; guardando agora...").
+
 ## Ferramentas e resumo do dia
 
 Na conversa, o Tony usa sozinho as ferramentas quando precisa; cada chamada aparece como
@@ -35,6 +38,8 @@ Na conversa, o Tony usa sozinho as ferramentas quando precisa; cada chamada apar
 
 Todo dia às 08:00 chega uma notificação com o resumo do dia (`tony dia`). Para mudar a hora:
 `uv run tony agendar --hora 07:30`; para desligar: `systemctl --user disable --now tony-dia.timer`.
+Se o PC estava desligado às 08:00, ele roda ao ligar e tenta de novo a cada 2 minutos até a rede
+subir. Para ver o que aconteceu: `journalctl --user -u tony-dia`.
 O passo a passo do e-mail (senha de app do Google) está no README do repositório.
 
 ## Testar
@@ -47,6 +52,13 @@ uv run tony testar tamanho ambiguo                # só algumas
 Cada fala de `testes/falas.yaml` roda 4 vezes; o juiz (`gpt-oss:120b-cloud`) confere cada resposta e
 o placar sai comparado com a rodada anterior. Para criar um teste novo, acrescente uma fala com um
 `espera` que dê para responder com sim ou não.
+
+O que não depende do modelo (a leitura do e-mail, a recuperação de conversa) tem testes de código,
+sem rede, em poucos segundos:
+
+```bash
+cd ~/projetos/tony && uv run python -m unittest discover testes
+```
 
 ## Revisar
 
