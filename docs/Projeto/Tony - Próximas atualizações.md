@@ -255,7 +255,8 @@ Um registro de `eventos.json`:
   aviso de app não verificado; para uso só seu, é só seguir. O arquivo do cliente vai para
   `~/.config/tony/`.
 - **Telegram:** criar o bot com o @BotFather e guardar o token em `~/.config/tony/telegram-token`.
-- Na hora, eu preparo um passo a passo guiado para os dois.
+- Os dois têm assistente no terminal: `scripts/assistente-google.sh` e `scripts/assistente-telegram.sh`
+  (no repositório). Eles guardam o cliente OAuth, o token e o `chat_id` em `~/.config/tony/`.
 
 ### Pesquisar antes de implementar (regra 3)
 

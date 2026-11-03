@@ -33,6 +33,16 @@ memoria:
 Para usar a pasta do próprio repositório, aponte para `docs/Inteligência` e copie para lá os modelos
 de `docs/Inteligência/modelos/`, preenchidos com os seus dados. As notas preenchidas ficam fora do git.
 
+## Contas do Google e do Telegram (v4)
+
+Dois assistentes no terminal fazem a parte manual, passo a passo, e guardam tudo em `~/.config/tony/`
+(fora do repositório):
+
+```bash
+scripts/assistente-google.sh     # projeto no Google Cloud, APIs do Gmail e da Agenda, cliente OAuth
+scripts/assistente-telegram.sh   # bot no @BotFather, token e o seu chat_id
+```
+
 ## Usar
 
 ```bash
