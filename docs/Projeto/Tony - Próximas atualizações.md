@@ -291,7 +291,7 @@ Qualquer ideia entra aqui primeiro, sem compromisso; na hora de planejar uma ver
 
 ## Decisões
 
-- 2026-10-24: a v1.0 saiu antes do meu uso pessoal; valeu como uso real a conversa conduzida pelo Claude ([[2026-10-24]])
+- 2026-10-24: a v1.0 saiu antes do meu uso pessoal; valeu como uso real a conversa conduzida pelo Claude (2026-10-24)
 
 ## Relacionado
 

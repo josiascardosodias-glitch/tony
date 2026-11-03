@@ -33,7 +33,7 @@ anterior pelo log (aparece "terminou sem resumo; guardando agora...").
 ## Ferramentas e resumo do dia
 
 Na conversa, o Tony usa sozinho as ferramentas quando precisa; cada chamada aparece como
-`· ler_nota(nome='...')`. Elas só enxergam `08-Tony/Inteligência/`: `listar_notas`, `ler_nota`,
+`· ler_nota(nome='...')`. Elas só enxergam `Tony/Inteligência/`: `listar_notas`, `ler_nota`,
 `buscar_notas`, `lembrar` (sempre pergunta antes de gravar) e, com o e-mail configurado, `ler_emails`.
 
 Todo dia às 08:00 chega uma notificação com o resumo do dia (`tony dia`). Para mudar a hora:
@@ -77,11 +77,11 @@ marcações (não eram problema) ou **sair**. Mudança mantida → o comando mos
 |---|---|---|
 | Personalidade | `~/projetos/tony/personalidade/` (identidade, tom, regras) | sim |
 | Configuração padrão | `config.exemplo.yaml` | sim |
-| Seus valores (caminho do vault) | `config.local.yaml` | **não** |
-| O que ele sabe sobre você | `08-Tony/Inteligência/` (este vault) | **não** |
+| Seus valores (caminho da Inteligência) | `config.local.yaml` | **não** |
+| O que ele sabe sobre você | `My-Brain/Tony/Inteligência/` | **não** |
 | Resumos das conversas | `~/projetos/tony/dados/resumos/` | **não** |
 | Memória das conversas antigas | `~/projetos/tony/dados/memoria.md` (até 40 fatos, pode editar) | **não** |
-| Lembretes do `/lembrar` | `08-Tony/Inteligência/Tony - Lembretes.md` | **não** |
+| Lembretes do `/lembrar` | `My-Brain/Tony/Inteligência/Tony - Lembretes.md` | **não** |
 | Logs com `/bom` e `/ruim` | `~/projetos/tony/logs/*.jsonl` | **não** |
 | Falas de teste | `~/projetos/tony/testes/falas.yaml` | sim |
 | Placares e respostas dos testes | `~/projetos/tony/dados/testes/` | **não** |
@@ -105,7 +105,7 @@ em segunda pessoa (commit `68c6d83`).
 
 ## Alimentar a memória
 
-Crie notas em `08-Tony/Inteligência/` (prefixo `Tony - `). Todas entram no prompt no início de cada
+Crie notas em `Tony/Inteligência/` (prefixo `Tony - `). Todas entram no prompt no início de cada
 conversa. Tudo ali vai para o modelo na nuvem: só o que pode sair da máquina.
 
 O resto ele faz sozinho: ao sair, a conversa vira um resumo (lido inteiro na próxima), e o resumo
