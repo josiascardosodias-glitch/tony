@@ -1,5 +1,30 @@
 # Changelog
 
+## v4.0.0 — em construção (branch `develop`)
+
+O Tony vira assistente de e-mail: datas dos e-mails → agenda "Tony" → consulta pelo Telegram, com o
+mínimo de IA. Plano completo no `ROADMAP.md` e em `docs/Projeto/Tony - Próximas atualizações.md`.
+
+**Etapa 1 — enxugamento e pendências**
+
+- Saem as ferramentas das notas (`listar_notas`, `ler_nota`, `buscar_notas`, `lembrar`), o `/lembrar`,
+  a memória entre conversas (resumos, `dados/memoria.md`, consolidação e recuperação de conversa sem
+  `/sair`), o `tony revisar` e o IMAP (`ler_emails`, `email` no config). Os arquivos que já existem em
+  `dados/` ficam onde estão, sem uso. A pasta `tony/ferramentas/` continua, vazia, para a agenda.
+- Ficam a personalidade, a conversa no terminal (`/bom`, `/ruim`, `/nova`, `/prompt`), a Inteligência
+  inteira no prompt, o `tony dia` (agora só com as notas) e as falas de teste.
+- Personalidade: não promete o que não depende dele ("eu aviso quando o sistema liberar") e sabe que
+  cada conversa começa do zero. Fala nova `nao-promete`: 0/8 com a personalidade antiga, 4/4 com a nova.
+- `tony dia`: quando as 6 tentativas falham, chega uma notificação (`OnFailure` no systemd); antes, a
+  falha só aparecia no `journalctl`. Quem já agendou: rode `tony agendar` de novo, da pasta de produção.
+- Documentação em `docs/` (notas do Obsidian, com o histórico); dados pessoais em
+  `docs/Inteligência/`, fora do git, com modelos vazios em `docs/Inteligência/modelos/`.
+- Assistentes `scripts/assistente-google.sh` e `scripts/assistente-telegram.sh`.
+- Falas de teste: de 33 para 13 (saíram as de memória, ferramentas das notas e e-mail). Placar
+  51/52; a falha (`sem-pergunta-de-praxe`) foi variação: 8/8 na repetição.
+- Testes de código: os de IMAP e recuperação saíram com o código; 16 novos (notas, calendário,
+  ferramentas, log, conversa com um modelo falso, timer e as falas).
+
 ## v3.0.0 — 2026-10-26
 
 O mundo de fora: o Tony lê o e-mail da faculdade e fala primeiro, com o resumo do dia.

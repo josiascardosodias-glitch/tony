@@ -18,6 +18,7 @@ ponto de entrada.
 > [!important] v4 em construção na branch `develop` (desde 2026-11-03)
 > O Tony vira assistente de e-mail: datas dos e-mails → agenda "Tony" no Google → consulta pelo
 > Telegram, com o mínimo de IA. Regras de branch e de produção em [[Tony - Regras do projeto]].
+> Etapa 1 (enxugamento) pronta; Google e Telegram configurados. Próxima: etapa 2, o modelo novo.
 
 ## Projeto — o que nós planejamos (o Tony não lê)
 
@@ -36,10 +37,10 @@ cada versão) e `ROADMAP.md` (resumo público).
 A única pasta que o Tony lê (`docs/Inteligência/`, apontada no `config.local.yaml`). Tudo aqui vai
 para o modelo na nuvem: só entra o que pode sair da máquina. As notas daqui **não sobem para o
 GitHub**: o repositório guarda só os modelos vazios em `modelos/`, e cada pessoa preenche os seus. Uma nota = um assunto, com o prefixo
-`Tony - `. Na v4, as ferramentas das notas saem e esta pasta deixa de ser lida durante a conversa.
+`Tony - `. Desde a v4 elas vão inteiras no prompt, sem ferramenta para ler sob demanda.
 
 1. [[Tony - Sobre o Josias]] — quem eu sou e como prefiro as respostas
-2. [[Tony - Lembretes]] — escrita pelo `/lembrar`, uma linha por fato confirmado
+2. [[Tony - Lembretes]] — fatos soltos (o `/lembrar` saiu na v4: edite à mão)
 3. Modelos: [[Tony - Sobre mim (modelo)]] e [[Tony - Lembretes (modelo)]]
 
 ## Histórico

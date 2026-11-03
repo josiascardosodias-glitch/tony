@@ -33,22 +33,3 @@ def anotar(arquivo: Path, tipo: str, **dados) -> None:
     with arquivo.open("a", encoding="utf-8") as f:
         f.write(json.dumps(evento, ensure_ascii=False) + "\n")
 
-
-def conversa_sem_resumo(pasta: Path) -> tuple[Path, list[dict]] | None:
-    """A última conversa, se ela acabou sem resumo (terminal fechado, queda de rede): (log, turnos).
-
-    Olha só o log mais recente que tem conversa (os do `tony dia` e as sessões vazias não contam);
-    os turnos depois do último resumo dele são os que ninguém resumiu.
-    """
-    for arquivo in sorted(pasta.glob("*.jsonl"), reverse=True) if pasta.is_dir() else []:
-        eventos = [json.loads(linha) for linha in arquivo.read_text(encoding="utf-8").splitlines() if linha.strip()]
-        if not any(e["tipo"] == "turno" for e in eventos):
-            continue
-        turnos = []
-        for e in eventos:
-            if e["tipo"] == "resumo":
-                turnos = []
-            elif e["tipo"] == "turno":
-                turnos.append(e)
-        return (arquivo, turnos) if turnos else None
-    return None

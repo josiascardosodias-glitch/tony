@@ -1,5 +1,8 @@
 """Ferramentas do Tony: uma função por arquivo nesta pasta, descobertas automaticamente.
 
+Desde a v4 a pasta está vazia: as ferramentas das notas e do IMAP saíram, e as da agenda entram
+nas próximas etapas. O laço e a descoberta ficam prontos para elas.
+
 O modelo só vê o nome, a docstring e os tipos de cada função (a lib `ollama` monta o esquema a partir
 deles). O corpo pode fazer qualquer coisa — ler um arquivo, chamar uma API ou um webhook — e ser
 trocado sem mexer no laço da conversa.
@@ -17,7 +20,6 @@ import importlib
 import inspect
 import pkgutil
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Callable
 
 
@@ -28,10 +30,7 @@ class ErroDaFerramenta(Exception):
 @dataclass
 class Ambiente:
     """O que as ferramentas usam além dos argumentos do modelo. A sessão (ou o teste) preenche."""
-    inteligencia: Path | None = None              # a única pasta que as ferramentas enxergam
-    lembretes: Path | None = None                 # onde `lembrar` escreve
     confirmar: Callable[[str], bool] = lambda pergunta: False  # quem conversa diz sim ou não
-    caixa_de_email: Callable[[int], list[dict]] | None = None   # e-mails dos últimos N dias; None = sem e-mail
 
 
 ambiente = Ambiente()

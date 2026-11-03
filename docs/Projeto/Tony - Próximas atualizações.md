@@ -234,10 +234,11 @@ Um registro de `eventos.json`:
 
 ### Etapas (todas na `develop`)
 
-1. **Pendências e enxugamento.** Sair o que a decisão tirou, sem quebrar os testes de código. Das 7
-   correções da conversa de 26/10, só a 5 (prometer o que não tem como cumprir) continua valendo: as
-   outras eram de ferramentas e memória que saem. Ajustar as falas de teste para o novo papel. Avisar
-   quando o `tony dia` falhar em todas as tentativas.
+1. ✅ **Pendências e enxugamento** (2026-11-03). Saíram as ferramentas das notas, o `/lembrar`, a
+   memória entre conversas, o `tony revisar` e o IMAP. A correção 5 (prometer o que não tem como
+   cumprir) virou regra e a fala `nao-promete` (0/8 antes, 4/4 depois). O `tony dia` avisa quando as 6
+   tentativas falham. Falas de 33 para 13, placar 51/52; 16 testes de código. A produção passou a rodar
+   de `~/projetos/tony-producao`, presa à `main`.
 2. **Modelo novo.** Comparar os candidatos mais fortes da nuvem do Ollama com as falas de teste.
 3. **Coleta + bloqueados + extrator + `eventos.json`.** Zero IA. Testes de código com e-mails de
    exemplo (datas em vários formatos, rodapés, convites `.ics`, remetente bloqueado).
@@ -249,7 +250,12 @@ Um registro de `eventos.json`:
 
 ### O que só você pode fazer
 
-- **Google:** criar um projeto no Google Cloud, ativar as APIs do Gmail e da Agenda e criar um
+- ✅ **Feito em 2026-11-03:** projeto `tony-513620`, APIs do Gmail e da Agenda, cliente OAuth "Tony no
+  PC" em `~/.config/tony/google-cliente.json`, você como usuário de teste. **Ficou "Em teste"**
+  (caminho 1): publicar exige página inicial e Política de Privacidade num domínio autorizado. A
+  autorização expira a cada 7 dias, e o Tony vai pedir a reautorização pelo Telegram.
+  Bot do Telegram: `@tony_josias_bot`, token e `chat_id` em `~/.config/tony/`.
+- *Como era o plano:* criar um projeto no Google Cloud, ativar as APIs do Gmail e da Agenda e criar um
   cliente OAuth "app para computador". A tela de consentimento precisa ficar **"Em produção"** (não
   "Em teste"): em teste, a autorização expira a cada 7 dias e a coleta para sozinha. Vai aparecer o
   aviso de app não verificado; para uso só seu, é só seguir. O arquivo do cliente vai para

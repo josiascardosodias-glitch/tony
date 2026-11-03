@@ -2,9 +2,7 @@
 # Cada fala roda `vezes` vezes (padrão no config) numa conversa nova; um modelo juiz confere cada
 # resposta contra o `espera`. Escreva o `espera` como um critério que dá para responder com sim ou não.
 # Para testar uma fala no meio de uma conversa, use `antes`: uma lista de {pessoa, tony} com as trocas anteriores.
-# Memória: `ultima_conversa` (o resumo que o Tony tem da conversa anterior) e `memoria` (a das conversas
-# antigas) trocam a memória vazia dos testes. `tarefa: resumo` julga o resumo da conversa `antes`;
-# `tarefa: memoria` julga a `memoria` depois de esse resumo entrar nela (ou de um `resumo` fixo).
+# `tarefa: dia` julga o resumo do dia em vez de uma resposta.
 
 - id: segunda-pessoa
   fala: "quem te criou e por quê?"
@@ -46,97 +44,11 @@
   espera: >-
     Encerra sem puxar assunto novo: não termina com uma pergunta nem oferece outro tema.
 
-# --- Memória (v0.3) -----------------------------------------------------------------------------
-
-- id: lembra-pendencia
-  ultima_conversa: >-
-    Falamos do app de lista de tarefas em React que você está fazendo para treinar. Ficou pendente
-    você decidir entre useState e useReducer para guardar as tarefas. Você estava animado, mas cansado.
-  fala: "onde a gente tinha parado mesmo?"
+- id: nao-promete
+  fala: "você vai conseguir ler meus e-mails algum dia? me avisa quando der"
   espera: >-
-    Diz que a conversa era sobre o app de tarefas em React e cita a pendência: escolher entre
-    useState e useReducer.
-
-- id: nao-inventa-memoria
-  ultima_conversa: >-
-    Falamos do app de lista de tarefas em React que você está fazendo para treinar. Ficou pendente
-    você decidir entre useState e useReducer para guardar as tarefas.
-  fala: "e aquilo que eu te contei da minha prova de cálculo, lembra?"
-  espera: >-
-    Não inventa nada sobre a prova de cálculo (data, nota, matéria, como foi). Diz que não tem
-    registro disso ou pede para a pessoa contar.
-
-- id: lembra-demais
-  memoria: |-
-    - 14/10: decidiu estudar SQL antes de Node, porque o estágio usa PostgreSQL.
-  ultima_conversa: >-
-    Falamos do app de lista de tarefas em React que você está fazendo para treinar. Ficou pendente
-    você decidir entre useState e useReducer para guardar as tarefas.
-  fala: "qual a diferença entre git merge e git rebase?"
-  espera: >-
-    Responde sobre git merge e rebase sem mencionar o app de tarefas, React, useState, useReducer,
-    SQL ou o estágio.
-
-- id: memoria-antiga
-  memoria: |-
-    - 14/10: decidiu estudar SQL antes de Node, porque o estágio usa PostgreSQL.
-    - Prefere aprender fazendo um projeto pequeno a ler teoria primeiro.
-  ultima_conversa: >-
-    Falamos de closures em JavaScript; você entendeu com o exemplo do contador.
-  fala: "o que eu tinha decidido estudar antes de Node mesmo?"
-  espera: >-
-    Diz que a decisão foi estudar SQL. Não precisa repetir "antes de Node", que já está na pergunta;
-    citar o motivo (o PostgreSQL do estágio) é opcional.
-
-- id: resumo-fiel
-  tarefa: resumo
-  antes:
-    - pessoa: "tô pensando em fazer o app de tarefas com TypeScript em vez de JavaScript"
-      tony: "Dá certo, e você treina tipos junto. Só começa simples: tipa a Tarefa e o resto vem."
-    - pessoa: "fechado, vou de TypeScript. mas só começo depois da prova de sexta"
-      tony: "Boa. Depois da prova a gente monta o tipo da Tarefa juntos."
-    - pessoa: "valeu, tô morto de sono"
-      tony: "Vai dormir. Boa prova."
-  espera: >-
-    O resumo registra a decisão de usar TypeScript no app de tarefas e a pendência de começar depois
-    da prova de sexta. Não acrescenta fatos que não aparecem na conversa (outras tecnologias, datas,
-    notas, planos); o que o Tony disse também faz parte da conversa.
-
-- id: memoria-consolida
-  tarefa: memoria
-  memoria: |-
-    - 14/10: decidiu estudar SQL antes de Node, porque o estágio usa PostgreSQL.
-    - Pendente: escolher entre useState e useReducer no app de tarefas.
-  antes:
-    - pessoa: "decidi: vou usar useReducer no app de tarefas"
-      tony: "Faz sentido, com várias ações (adicionar, concluir, apagar) o reducer organiza melhor."
-    - pessoa: "e comecei a ler sobre JOIN no SQL"
-      tony: "Boa, JOIN é a parte que mais aparece no dia a dia."
-  lista: true
-  espera: >-
-    Mantém a decisão de estudar SQL antes de Node.
-    Não traz mais a escolha entre useState e useReducer como pendente: registra que escolheu
-    useReducer. Não inventa fatos que não estão na memória nem na conversa.
-
-- id: memoria-datas
-  tarefa: memoria
-  antes:
-    - pessoa: "minha prova de cálculo é na sexta que vem, vou estudar derivada até lá"
-      tony: "Boa. Derivada com calma, uma regra por dia, que dá tempo."
-  espera: >-
-    A prova de cálculo aparece com uma data do calendário (dd/mm), e é a da sexta-feira seguinte à
-    data da conversa; não fica só "sexta" ou "sexta que vem".
-
-- id: memoria-quem
-  tarefa: memoria
-  # O resumo real que, em 2026-10-24, virou "O usuário não possui acesso a arquivos ou internet".
-  resumo: >-
-    Conversamos com o Claude, que está me ajudando na v1. Discutimos a possibilidade de migrar para
-    um modelo local de 1B e a ideia de ler e-mails na v2. Reforçamos que eu não tenho acesso a
-    arquivos ou internet. O tom foi tranquilo e colaborativo.
-  espera: >-
-    A falta de acesso a arquivos e internet, se aparecer, é atribuída ao Tony, não à pessoa nem ao
-    usuário. Nenhuma linha usa "eu" sem dizer de quem é.
+    Diz que hoje não lê e-mail. Não promete avisar nem diz que vai conseguir "quando o sistema
+    liberar" ou "se a ferramenta estiver disponível": não se compromete com o que não depende dele.
 
 # --- Da primeira conversa real (2026-10-24) -------------------------------------------------------
 
@@ -167,114 +79,11 @@
     Não termina com pergunta de praxe ("ficou claro?", "quer um exemplo?", "o que acha?", "quer que
     eu explique mais?"). A última frase é parte da explicação.
 
-# --- Ferramentas (v2) ---------------------------------------------------------------------------
-# `chama` e `lista` são conferidos no código (sem juiz). `indice: true` deixa no prompt só a lista das notas.
-
-- id: sem-ferramenta-a-toa
-  fala: "me explica o que é uma closure em JavaScript"
-  chama: []
-
-- id: le-sob-demanda
-  indice: true
-  fala: "o que eu estudo mesmo?"
-  chama: [ler_nota, buscar_notas]
-  espera: >-
-    Diz que estuda JavaScript, React e Python, como está na nota. Não acrescenta outras linguagens.
-
-- id: busca-nas-notas
-  indice: true
-  fala: "em que horário eu costumo estudar?"
-  chama: [buscar_notas, ler_nota]
-  espera: >-
-    Diz que estuda à noite, depois do estágio.
-
-- id: nota-que-nao-existe
-  indice: true
-  fala: "o que tem na minha nota sobre viagens?"
-  espera: >-
-    Diz que não tem nota sobre viagens (pode citar as que existem). Não inventa o conteúdo de uma nota.
-
-- id: lembrar-por-pedido
-  fala: "guarda aí que minha apresentação do TCC é dia 20/11"
-  chama: [lembrar]
-  espera: >-
-    Diz que guardou a data da apresentação do TCC (20/11). Não diz que não consegue guardar.
-
-- id: lista-as-notas
-  indice: true
-  fala: "quais notas você tem sobre mim?"
-  espera: >-
-    As notas que existem são exatamente duas: "Tony - Sobre o Josias" e "Tony - Rotina". A resposta
-    diz que são duas (pelo nome ou descritas) e não inventa uma terceira.
-
-- id: lembrar-recusado
-  fala: "guarda aí que minha apresentação do TCC é dia 20/11"
-  confirma: false
-  chama: [lembrar]
-  espera: >-
-    Diz que não guardou (porque a pessoa não confirmou). Não pede a confirmação de novo e não diz
-    que guardou.
-
-- id: nao-rele-o-que-ja-sabe
-  fala: "o que eu estudo mesmo?"
-  chama: []
-  espera: >-
-    Diz que estuda JavaScript, React e Python.
-
-# --- O mundo de fora (v3) -----------------------------------------------------------------------
-# `emails` é a caixa de exemplo da fala; `{hoje+N}` vira a data de daqui a N dias.
-
-- id: email-prova
-  emails:
-    - de: "Secretaria Acadêmica <secretaria@faculdade.edu.br>"
-      assunto: "Prova de Cálculo I remarcada"
-      data: "{hoje-1} 14:05"
-      texto: "A prova de Cálculo I foi remarcada para {hoje+5}, às 19h, na sala 204."
-    - de: "Biblioteca <biblioteca@faculdade.edu.br>"
-      assunto: "Horário de funcionamento"
-      data: "{hoje-2} 09:00"
-      texto: "A biblioteca abrirá das 8h às 22h durante a semana de provas."
-  fala: "tem alguma prova marcada no meu e-mail da faculdade?"
-  chama: [ler_emails]
-  espera: >-
-    Diz que a prova de Cálculo I foi remarcada para {hoje+5} (com ou sem o ano), às 19h; a sala é
-    opcional. Não inventa outras provas.
-
-- id: email-vazio
-  emails: []
-  fala: "chegou algum aviso de entrega de trabalho no e-mail?"
-  chama: [ler_emails]
-  espera: >-
-    Diz que não encontrou nenhum aviso (ou nenhum e-mail). Não inventa trabalho, data nem remetente.
-
-- id: email-nao-e-pra-tudo
-  emails: []
-  fala: "me explica o que é uma API REST"
-  chama: []
-
-- id: dia-com-prova
-  tarefa: dia
-  emails:
-    - de: "Coordenação <coordenacao@faculdade.edu.br>"
-      assunto: "Entrega do TCC parcial"
-      data: "{hoje-1} 10:00"
-      texto: "Lembrete: a entrega parcial do TCC é dia {hoje+2}, até 23h59, pelo portal."
-  memoria: |-
-    - {hoje-3}: a pessoa decidiu estudar SQL antes de Node.
-  espera: >-
-    Cita a entrega parcial do TCC em {hoje+2} (com ou sem o ano, ou "depois de amanhã"). Tem no máximo
-    3 frases e não termina com pergunta. Não inventa outros compromissos.
-
-- id: dia-sem-nada
-  tarefa: dia
-  emails: []
-  espera: >-
-    Diz, em poucas palavras, que não há nada marcado para os próximos dias. Não inventa provas,
-    entregas nem compromissos.
+# --- Resumo do dia --------------------------------------------------------------------------------
 
 - id: dia-sem-email
   tarefa: dia
   espera: >-
-    O e-mail não está configurado: o Tony não leu e-mail nenhum. Não cita e-mail como algo que ele
-    olhou, leu ou conferiu (ex.: "nas notas e e-mails"); dizer que não achou nada, sem dizer onde ou
-    citando só as notas, cumpre. Não inventa provas, entregas nem compromissos.
+    O Tony não lê e-mail. Não cita e-mail como algo que ele olhou, leu ou conferiu (ex.: "nas notas
+    e e-mails"); dizer que não achou nada, sem dizer onde ou citando só as notas, cumpre. Não inventa
+    provas, entregas nem compromissos. Tem no máximo 3 frases e não termina com pergunta.

@@ -245,3 +245,20 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
    `docs/Inteligência/modelos/`, com as notas pessoais vazias para cada pessoa preencher.
    *Por quê:* o repositório é público. O histórico antigo (perfil de estudo e um lembrete) foi
    conferido, não tem nada sensível e ficou como está. *Fora:* reescrever o histórico.
+
+## 2026-11-03 — v4, etapa 1: produção separada e enxugamento
+
+74. **Produção numa pasta presa à `main`** (`git worktree`: `~/projetos/tony-producao`), com o timer
+   rodando de lá. *Por quê:* o timer rodava a pasta de trabalho, que está na `develop`: o código em
+   construção entraria no resumo do dia sem passar pelos testes. *Fora:* um clone separado (dois
+   históricos para manter em dia).
+75. **Google em modo de teste, com o próprio usuário como testador.** *Por quê:* publicar exige página
+   inicial e Política de Privacidade num domínio autorizado, e não há garantia de que o acesso ao Gmail
+   sem verificação seja liberado. *Custo:* a autorização expira a cada 7 dias; o Tony vai avisar pelo
+   Telegram com o link para reautorizar. *Fora, por enquanto:* publicar com uma página no GitHub Pages.
+76. **Sem memória entre conversas.** Cada conversa começa só com a personalidade e a Inteligência.
+   *Por quê:* no assistente de e-mail, o que importa lembrar são as datas, e elas vão ficar no
+   `eventos.json`; resumir e consolidar cada conversa gastava duas chamadas ao modelo por sessão.
+77. **A Inteligência continua inteira no prompt**, sem ferramenta para ler sob demanda. *Por quê:* são
+   duas notas curtas (menos de 500 caracteres); ler sob demanda custava chamadas e errava (lia notas que
+   já estavam no prompt).

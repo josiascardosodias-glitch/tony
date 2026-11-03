@@ -29,6 +29,9 @@ nos testes (ver a regra 2).
      (ou um `git merge main` dentro da `develop` sai limpo).
 - Só então: `git switch main && git merge --no-ff develop`, tag e release. Depois, a `develop` volta a
   acompanhar a `main` (`git switch develop && git merge main`).
+- **A produção roda de uma pasta presa à `main`:** `~/projetos/tony-producao` (`git worktree`). O
+  timer do resumo do dia roda de lá. Depois de um merge, `git pull` nessa pasta. Nunca agende o timer
+  da pasta de trabalho, que está na `develop`.
 - Push só com pedido. Por HTTPS:
   `git -c credential.helper= -c credential.helper="!gh auth git-credential" push origin develop`.
 
@@ -62,8 +65,10 @@ respostas de agenda são código. O modelo fica como **gerenciador**, para o que
 1. Esta nota.
 2. [[Tony - Próximas atualizações]]: o que está planejado e o que ficou pendente.
 3. [[Tony - Diário de bordo]]: a última entrada.
-4. No repositório: `git branch -a`, `git log --oneline main..develop` (o que está na `develop` e
-   ainda não foi para produção), `git status` e o `ROADMAP.md`.
+4. No repositório: `git branch -a`, `git worktree list`, `git log --oneline main..develop` (o que está
+   na `develop` e ainda não foi para produção), `git status` e o `ROADMAP.md`.
+5. O timer: `grep WorkingDirectory ~/.config/systemd/user/tony-dia.service` tem que apontar para a
+   pasta de produção.
 
 ## Relacionado
 

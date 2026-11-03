@@ -10,6 +10,29 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-11-03 (noite) — Google, Telegram e a etapa 1 da v4
+
+**Feito**
+- Bot `@tony_josias_bot` criado pelo Telegram Web (`TonyBot` e `Tony_Bot` já eram de outras pessoas):
+  token e `chat_id` em `~/.config/tony/`.
+- Google Cloud pelo navegador: projeto `tony-513620`, APIs do Gmail e da Agenda, tela de consentimento
+  e cliente OAuth "Tony no PC". Ficou **em teste**, com você como usuário de teste (caminho 1).
+- Produção separada: `~/projetos/tony-producao`, presa à `main`, e o timer rodando de lá.
+- Etapa 1 da v4 na `develop`: enxugamento, regra e fala `nao-promete`, aviso de falha do `tony dia`,
+  falas de teste ajustadas (51/52) e 16 testes de código novos.
+
+**Pendente**
+- Etapa 2: comparar os modelos mais fortes da nuvem do Ollama nas falas de teste.
+- Merge na `main` só no fim da v4 (ou antes, se você pedir), seguindo as regras.
+
+**Aprendi**
+- O timer roda a pasta de onde foi agendado: com a pasta de trabalho na `develop`, a "produção" era o
+  código em construção. Um `git worktree` na `main` resolve sem clonar de novo.
+- Publicar um app OAuth exige página inicial e Política de Privacidade num domínio autorizado; em
+  teste, nada disso é preciso, mas a autorização vence em 7 dias.
+- A chave secreta do cliente OAuth só aparece na janela de criação: copiar na hora ou criar outra.
+- Uma fala de teste nova só vale se reprovar a versão com o problema (`nao-promete`: 0/8 na antiga).
+
 ## 2026-11-03 — Rumo da v4: assistente de e-mail em produção
 
 **Feito**

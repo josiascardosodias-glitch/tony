@@ -2,12 +2,12 @@
 
 Um agente de IA pessoal construído do zero em Python, para aprender como agentes funcionam por dentro.
 
-**v3: conversa, ferramentas e o mundo de fora.** O foco não é ser útil, é conversar bem e melhorar
-com o uso: a personalidade fica em arquivos de texto versionados, o Tony lembra da última conversa e
-das mais antigas, e cada resposta pode ser marcada como boa ou ruim para guiar os próximos ajustes.
-Desde a v2 ele tem ferramentas para consultar as notas sobre você e guardar fatos (com sua
-confirmação); desde a v3, lê o e-mail da faculdade (só leitura) e fala primeiro, com o resumo do dia.
-Falas de teste medem cada mudança (placar da v3: 131/132).
+**v4 (em construção na branch `develop`): assistente de e-mail.** O Tony vai achar as datas nos seus
+e-mails, gravar numa agenda "Tony" do Google Agenda e responder pelo Telegram o que está marcado, com
+o mínimo de IA: buscar, filtrar e achar datas é código; o modelo só entra no que o código não resolve.
+A primeira etapa enxugou o que veio das versões anteriores: ficaram a personalidade em arquivos de
+texto versionados, a conversa no terminal, as marcações `/bom` e `/ruim`, o resumo do dia e as falas
+de teste (placar da etapa 1: 51/52). O plano está no [ROADMAP.md](ROADMAP.md).
 
 ## Instalar
 
@@ -53,59 +53,39 @@ uv run tony
 |---|---|
 | `/bom` | marca a última resposta como boa |
 | `/ruim <motivo>` | marca a última resposta como ruim |
-| `/lembrar <fato>` | guarda um fato numa nota da pasta `memoria.inteligencia` (pede confirmação) |
-| `/nova` | encerra a conversa (com resumo) e começa outra |
+| `/nova` | começa uma conversa nova |
 | `/prompt` | mostra o prompt de sistema montado |
-| `/sair` | encerra, guardando um resumo para a próxima vez |
+| `/sair` | encerra |
 
-Se a conversa acabar sem `/sair` (o terminal fechou, a rede caiu), o Tony resume ela pelo log na
-próxima vez que abrir.
+Cada conversa começa do zero: desde a v4 o Tony não guarda memória entre conversas. O que ele sabe
+sobre você vem só das notas da pasta `memoria.inteligencia`.
 
 ## Ferramentas
 
 Ficam em `tony/ferramentas/`, uma função por arquivo, e são descobertas sozinhas: o modelo lê o nome,
-a docstring e os tipos para decidir quando usar.
-
-| Ferramenta | O que faz |
-|---|---|
-| `listar_notas` | lista as notas da pasta `memoria.inteligencia` |
-| `ler_nota` | lê uma nota (aceita o nome aproximado) |
-| `buscar_notas` | procura palavras nas notas |
-| `lembrar` | guarda um fato na nota de lembretes, depois da sua confirmação |
-| `ler_emails` | lê os e-mails recentes (só aparece com o e-mail configurado) |
-
-Só a pasta `memoria.inteligencia` é acessível. Enquanto as notas cabem em
-`memoria.inteligencia_inteira_ate` caracteres, elas vão inteiras no prompt; acima disso, só a lista, e
-o Tony lê sob demanda. Para criar uma ferramenta, veja a docstring de `tony/ferramentas/__init__.py`.
+a docstring e os tipos para decidir quando usar. Na v4 a pasta está vazia: as ferramentas das notas e
+do IMAP saíram, e as da agenda entram nas próximas etapas. Para criar uma, veja a docstring de
+`tony/ferramentas/__init__.py`.
 
 ## O Tony fala primeiro
 
 ```bash
-uv run tony dia               # o resumo do dia: provas, entregas e pendências dos próximos 7 dias
+uv run tony dia               # o resumo do dia: provas, entregas e pendências dos próximos 7 dias, tirado das notas
 uv run tony dia --notificar   # o mesmo, como notificação na área de trabalho
 uv run tony agendar --hora 08:00   # todo dia nesse horário (timer do systemd do seu usuário)
 ```
 
 Se o PC estava desligado na hora, o resumo roda ao ligar; se a rede ainda não subiu, o systemd tenta
-de novo a cada 2 minutos (até 6 vezes). Para ver o que aconteceu: `journalctl --user -u tony-dia`.
-Para desligar: `systemctl --user disable --now tony-dia.timer`.
+de novo a cada 2 minutos (até 6 vezes). Se as 6 falharem, chega uma notificação avisando. Para ver o
+que aconteceu: `journalctl --user -u tony-dia`. Para desligar: `systemctl --user disable --now tony-dia.timer`.
 
-## E-mail (opcional)
+O timer roda a pasta de onde o `tony agendar` foi chamado. Para ele usar só o que está na `main`
+(produção), deixe uma pasta presa nela e agende de lá:
 
-Só leitura, por IMAP: nada é apagado nem marcado como lido. Com o Gmail:
-
-1. Ative a verificação em duas etapas e crie uma senha de app em <https://myaccount.google.com/apppasswords>.
-2. Guarde a senha fora do repositório:
-   `mkdir -p ~/.config/tony && read -rs s && printf '%s' "$s" > ~/.config/tony/senha-email && chmod 600 ~/.config/tony/senha-email`
-3. No `config.local.yaml`:
-   ```yaml
-   email:
-     usuario: "voce@gmail.com"
-     filtro: 'FROM "faculdade.edu.br"'   # só esses e-mails vão para o modelo
-   ```
-
-Com o e-mail configurado, aparece a ferramenta `ler_emails`, e o `tony dia` passa a olhar os e-mails
-dos últimos 3 dias. O conteúdo desses e-mails vai para o modelo: use o `filtro`.
+```bash
+git worktree add ../tony-producao main && cp config.local.yaml ../tony-producao/
+cd ../tony-producao && uv sync && uv run tony agendar --hora 08:00
+```
 
 ## Testar
 
@@ -116,11 +96,10 @@ uv run tony testar --vezes 8       # mais repetições, placar mais confiável
 ```
 
 Cada fala roda várias vezes (a resposta varia) numa conversa nova, com a memória de exemplo de
-`exemplos/inteligencia/`. Uma fala pode trazer a sua própria memória (`ultima_conversa`, `memoria`), e
-`tarefa: resumo` ou `tarefa: memoria` julgam o resumo da conversa ou a memória depois dele, em vez de
-uma resposta. `chama: [ferramentas]` confere no código quais ferramentas ele chamou (`[]` = nenhuma);
-nos testes, elas rodam sobre a memória de exemplo e a escrita vai para uma pasta temporária. Um segundo modelo, o juiz (`testes.juiz` no config), confere cada resposta
-contra o critério `espera` e o placar sai por fala, comparado com a rodada anterior:
+`exemplos/inteligencia/`. `antes` põe uma conversa curta antes da fala, `tarefa: dia` julga o resumo
+do dia e `chama: [ferramentas]` confere no código quais ferramentas ele chamou (`[]` = nenhuma). Um
+segundo modelo, o juiz (`testes.juiz` no config), confere cada resposta contra o critério `espera` e
+o placar sai por fala, comparado com a rodada anterior:
 
 ```
 segunda-pessoa   ✓✓✓✓  4/4   (antes: 0/4)
@@ -128,40 +107,20 @@ segunda-pessoa   ✓✓✓✓  4/4   (antes: 0/4)
 
 As respostas e os motivos do juiz ficam em `dados/testes/` (fora do git).
 
-O que não depende do modelo tem testes de código, sem rede e em poucos segundos — a leitura do
-e-mail contra um servidor IMAP falso (só leitura, filtro, e-mails tortos) e a recuperação de conversa:
+O que não depende do modelo tem testes de código, sem rede e em menos de um segundo:
 
 ```bash
 uv run python -m unittest discover testes
 ```
 
-## Revisar
-
-```bash
-uv run tony revisar
-```
-
-Lê as respostas marcadas com `/ruim` nos logs e pede a um segundo modelo, o revisor (`revisao.revisor`
-no config), **uma** mudança na personalidade, mostrada como diff:
-
-- **aceitar** — a mudança é aplicada e testada: placar completo antes e depois, mais as próprias falas
-  marcadas (com a conversa que veio antes delas). No fim, você decide se ela fica;
-- **outra proposta** — o revisor tenta algo diferente;
-- **descartar** — as marcações não eram problema e não serão propostas de novo.
-
-Só arquivos de `personalidade/` são alterados, e o commit fica com você.
-
 ## Como o Tony evolui
 
 1. **Personalidade** — `personalidade/*.md`. Edite o texto e faça commit: o log de cada sessão
    registra a versão da personalidade que estava em uso.
-2. **Memória** — as notas da pasta `memoria.inteligencia` entram no prompt; ao sair, a conversa vira
-   um resumo em `dados/resumos/`, lido inteiro no início da próxima. O resumo anterior, que deixa de
-   ser o último, é consolidado em `dados/memoria.md`: uma lista de até 40 fatos com data, que também
-   entra no prompt. `/lembrar` grava um fato na pasta da Inteligência, com a sua confirmação.
-3. **Retorno** — `logs/*.jsonl` guarda cada fala, resposta e marcação `/bom`/`/ruim`.
-4. **Medida** — `tony testar` antes e depois de cada mudança: só fica a mudança que não piora o placar.
-5. **Revisão** — `tony revisar` junta tudo: das marcações a uma mudança testada, uma por rodada.
+2. **Retorno** — `logs/*.jsonl` guarda cada fala, resposta e marcação `/bom`/`/ruim`.
+3. **Medida** — `tony testar` antes e depois de cada mudança: só fica a mudança que não piora o placar.
+4. **Produção** — o trabalho é feito na branch `develop` e só vai para a `main` com os testes de
+   código passando, o placar sem piorar e sem conflito.
 
 ## Estrutura
 
@@ -169,6 +128,7 @@ Só arquivos de `personalidade/` são alterados, e o commit fica com você.
 tony/
 ├── config.exemplo.yaml   padrões (config.local.yaml sobrescreve)
 ├── personalidade/        quem o Tony é, como fala, regras
+├── scripts/              assistentes para configurar o Google e o Telegram
 ├── testes/              falas de teste (falas.yaml) e testes de código (test_*.py)
 ├── exemplos/             memória de exemplo usada nos testes
 ├── docs/                 documentação do projeto (notas do Obsidian): regras, roadmap, diário
@@ -176,13 +136,12 @@ tony/
 └── tony/
     ├── main.py           loop do terminal e comandos
     ├── cliente.py        único arquivo que conhece o Ollama
-    ├── conversa.py       histórico, prompt de sistema, laço de ferramentas, resumos e memória
-    ├── ferramentas/      uma ferramenta por arquivo, descobertas sozinhas
-    ├── memoria.py        personalidade, notas, resumos, memória e lembretes
+    ├── conversa.py       histórico, prompt de sistema e laço de ferramentas
+    ├── ferramentas/      uma ferramenta por arquivo, descobertas sozinhas (vazia até a agenda)
+    ├── memoria.py        personalidade e notas da Inteligência
     ├── dia.py            resumo do dia e o timer que o agenda
     ├── registro.py       log da sessão
     ├── testes.py         falas de teste e juiz
-    ├── revisao.py        propostas de mudança a partir das marcações
     └── config.py         leitura da configuração
 ```
 
