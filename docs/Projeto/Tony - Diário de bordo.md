@@ -22,12 +22,17 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
 - Decisões: começar pelo Gmail pessoal (API, Python local), enxugar o que existe, agenda separada
   "Tony", descrição feita por script (0 token). Plano detalhado em [[Tony - Próximas atualizações]].
 - v3.0.x (IMAP com a caixa real) cancelada: a v4 usa a API do Gmail.
+- **O Tony saiu do Cofre:** a documentação virou a pasta `My-Brain/Tony/`, com Git próprio e o
+  histórico das notas (30 commits, extraídos com `git-filter-repo`) e regras de isolamento como as
+  das outras pastas. O `config.local.yaml` do código já aponta para `Tony/Inteligência/`.
 
 **Pendente**
 - Etapa 1 da v4: enxugamento e a correção que continua valendo (prometer o que não pode cumprir).
 - Seu: projeto no Google Cloud com o cliente OAuth "Em produção" e o bot no @BotFather.
 
 **Aprendi**
+- `git filter-repo --path ... --path-rename ...` tira uma pasta de um repositório com todo o histórico,
+  mesmo quando ela mudou de caminho no meio (aqui, `My-Brain/08-Tony/` e depois `08-Tony/`).
 - Tela de consentimento do Google "Em teste" faz a autorização expirar em 7 dias: para um robô que
   roda sozinho, ela precisa ficar "Em produção".
 
