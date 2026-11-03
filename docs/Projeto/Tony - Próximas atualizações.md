@@ -239,7 +239,10 @@ Um registro de `eventos.json`:
    cumprir) virou regra e a fala `nao-promete` (0/8 antes, 4/4 depois). O `tony dia` avisa quando as 6
    tentativas falham. Falas de 33 para 13, placar 51/52; 16 testes de código. A produção passou a rodar
    de `~/projetos/tony-producao`, presa à `main`.
-2. **Modelo novo.** Comparar os candidatos mais fortes da nuvem do Ollama com as falas de teste.
+2. ✅ **Modelo** (2026-11-03): continua o `gemma4:31b-cloud`. Dos 25 modelos de nuvem, só 6 são
+   gratuitos; os gratuitos mais fortes (`nemotron-3-ultra`, `nemotron-3-super`, `gpt-oss:120b`)
+   fizeram 44/52 contra 51/52 do gemma4. Os pagos (glm-5.3, kimi-k3, deepseek-v4-pro…) ficam para
+   reavaliar na etapa 5, com falas que chamam as ferramentas da agenda. Detalhes no `DECISOES.md`.
 3. **Coleta + bloqueados + extrator + `eventos.json`.** Zero IA. Testes de código com e-mails de
    exemplo (datas em vários formatos, rodapés, convites `.ics`, remetente bloqueado).
 4. **Agenda "Tony".** Criar, atualizar sem duplicar e apagar o evento quando o e-mail muda.

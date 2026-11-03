@@ -262,3 +262,22 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
 77. **A Inteligência continua inteira no prompt**, sem ferramenta para ler sob demanda. *Por quê:* são
    duas notas curtas (menos de 500 caracteres); ler sob demanda custava chamadas e errava (lia notas que
    já estavam no prompt).
+
+## 2026-11-03 — v4, etapa 2: o modelo
+
+78. **O modelo continua o `gemma4:31b-cloud`.** Dos 25 modelos de nuvem do Ollama, só 6 respondem no
+   plano gratuito; os mais fortes (glm-5.3, kimi-k3, deepseek-v4-pro, mistral-large-4, minimax-m3,
+   mimo-v2.6-pro) pedem crédito pago. Os candidatos gratuitos mais fortes, nas 13 falas × 4:
+
+   | Modelo | Juiz gpt-oss:120b | Juiz nemotron-3-ultra |
+   |---|---|---|
+   | gemma4:31b (atual) | **51/52** | 32/32 nas 8 primeiras falas (a rodada foi cortada) |
+   | nemotron-3-ultra | 44/52 | (é o juiz) |
+   | nemotron-3-super | 44/52 | — |
+   | gpt-oss:120b | (é o juiz) | 44/52 |
+
+   Os três erram no jeito: respostas longas, "Boa ideia" no começo, "depende" em vez de discordar,
+   terceira pessoa com o Josias. Todos têm chamada de ferramentas. *Por quê:* na v4 a IA quase não
+   entra (datas e agenda são código), e onde entra é a conversa, em que o gemma4 é o melhor dos
+   gratuitos. *Fora:* pagar crédito por um modelo maior agora; volta a ser avaliado na etapa 5, com
+   falas de teste que chamam as ferramentas da agenda.

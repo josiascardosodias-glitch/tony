@@ -21,8 +21,11 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
 - Etapa 1 da v4 na `develop`: enxugamento, regra e fala `nao-promete`, aviso de falha do `tony dia`,
   falas de teste ajustadas (51/52) e 16 testes de código novos.
 
+- Etapa 2: comparados os modelos gratuitos mais fortes nas 13 falas. Fica o `gemma4:31b` (51/52);
+  `nemotron-3-ultra`, `nemotron-3-super` e `gpt-oss:120b` fizeram 44/52. Os mais fortes são pagos.
+
 **Pendente**
-- Etapa 2: comparar os modelos mais fortes da nuvem do Ollama nas falas de teste.
+- Etapa 3: coleta do Gmail, bloqueados, extrator de datas e `eventos.json`, sem IA.
 - Merge na `main` só no fim da v4 (ou antes, se você pedir), seguindo as regras.
 
 **Aprendi**
@@ -32,6 +35,9 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
   teste, nada disso é preciso, mas a autorização vence em 7 dias.
 - A chave secreta do cliente OAuth só aparece na janela de criação: copiar na hora ou criar outra.
 - Uma fala de teste nova só vale se reprovar a versão com o problema (`nao-promete`: 0/8 na antiga).
+- Modelo maior não é modelo melhor para conversar: os três de 100B+ gratuitos perderam do gemma4 nas
+  regras de tom (tamanho, bajulação, discordar). Trocar de juiz também muda o placar, então só se
+  compara modelo com o mesmo juiz.
 
 ## 2026-11-03 — Rumo da v4: assistente de e-mail em produção
 
