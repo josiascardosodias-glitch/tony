@@ -208,3 +208,29 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
     defeito já existia e só aparecia em alguns dias da semana). Uma regra em texto ("sexta que vem é a
     primeira sexta depois da conversa") não mudou nada (4/8) e saiu; a marca calculada pelo código
     deu 8/8. Mesma lição da decisão 34: conta de calendário é do código.
+
+## 2026-11-03 — v4: assistente de e-mail em produção
+
+65. **A v4 é a primeira versão de produção, e a `main` passa a ser só produção.** Todo trabalho vai
+   na branch `develop`; ela entra na `main` quando os testes de código passam, o placar das falas não
+   piora e não há conflito (`git merge-tree --write-tree main develop`). Releases só da `main`.
+   *Por quê:* o Tony vai rodar sozinho todo dia; o que está em uso não pode quebrar por uma mudança
+   pela metade. *Fora:* uma branch por feature (por enquanto, uma secundária basta).
+66. **O Tony vira só assistente de e-mail:** datas dos e-mails → agenda "Tony" no Google →
+   consulta pelo Telegram. Saem as ferramentas das notas, a memória de conversas, o `/lembrar`, o
+   `tony revisar` e o IMAP; ficam a personalidade, as falas de teste, o cliente do Ollama e o timer.
+   *Fora:* manter o Tony conversacional ao lado; recomeçar do zero.
+67. **IA no mínimo.** Buscar, filtrar, achar datas, gravar na agenda e responder perguntas de agenda
+   são código; o modelo só entra no que o código não resolve. Antes de pôr a IA num passo, pesquisar se
+   um script ou uma API resolve, e registrar aqui. *Por quê:* ele roda dezenas de vezes por dia, o mês
+   inteiro. *Fora:* deixar o modelo ler os e-mails e achar as datas.
+68. **Primeira conta: o Gmail pessoal, pela API do Gmail (só leitura) num script Python local**, não
+   por IMAP nem por Apps Script. *Por quê:* bloqueados, eventos e filtro ficam todos no PC; a API dá
+   busca incremental (`historyId`) e categorias. A conta da faculdade vem depois, por Apps Script
+   (lá, os prazos do Classroom já vêm prontos). *Fora:* IMAP com senha de app (v3.0.x cancelada).
+69. **Agenda separada "Tony"**, criada pela API da Agenda, com o id do e-mail guardado no evento para
+   não duplicar. *Por quê:* fica junto das outras, dá para compartilhar e, se ele errar, apaga-se só ela.
+70. **Descrição do evento feita por script:** assunto, a frase com a data e o `snippet` do Gmail.
+   *Por quê:* zero token por e-mail. *Fora:* resumo pelo modelo.
+71. **Bloqueados em `dados/bloqueados.json`, local**, aplicados na própria busca do Gmail (`-from:`):
+   o e-mail bloqueado nem é baixado.
