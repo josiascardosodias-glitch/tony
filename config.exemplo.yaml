@@ -32,6 +32,9 @@ coleta:                        # `tony coletar`: e-mails → datas → eventos.j
   estado: "dados/coleta.json"  # última coleta e e-mails já vistos
   bloqueados: "dados/bloqueados.json"   # {"enderecos": [...], "dominios": [...]}: nunca são lidos
 
+agenda:
+  arquivo: "dados/agenda.json" # id da agenda "Tony" no Google (o Tony não consegue listar as suas agendas)
+
 personalidade: "personalidade"
 logs: "logs"
 

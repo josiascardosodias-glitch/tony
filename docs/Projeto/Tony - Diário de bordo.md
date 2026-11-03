@@ -28,9 +28,12 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
   Primeira coleta real: 276 e-mails, e o resultado só ficou bom depois de três ajustes vistos nela
   (datas passadas, o horário do próprio aviso, marketing). Ficou: 0 eventos e 8 para revisar.
 
+- Etapa 4: agenda "Tony" criada no Google Agenda, `tony agenda`, `aceitar` e `descartar`. Sem
+  bloqueios por enquanto: o marketing cai em revisar e não vira evento.
+
 **Pendente**
-- Escolher quem bloquear (Alura, nocodestartup, techleads, InfoJobs…).
-- Etapa 4: agenda "Tony" no Google Agenda.
+- Decidir as 8 datas em revisar (o ingresso do Oktober Summit em 05/11 é o único compromisso real).
+- Etapa 5: Telegram.
 - Merge na `main` só no fim da v4 (ou antes, se você pedir), seguindo as regras.
 
 **Aprendi**
@@ -42,6 +45,8 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
 - Uma fala de teste nova só vale se reprovar a versão com o problema (`nao-promete`: 0/8 na antiga).
 - Testar o extrator com e-mails de verdade achou três defeitos que os 27 testes de exemplo não pegavam.
   Cada um virou teste antes da correção.
+- Com o acesso mínimo à Agenda (`calendar.app.created`), nem listar as agendas é permitido: o Tony
+  guarda o id da dele. Menos acesso é mais estado para guardar.
 - O cabeçalho `List-Unsubscribe` separa newsletter de e-mail pessoal sem ler o texto: é o filtro de
   spam mais barato que existe.
 - Modelo maior não é modelo melhor para conversar: os três de 100B+ gratuitos perderam do gemma4 nas

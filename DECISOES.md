@@ -306,3 +306,17 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
    e-mails. 276 e-mails levaram 2,5 min.
 84. **Escopos mínimos do Google:** `gmail.readonly` e `calendar.app.created` (só as agendas que o Tony
    criar). *Fora:* `calendar` inteiro, que enxergaria todas as suas agendas.
+
+## 2026-11-03 — v4, etapa 4: a agenda
+
+85. **O id da agenda "Tony" fica em `dados/agenda.json`.** *Por quê:* com `calendar.app.created`, o
+   Tony não consegue listar as suas agendas (a API responde 403), então não tem como achar a dele pelo
+   nome. É o preço do acesso mínimo, e vale: ele não enxerga nada seu além do que criou.
+86. **Sem duplicar, em três camadas:** o id do Google guardado no evento; o id do Tony em
+   `extendedProperties.private.tony_id`, procurado antes de criar (para quando o `eventos.json` se
+   perde); e o mesmo remetente no mesmo dia e hora vira um evento só (confirmação e lembrete).
+87. **Evento com hora dura 1 hora; sem hora, é de dia inteiro.** O e-mail quase nunca diz quando termina.
+88. **Só os eventos aceitos vão para a agenda.** Os de "revisar" esperam `tony aceitar <id>` (ou, na
+   etapa 5, um sim pelo Telegram); `tony descartar <id>` joga fora de vez.
+89. **Apagar ou mudar o evento quando o e-mail muda: fora.** E-mail não é editado depois de enviado; uma
+   remarcação chega como e-mail novo, com data nova. Se a data antiga ficar sobrando, você apaga na agenda.

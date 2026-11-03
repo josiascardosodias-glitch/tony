@@ -53,7 +53,14 @@ uv run tony coletar              # e-mails novos → datas → dados/eventos.jso
 uv run tony eventos              # as datas dos próximos 30 dias
 uv run tony eventos --revisar    # as de confiança média, para você decidir
 uv run tony bloquear @loja.com   # nunca mais lê e-mails desse domínio (ou de um endereço)
+uv run tony aceitar <id>         # uma data de revisar vira evento (os ids estão no --revisar)
+uv run tony descartar <id>       # uma data de revisar é jogada fora
+uv run tony agenda               # leva os eventos para a agenda "Tony" (o coletar já faz isso)
 ```
+
+Os eventos vão para uma agenda "Tony" que ele cria no seu Google Agenda. Ele só tem acesso às agendas
+que ele mesmo criou: as suas, ele não enxerga. Para recomeçar, apague a agenda "Tony" e o
+`dados/agenda.json`.
 
 Cada data recebe uma confiança de 0 a 1 (`tony/datas.py`): palavra de compromisso, hora e data no
 assunto somam; e-mail em massa (com link de descadastro) perde. A partir de 0,6 vira evento; de 0,3 a
@@ -159,6 +166,7 @@ tony/
     ├── google.py         OAuth e clientes das APIs do Google
     ├── coleta.py         e-mails → datas → eventos.json, bloqueados
     ├── datas.py          o extrator de datas (sem IA)
+    ├── agenda.py         a agenda "Tony" no Google Agenda, sem duplicar
     ├── contas.py         os comandos autorizar, coletar, eventos e bloquear
     ├── registro.py       log da sessão
     ├── testes.py         falas de teste e juiz

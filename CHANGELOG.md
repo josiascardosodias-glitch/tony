@@ -5,6 +5,15 @@
 O Tony vira assistente de e-mail: datas dos e-mails → agenda "Tony" → consulta pelo Telegram, com o
 mínimo de IA. Plano completo no `ROADMAP.md` e em `docs/Projeto/Tony - Próximas atualizações.md`.
 
+**Etapa 4 — a agenda "Tony"**
+
+- `tony agenda`: cria a agenda "Tony" no Google Agenda (uma vez; o id fica em `dados/agenda.json`) e
+  leva para lá os eventos de hoje em diante. O `tony coletar` faz isso sozinho no fim.
+- Sem duplicar: id do Google no evento, `tony_id` no Google e um evento só para o mesmo remetente, dia
+  e hora. Título e data aparecem; a descrição (frase, remetente e link do e-mail) fica no corpo.
+- `tony aceitar <id>` e `tony descartar <id>` para as datas em revisar; `tony eventos --revisar` mostra os ids.
+- Testes de código: 66 (7 da agenda, com uma API falsa).
+
 **Etapa 3 — coleta e datas, sem IA**
 
 - `tony autorizar`: OAuth do Google (só leitura no Gmail; na Agenda, só as agendas do Tony). Token em

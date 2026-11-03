@@ -133,6 +133,11 @@ def main() -> None:
     eventos.add_argument("--revisar", action="store_true", help="mostra as datas de confiança média, para decidir")
     bloquear = comandos.add_parser("bloquear", help="nunca mais lê e-mails de um endereço (x@y.com) ou domínio (@y.com)")
     bloquear.add_argument("alvo")
+    comandos.add_parser("agenda", help="leva os eventos para a agenda \"Tony\" do Google (o coletar já faz isso)")
+    aceitar = comandos.add_parser("aceitar", help="uma data de revisar vira evento (e vai para a agenda)")
+    aceitar.add_argument("id")
+    descartar = comandos.add_parser("descartar", help="uma data de revisar é jogada fora")
+    descartar.add_argument("id")
     args = parser.parse_args()
 
     cfg = config.carregar()
@@ -141,7 +146,7 @@ def main() -> None:
             from . import dia
 
             dia.dia(cfg, args.notificar) if args.comando == "dia" else dia.agendar(args.hora)
-        elif args.comando in ("autorizar", "coletar", "eventos", "bloquear"):
+        elif args.comando in ("autorizar", "coletar", "eventos", "bloquear", "agenda", "aceitar", "descartar"):
             from . import contas
 
             contas.rodar(cfg, args)
