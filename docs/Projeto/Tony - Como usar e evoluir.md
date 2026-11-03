@@ -78,10 +78,10 @@ marcações (não eram problema) ou **sair**. Mudança mantida → o comando mos
 | Personalidade | `~/projetos/tony/personalidade/` (identidade, tom, regras) | sim |
 | Configuração padrão | `config.exemplo.yaml` | sim |
 | Seus valores (caminho da Inteligência) | `config.local.yaml` | **não** |
-| O que ele sabe sobre você | `My-Brain/Tony/Inteligência/` | **não** |
+| O que ele sabe sobre você | `docs/Inteligência/` (fora do git; no git só `modelos/`) | **não** |
 | Resumos das conversas | `~/projetos/tony/dados/resumos/` | **não** |
 | Memória das conversas antigas | `~/projetos/tony/dados/memoria.md` (até 40 fatos, pode editar) | **não** |
-| Lembretes do `/lembrar` | `My-Brain/Tony/Inteligência/Tony - Lembretes.md` | **não** |
+| Lembretes do `/lembrar` | `docs/Inteligência/Tony - Lembretes.md` | **não** |
 | Logs com `/bom` e `/ruim` | `~/projetos/tony/logs/*.jsonl` | **não** |
 | Falas de teste | `~/projetos/tony/testes/falas.yaml` | sim |
 | Placares e respostas dos testes | `~/projetos/tony/dados/testes/` | **não** |

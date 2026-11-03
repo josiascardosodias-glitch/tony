@@ -24,7 +24,12 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
 - v3.0.x (IMAP com a caixa real) cancelada: a v4 usa a API do Gmail.
 - **O Tony saiu do Cofre:** a documentação virou a pasta `My-Brain/Tony/`, com Git próprio e o
   histórico das notas (30 commits, extraídos com `git-filter-repo`) e regras de isolamento como as
-  das outras pastas. O `config.local.yaml` do código já aponta para `Tony/Inteligência/`.
+  das outras pastas.
+- **As notas foram para o repositório do código**, em `docs/` (merge com o histórico, na `develop`). O
+  vault mostra a pasta por um link: `My-Brain/Tony` → `~/projetos/tony/docs`. Cor própria no grafo.
+- **Informação pessoal fora do git:** `docs/Inteligência/` no `.gitignore`, com modelos vazios em
+  `docs/Inteligência/modelos/`. O histórico antigo foi conferido (só o perfil de estudo e um
+  lembrete, nada sensível) e ficou como está.
 
 **Pendente**
 - Etapa 1 da v4: enxugamento e a correção que continua valendo (prometer o que não pode cumprir).

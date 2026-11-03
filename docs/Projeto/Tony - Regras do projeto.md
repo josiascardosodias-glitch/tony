@@ -52,6 +52,10 @@ respostas de agenda são código. O modelo fica como **gerenciador**, para o que
 - Senhas e tokens (OAuth do Google, bot do Telegram) ficam em `~/.config/tony/` com `chmod 600`.
 - A lista de bloqueados (`bloqueados.json`) é local: e-mail de remetente bloqueado não é baixado nem
   lido.
+- **Informação pessoal não sobe.** A documentação (`docs/`) é pública junto com o código; o que é
+  pessoal fica nas notas de `docs/Inteligência/`, fora do git pelo `.gitignore`, e o repositório guarda
+  só os modelos vazios (`docs/Inteligência/modelos/`). Antes de cada commit, confira com
+  `git status` que nenhuma nota pessoal entrou.
 
 ## Como levantar o estado antes de uma atualização
 

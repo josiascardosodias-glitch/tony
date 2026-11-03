@@ -30,6 +30,9 @@ memoria:
   inteligencia: "~/notas/sobre-mim"     # pasta de .md que o Tony lê no início de cada conversa
 ```
 
+Para usar a pasta do próprio repositório, aponte para `docs/Inteligência` e copie para lá os modelos
+de `docs/Inteligência/modelos/`, preenchidos com os seus dados. As notas preenchidas ficam fora do git.
+
 ## Usar
 
 ```bash
@@ -158,6 +161,8 @@ tony/
 ├── personalidade/        quem o Tony é, como fala, regras
 ├── testes/              falas de teste (falas.yaml) e testes de código (test_*.py)
 ├── exemplos/             memória de exemplo usada nos testes
+├── docs/                 documentação do projeto (notas do Obsidian): regras, roadmap, diário
+│   └── Inteligência/     o que o Tony sabe sobre você: fora do git, menos os modelos vazios
 └── tony/
     ├── main.py           loop do terminal e comandos
     ├── cliente.py        único arquivo que conhece o Ollama

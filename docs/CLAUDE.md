@@ -1,11 +1,9 @@
 # CLAUDE.md do Tony — documentação do agente Tony
 
 Esta pasta guarda a documentação do Tony, o agente de IA próprio do Josias: o planejamento, o diário
-de bordo, as regras do projeto e a pasta que o Tony lê (`Inteligência/`). O código fica em outro
-lugar, no repositório público `~/projetos/tony`.
-
-É uma pasta dentro do vault My-Brain, isolada no conteúdo, com Git próprio (repositório local; sem
-remoto até o usuário pedir). O ponto de entrada é `Mapa - Tony.md`.
+de bordo, as regras do projeto e a pasta que o Tony lê (`Inteligência/`). Fica na pasta `docs/` do
+repositório **público** do código (`~/projetos/tony`), e o vault My-Brain mostra ela por um link
+(`My-Brain/Tony` → `~/projetos/tony/docs`). O ponto de entrada é `Mapa - Tony.md`.
 
 ## Isolamento
 
@@ -27,7 +25,8 @@ levantar o estado, siga a lista "Como levantar o estado" dessa nota.
 |---|---|
 | `Mapa - Tony.md` | entrada: estado atual e a lista das notas |
 | `Projeto/` | o que planejamos (o Tony não lê): regras, roadmap, diário, briefing, guia de uso |
-| `Inteligência/` | a única pasta que o Tony lê (`memoria.inteligencia` no `config.local.yaml`). Vai para um modelo na nuvem: nada sensível nela |
+| `Inteligência/` | a única pasta que o Tony lê (`memoria.inteligencia` no `config.local.yaml`). Vai para um modelo na nuvem: nada sensível nela. **Fora do git**, menos `modelos/` |
+| `Inteligência/modelos/` | modelos vazios das notas pessoais (sobem para o GitHub) |
 
 ## Convenções das notas
 
@@ -44,10 +43,13 @@ levantar o estado, siga a lista "Como levantar o estado" dessa nota.
 - Nomes com o prefixo `Tony - `. Uma nota = um assunto. Nota nova entra no `Mapa - Tony`.
 - O diário de bordo recebe uma entrada por sessão de trabalho, a mais recente no topo.
 - Nenhum segredo nas notas (senha, token, chave): eles ficam em `~/.config/tony/`.
+- **Dado pessoal não sobe para o repositório.** Ele vai numa nota da `Inteligência/`, que o
+  `.gitignore` deixa de fora; no repositório fica só o modelo vazio em `Inteligência/modelos/`
+  (nome com `(modelo)`, para não confundir os links). Nota nova com dado pessoal: crie o modelo
+  vazio junto. Nas notas de `Projeto/`, que sobem, escreva sobre o projeto, não sobre a pessoa.
 
 ## Git
 
-- Commit ao fim de cada sessão de trabalho, com mensagens `tony: <o que mudou>`. Antes de reescrever
-  várias notas, faça um checkpoint: `git commit --allow-empty -qm "tony: antes de <tarefa>"`.
-- O histórico anterior a 2026-11-03 veio do Cofre (mensagens `vault: ...`), extraído só com as notas
-  do Tony.
+- O Git é o do repositório do código, e as regras de branch valem aqui também: commit na `develop`,
+  com mensagens `docs: <o que mudou>`.
+- O histórico das notas anterior a 2026-11-03 veio do Cofre (mensagens `vault: ...` e `tony: ...`).

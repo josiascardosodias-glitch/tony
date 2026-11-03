@@ -234,3 +234,14 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
    *Por quê:* zero token por e-mail. *Fora:* resumo pelo modelo.
 71. **Bloqueados em `dados/bloqueados.json`, local**, aplicados na própria busca do Gmail (`-from:`):
    o e-mail bloqueado nem é baixado.
+
+## 2026-11-03 — Documentação dentro do repositório
+
+72. **As notas do Tony saem do vault e vão para `docs/`, com o histórico.** O vault mostra a pasta por
+   um link (`My-Brain/Tony` → `docs/`). *Por quê:* o Tony é um projeto só, e o vault (Cofre) ficou só
+   para documentos de estudo; código e documentação passam a subir no mesmo push.
+   *Fora:* um repositório privado só para as notas; o Tony numa branch do repositório do vault.
+73. **Informação pessoal fica fora do git.** `docs/Inteligência/` está no `.gitignore`, menos
+   `docs/Inteligência/modelos/`, com as notas pessoais vazias para cada pessoa preencher.
+   *Por quê:* o repositório é público. O histórico antigo (perfil de estudo e um lembrete) foi
+   conferido, não tem nada sensível e ficou como está. *Fora:* reescrever o histórico.

@@ -7,3 +7,7 @@ dados/
 .venv/
 __pycache__/
 *.pyc
+
+# Dados pessoais da documentação: cada pessoa preenche os seus a partir de docs/Inteligência/modelos/
+docs/Inteligência/*
+!docs/Inteligência/modelos/

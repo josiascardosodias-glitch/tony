@@ -4,9 +4,10 @@ tags: [mapa, tony, projeto, ia]
 
 # 🗺️ Tony
 
-O Tony é o meu agente de IA próprio, construído do zero em Python. Esta pasta (`My-Brain/Tony/`) é
-um mundo próprio dentro do vault: Git e regras próprios (o `CLAUDE.md` desta pasta) e nenhum conteúdo
-cruzando com as outras pastas. Este mapa é o ponto de entrada.
+O Tony é o meu agente de IA próprio, construído do zero em Python. Esta pasta é a `docs/` do
+repositório do código, e aparece no vault como `My-Brain/Tony/`: um mundo próprio, com regras
+próprias (o `CLAUDE.md` desta pasta) e nenhum conteúdo cruzando com as outras pastas. Este mapa é o
+ponto de entrada.
 
 > [!success] Em produção: v3.0.0 (2026-10-26), na `main`
 > Conversa, `tony testar` (placar 131/132), `tony dia` com notificação diária às 08:00.
@@ -32,14 +33,17 @@ cada versão) e `ROADMAP.md` (resumo público).
 
 ## Inteligência — o que o Tony lê
 
-A única pasta que o Tony lê (`Tony/Inteligência/`, apontada no `config.local.yaml`). Tudo aqui vai
-para o modelo na nuvem: só entra o que pode sair da máquina. Uma nota = um assunto, com o prefixo
+A única pasta que o Tony lê (`docs/Inteligência/`, apontada no `config.local.yaml`). Tudo aqui vai
+para o modelo na nuvem: só entra o que pode sair da máquina. As notas daqui **não sobem para o
+GitHub**: o repositório guarda só os modelos vazios em `modelos/`, e cada pessoa preenche os seus. Uma nota = um assunto, com o prefixo
 `Tony - `. Na v4, as ferramentas das notas saem e esta pasta deixa de ser lida durante a conversa.
 
 1. [[Tony - Sobre o Josias]] — quem eu sou e como prefiro as respostas
 2. [[Tony - Lembretes]] — escrita pelo `/lembrar`, uma linha por fato confirmado
+3. Modelos: [[Tony - Sobre mim (modelo)]] e [[Tony - Lembretes (modelo)]]
 
 ## Histórico
 
-As notas vieram do Cofre em 2026-11-03 com o histórico do Git (`git log` desta pasta mostra desde
-2026-10-22). Duas notas antigas que viraram notas do Tony só existem no histórico, em `historico/`.
+As notas vieram do Cofre em 2026-11-03 com o histórico do Git (`git log -- docs` mostra desde
+2026-10-22). Duas notas antigas que viraram notas do Tony só existem no histórico, em
+`docs/historico/`.
