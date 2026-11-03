@@ -243,8 +243,10 @@ Um registro de `eventos.json`:
    gratuitos; os gratuitos mais fortes (`nemotron-3-ultra`, `nemotron-3-super`, `gpt-oss:120b`)
    fizeram 44/52 contra 51/52 do gemma4. Os pagos (glm-5.3, kimi-k3, deepseek-v4-pro…) ficam para
    reavaliar na etapa 5, com falas que chamam as ferramentas da agenda. Detalhes no `DECISOES.md`.
-3. **Coleta + bloqueados + extrator + `eventos.json`.** Zero IA. Testes de código com e-mails de
-   exemplo (datas em vários formatos, rodapés, convites `.ics`, remetente bloqueado).
+3. ✅ **Coleta + bloqueados + extrator + `eventos.json`** (2026-11-03). `tony autorizar`, `coletar`,
+   `eventos` e `bloquear`. Extrator próprio (o `dateparser` errava), confiança por pontos com penalidade
+   para e-mail em massa. Primeira coleta real: 276 e-mails em 2,5 min, 0 eventos e 8 para revisar (um
+   ingresso de verdade no meio). 59 testes de código.
 4. **Agenda "Tony".** Criar, atualizar sem duplicar e apagar o evento quando o e-mail muda.
 5. **Telegram.** Bot por long polling num serviço do systemd, travado no seu `chat_id`.
    Comandos `/hoje`, `/semana`, `/proximos` e perguntas livres.
@@ -268,6 +270,12 @@ Um registro de `eventos.json`:
   (no repositório). Eles guardam o cliente OAuth, o token e o `chat_id` em `~/.config/tony/`.
 
 ### Pesquisar antes de implementar (regra 3)
+
+> [!check] Respondido na etapa 3 (detalhes no `DECISOES.md`)
+> `history.list` → não: busca por `after:` (os bloqueados nem são baixados). Categorias do Gmail → sim,
+> `-category:promotions -category:social`, mais a penalidade para `List-Unsubscribe`. `dateparser` →
+> não: extrator próprio. `icalendar` → sim. Datas sem certeza → frequentes em marketing: a fila de
+> revisão fica, e a IA continua fora.
 
 Cada item vira uma linha no `DECISOES.md`, com o resultado:
 

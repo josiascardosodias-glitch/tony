@@ -281,3 +281,28 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
    entra (datas e agenda são código), e onde entra é a conversa, em que o gemma4 é o melhor dos
    gratuitos. *Fora:* pagar crédito por um modelo maior agora; volta a ser avaliado na etapa 5, com
    falas de teste que chamam as ferramentas da agenda.
+
+## 2026-11-03 — v4, etapa 3: coleta e datas sem IA
+
+79. **Extrator de datas próprio, com expressões regulares** (`tony/datas.py`), não o `dateparser`.
+   *Por quê:* testado em frases de e-mail, o `dateparser` leu "12/11, às 19h" como 04/11 às 05:00, não
+   achou "20 de novembro" e separou "sexta" de "às 14h". O próprio cobre dd/mm(/aa), "20 de novembro",
+   "2 de dez.", hoje/amanhã/depois de amanhã, dias da semana com "-feira", "próxima" ou "que vem", e
+   horas como 19h, 23h59 e 14:30, com 30 testes de código.
+80. **Confiança por pontos, sem IA:** 0,3 de base, +0,4 com palavra de compromisso, +0,2 com hora,
+   +0,2 no assunto, −0,4 em e-mail em massa (`List-Unsubscribe` ou `Precedence: bulk`). A partir de 0,6
+   vira evento; de 0,3 a 0,6 vai para revisar. *Por quê:* na primeira coleta real (276 e-mails), o
+   marketing ("até amanhã às 23h59!") virava evento; o cabeçalho de descadastro separa newsletter de
+   e-mail pessoal sem ler o conteúdo.
+81. **Descartados:** datas antes de hoje, o dia do próprio e-mail sem hora depois da chegada ("novo
+   login em 03/11 às 09:12"), citações de resposta, rodapés, "3/4" sem ano (fração) e data sem ano que
+   só caberia no ano seguinte depois de 6 meses ("29/09" escrito em novembro já passou).
+82. **Busca por `after:` + ids já vistos**, não o `history.list`. *Por quê:* o `history.list` não aceita
+   busca, então os bloqueados (`-from:`) e o filtro de categorias teriam que ser aplicados depois de baixar
+   o e-mail; com `after:`, o e-mail bloqueado nem é baixado. Uma hora de folga para trás e os ids vistos
+   cobrem o arredondamento do `after:`.
+83. **Limite por minuto do Gmail:** a primeira coleta (30 dias) estourou a cota de consultas por minuto.
+   A coleta espera e tenta de novo (2 s, 5 s, 15 s, 30 s, 60 s, 60 s) e salva o progresso a cada 25
+   e-mails. 276 e-mails levaram 2,5 min.
+84. **Escopos mínimos do Google:** `gmail.readonly` e `calendar.app.created` (só as agendas que o Tony
+   criar). *Fora:* `calendar` inteiro, que enxergaria todas as suas agendas.

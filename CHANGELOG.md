@@ -5,6 +5,24 @@
 O Tony vira assistente de e-mail: datas dos e-mails → agenda "Tony" → consulta pelo Telegram, com o
 mínimo de IA. Plano completo no `ROADMAP.md` e em `docs/Projeto/Tony - Próximas atualizações.md`.
 
+**Etapa 3 — coleta e datas, sem IA**
+
+- `tony autorizar`: OAuth do Google (só leitura no Gmail; na Agenda, só as agendas do Tony). Token em
+  `~/.config/tony/google-token.json`, chmod 600. Em teste, vence a cada 7 dias.
+- `tony coletar`: e-mails novos (`after:` da última coleta; 30 dias na primeira), sem os bloqueados e
+  sem Promoções/Social, para `dados/eventos.json` (eventos e revisar). Espera e tenta de novo no limite
+  por minuto do Gmail; salva a cada 25 e-mails.
+- `tony eventos [--dias N] [--revisar]` e `tony bloquear <x@y.com | @dominio>`.
+- `tony/datas.py`: extrator próprio (o `dateparser` errava as frases de e-mail), convites `.ics` e
+  pontuação de confiança, com penalidade para e-mail em massa.
+- Primeira coleta real: 276 e-mails em 2,5 min; 0 eventos e 8 para revisar (um deles, um ingresso de
+  evento de verdade). Antes dos ajustes, eram 14 eventos de marketing e 62 datas para revisar.
+- Testes de código: 59 (30 do extrator, 14 da coleta com um Gmail falso).
+
+**Etapa 2 — o modelo**
+
+- Continua o `gemma4:31b-cloud` (51/52); os gratuitos maiores fizeram 44/52. Detalhes no `DECISOES.md`.
+
 **Etapa 1 — enxugamento e pendências**
 
 - Saem as ferramentas das notas (`listar_notas`, `ler_nota`, `buscar_notas`, `lembrar`), o `/lembrar`,

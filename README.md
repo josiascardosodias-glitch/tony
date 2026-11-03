@@ -43,6 +43,22 @@ scripts/assistente-google.sh     # projeto no Google Cloud, APIs do Gmail e da A
 scripts/assistente-telegram.sh   # bot no @BotFather, token e o seu chat_id
 ```
 
+## Coletar as datas dos e-mails (v4)
+
+Tudo aqui é código, sem IA, e os e-mails não saem do seu PC.
+
+```bash
+uv run tony autorizar            # uma vez (e a cada 7 dias, enquanto o app do Google estiver "Em teste")
+uv run tony coletar              # e-mails novos → datas → dados/eventos.json
+uv run tony eventos              # as datas dos próximos 30 dias
+uv run tony eventos --revisar    # as de confiança média, para você decidir
+uv run tony bloquear @loja.com   # nunca mais lê e-mails desse domínio (ou de um endereço)
+```
+
+Cada data recebe uma confiança de 0 a 1 (`tony/datas.py`): palavra de compromisso, hora e data no
+assunto somam; e-mail em massa (com link de descadastro) perde. A partir de 0,6 vira evento; de 0,3 a
+0,6 fica para revisar. Os limites estão em `coleta` no `config.exemplo.yaml`.
+
 ## Usar
 
 ```bash
@@ -140,6 +156,10 @@ tony/
     ├── ferramentas/      uma ferramenta por arquivo, descobertas sozinhas (vazia até a agenda)
     ├── memoria.py        personalidade e notas da Inteligência
     ├── dia.py            resumo do dia e o timer que o agenda
+    ├── google.py         OAuth e clientes das APIs do Google
+    ├── coleta.py         e-mails → datas → eventos.json, bloqueados
+    ├── datas.py          o extrator de datas (sem IA)
+    ├── contas.py         os comandos autorizar, coletar, eventos e bloquear
     ├── registro.py       log da sessão
     ├── testes.py         falas de teste e juiz
     └── config.py         leitura da configuração

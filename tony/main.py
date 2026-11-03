@@ -126,6 +126,13 @@ def main() -> None:
     dia.add_argument("--notificar", action="store_true", help="também mostra como notificação na área de trabalho")
     agendar = comandos.add_parser("agendar", help="instala um timer do systemd que roda `tony dia --notificar` todo dia")
     agendar.add_argument("--hora", default="08:00", help="HH:MM (padrão 08:00)")
+    comandos.add_parser("autorizar", help="abre o navegador para autorizar o Tony no Gmail e na Agenda")
+    comandos.add_parser("coletar", help="busca os e-mails novos e guarda as datas em eventos.json (sem IA)")
+    eventos = comandos.add_parser("eventos", help="mostra as datas guardadas (sem IA)")
+    eventos.add_argument("--dias", type=int, default=30, help="quantos dias à frente (padrão 30)")
+    eventos.add_argument("--revisar", action="store_true", help="mostra as datas de confiança média, para decidir")
+    bloquear = comandos.add_parser("bloquear", help="nunca mais lê e-mails de um endereço (x@y.com) ou domínio (@y.com)")
+    bloquear.add_argument("alvo")
     args = parser.parse_args()
 
     cfg = config.carregar()
@@ -134,6 +141,10 @@ def main() -> None:
             from . import dia
 
             dia.dia(cfg, args.notificar) if args.comando == "dia" else dia.agendar(args.hora)
+        elif args.comando in ("autorizar", "coletar", "eventos", "bloquear"):
+            from . import contas
+
+            contas.rodar(cfg, args)
         elif args.comando == "testar":
             from .testes import rodar
 

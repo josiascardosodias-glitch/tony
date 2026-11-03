@@ -19,6 +19,19 @@ contexto:
 memoria:
   inteligencia: ""             # pasta de notas .md que o Tony lê no início de cada conversa (vazio = nenhuma)
 
+google:
+  pasta: "~/.config/tony"      # cliente OAuth (google-cliente.json) e token: fora do repositório, chmod 600
+
+coleta:                        # `tony coletar`: e-mails → datas → eventos.json, sem IA
+  conta: "pessoal"             # nome da conta, gravado em cada evento (para quando houver mais de uma)
+  filtro: "-category:promotions -category:social"   # busca do Gmail que vale sempre; bloqueados entram sozinhos
+  primeira_vez_dias: 30        # na primeira coleta, quantos dias para trás
+  aceitar_a_partir_de: 0.6     # confiança da data para virar evento (ver tony/datas.py)
+  revisar_a_partir_de: 0.3     # entre um e outro, vai para "revisar"; abaixo, é descartada
+  eventos: "dados/eventos.json"
+  estado: "dados/coleta.json"  # última coleta e e-mails já vistos
+  bloqueados: "dados/bloqueados.json"   # {"enderecos": [...], "dominios": [...]}: nunca são lidos
+
 personalidade: "personalidade"
 logs: "logs"
 

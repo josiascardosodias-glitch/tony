@@ -24,8 +24,13 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
 - Etapa 2: comparados os modelos gratuitos mais fortes nas 13 falas. Fica o `gemma4:31b` (51/52);
   `nemotron-3-ultra`, `nemotron-3-super` e `gpt-oss:120b` fizeram 44/52. Os mais fortes são pagos.
 
+- Etapa 3: autorização do Google (só leitura no Gmail), coleta, extrator de datas e `eventos.json`.
+  Primeira coleta real: 276 e-mails, e o resultado só ficou bom depois de três ajustes vistos nela
+  (datas passadas, o horário do próprio aviso, marketing). Ficou: 0 eventos e 8 para revisar.
+
 **Pendente**
-- Etapa 3: coleta do Gmail, bloqueados, extrator de datas e `eventos.json`, sem IA.
+- Escolher quem bloquear (Alura, nocodestartup, techleads, InfoJobs…).
+- Etapa 4: agenda "Tony" no Google Agenda.
 - Merge na `main` só no fim da v4 (ou antes, se você pedir), seguindo as regras.
 
 **Aprendi**
@@ -35,6 +40,10 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
   teste, nada disso é preciso, mas a autorização vence em 7 dias.
 - A chave secreta do cliente OAuth só aparece na janela de criação: copiar na hora ou criar outra.
 - Uma fala de teste nova só vale se reprovar a versão com o problema (`nao-promete`: 0/8 na antiga).
+- Testar o extrator com e-mails de verdade achou três defeitos que os 27 testes de exemplo não pegavam.
+  Cada um virou teste antes da correção.
+- O cabeçalho `List-Unsubscribe` separa newsletter de e-mail pessoal sem ler o texto: é o filtro de
+  spam mais barato que existe.
 - Modelo maior não é modelo melhor para conversar: os três de 100B+ gratuitos perderam do gemma4 nas
   regras de tom (tamanho, bajulação, discordar). Trocar de juiz também muda o placar, então só se
   compara modelo com o mesmo juiz.
