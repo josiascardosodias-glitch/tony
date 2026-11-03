@@ -20,7 +20,12 @@ as ideias soltas. Quando uma versão sai, ela vai para o `CHANGELOG.md` e some d
 | v1.0.0   | O [[Tony - Briefing v1]] completo                  | ✅ publicada (76/76) |
 | v2.0.0   | Ferramentas                                        | ✅ publicada (108/108) |
 | v3.0.0   | O mundo de fora                                    | ✅ publicada (131/132) |
-| **v3.0.x** | **E-mail testado com a caixa real**              | ⏳ espera a senha    |
+| ~~v3.0.x~~ | ~~E-mail testado com a caixa real (IMAP)~~     | ❌ substituída pela v4 |
+| **v4.0.0** | **Assistente de e-mail: datas → agenda → Telegram** (produção) | 🚧 em construção na `develop` |
+
+> [!important] A partir da v4, siga [[Tony - Regras do projeto]]
+> Trabalho só na branch `develop`; a `main` é produção e só recebe o que passou nos testes e não
+> conflita. IA no mínimo: script e API primeiro.
 
 ## v0.2 — Falas de teste e revisão ✅
 
@@ -154,16 +159,122 @@ Buscar no vault inteiro é decisão sua, para depois.
 - [x] Conversa fechada sem `/sair` resumida na próxima abertura.
 - [ ] Teste com a caixa real → v3.0.x.
 
-### Para a v3.0.x: conferir com a caixa real
+> [!failure] v3.0.x cancelada (2026-11-03)
+> O teste do IMAP com a caixa real não vai mais acontecer: a v4 troca o IMAP pela API do Gmail.
 
-O que falta é seu: a senha de app do Gmail e o filtro do domínio da faculdade (capturado em 2026-10-24).
+## v4 — Assistente de e-mail (produção) 🚧
 
-1. Ativar a verificação em duas etapas e criar a senha em <https://myaccount.google.com/apppasswords>.
-2. Guardar fora do repositório (num terminal à parte):
-   ```bash
-   mkdir -p ~/.config/tony && read -rs s && printf '%s' "$s" > ~/.config/tony/senha-email && chmod 600 ~/.config/tony/senha-email
-   ```
-3. Passar ao Claude o e-mail e o domínio da faculdade (para o `email.filtro`) e testar com a caixa real.
+> [!abstract] Objetivo
+> O Tony passa a servir **só** como assistente de e-mail: acha as datas nos e-mails, grava na
+> agenda do Google e responde pelo Telegram o que está marcado. É a primeira versão de produção:
+> quando passar nos testes, vai para a `main` e passa a ser usada de verdade.
+
+### Decisões (2026-11-03)
+
+- [x] **Primeira conta: Gmail pessoal**, por um script Python no PC com a API do Gmail (só leitura) e
+  a API da Agenda. Tudo fica local: bloqueados, JSON e filtro. As outras contas vêm depois, uma por vez.
+- [x] **Enxugar o que existe.** Ficam a personalidade, as falas de teste (porta para produção), o
+  cliente do Ollama, o timer e a conversa, agora pelo Telegram (o terminal fica para testar). Saem as
+  ferramentas das notas, a memória de conversas, o `/lembrar`, o `tony revisar` e o IMAP.
+- [x] **Agenda separada "Tony"** na sua conta: aparece junto das outras, dá para compartilhar com outra
+  agenda e, se ele errar, basta apagar ela. A API da Agenda cria e edita eventos, então não precisa
+  dar a ele outro acesso à sua conta.
+- [x] **Descrição feita por script, sem token:** assunto + a frase do e-mail onde a data aparece + o
+  trecho inicial que o Gmail já entrega (`snippet`). No calendário, o evento mostra título e data, e
+  a descrição fica no corpo do evento e no JSON.
+- [x] **Modelo mais forte, ainda na nuvem do Ollama.** Os candidatos passam pelas falas de teste antes
+  da troca. O juiz continua sendo um modelo diferente do que conversa: se o `gpt-oss:120b-cloud` virar
+  o modelo da conversa, o juiz muda.
+- [x] **Bloqueados locais** em `dados/bloqueados.json` (endereços e domínios). Eles saem da busca no
+  próprio Gmail (`-from:`), então o e-mail bloqueado nem é baixado. A lista é editada à mão ou por
+  `tony bloquear <endereço>`, no PC.
+
+### Como vai funcionar
+
+```
+Gmail pessoal (API, só leitura)
+  → tony coletar  (timer do systemd, várias vezes por dia; sem IA)
+      busca incremental: só o que chegou desde a última vez (historyId)
+      → bloqueados.json corta os remetentes na própria busca
+      → extrator de datas (script):
+          1. convite .ics anexado → data exata (icalendar)
+          2. assunto e corpo: dd/mm, "12 de novembro", "sexta que vem", "até amanhã às 23h59"
+             (regex + dateparser em português)
+          3. pontuação: palavra-chave perto da data (prova, entrega, prazo, vencimento, reunião, até)
+             conta a favor; data passada, rodapé ("Em seg., 3 de nov. … escreveu") e assinatura, contra
+          4. o que ficar no meio vai para uma fila de revisão (a IA só entra aqui, se um dia valer a pena)
+      → dados/eventos.json  (o banco: um registro por data achada)
+      → API da Agenda: agenda "Tony", cria ou atualiza o evento (sem duplicar: o id do e-mail fica no evento)
+
+Telegram (bot, só responde ao seu chat)
+  → "o que tenho essa semana?"  → script entende o período (dateparser) → filtra eventos.json
+      → pergunta de agenda: resposta montada por modelo de texto, 0 token
+      → pergunta livre: vai ao modelo com só os eventos filtrados (título, data, descrição curta)
+
+tony dia → lê eventos.json → notificação no PC + mensagem no Telegram
+```
+
+Um registro de `eventos.json`:
+
+```json
+{
+  "id": "<id do e-mail>-1",
+  "conta": "pessoal",
+  "remetente": "fulano@exemplo.com",
+  "titulo": "Entrega do relatório",
+  "data": "2026-11-12",
+  "hora": "23:59",
+  "descricao": "…frase do e-mail com a data…",
+  "origem": "corpo | assunto | ics",
+  "confianca": 0.8,
+  "evento_agenda": "<id do evento no Google>",
+  "criado_em": "2026-11-03T10:00:00"
+}
+```
+
+### Etapas (todas na `develop`)
+
+1. **Pendências e enxugamento.** Sair o que a decisão tirou, sem quebrar os testes de código. Das 7
+   correções da conversa de 26/10, só a 5 (prometer o que não tem como cumprir) continua valendo: as
+   outras eram de ferramentas e memória que saem. Ajustar as falas de teste para o novo papel. Avisar
+   quando o `tony dia` falhar em todas as tentativas.
+2. **Modelo novo.** Comparar os candidatos mais fortes da nuvem do Ollama com as falas de teste.
+3. **Coleta + bloqueados + extrator + `eventos.json`.** Zero IA. Testes de código com e-mails de
+   exemplo (datas em vários formatos, rodapés, convites `.ics`, remetente bloqueado).
+4. **Agenda "Tony".** Criar, atualizar sem duplicar e apagar o evento quando o e-mail muda.
+5. **Telegram.** Bot por long polling num serviço do systemd, travado no seu `chat_id`.
+   Comandos `/hoje`, `/semana`, `/proximos` e perguntas livres.
+6. **`tony dia` novo**, lendo do `eventos.json` e mandando também no Telegram.
+7. **Produção:** testes de código + falas de teste + sem conflito → merge na `main` → `v4.0.0`.
+
+### O que só você pode fazer
+
+- **Google:** criar um projeto no Google Cloud, ativar as APIs do Gmail e da Agenda e criar um
+  cliente OAuth "app para computador". A tela de consentimento precisa ficar **"Em produção"** (não
+  "Em teste"): em teste, a autorização expira a cada 7 dias e a coleta para sozinha. Vai aparecer o
+  aviso de app não verificado; para uso só seu, é só seguir. O arquivo do cliente vai para
+  `~/.config/tony/`.
+- **Telegram:** criar o bot com o @BotFather e guardar o token em `~/.config/tony/telegram-token`.
+- Na hora, eu preparo um passo a passo guiado para os dois.
+
+### Pesquisar antes de implementar (regra 3)
+
+Cada item vira uma linha no `DECISOES.md`, com o resultado:
+
+- `history.list` do Gmail (só o que é novo) contra uma busca por data a cada rodada.
+- Categorias do próprio Gmail (Promoções, Social) como primeiro filtro de spam, sem custo.
+- `dateparser` em português: acerta "sexta que vem", "dia 12", "amanhã às 14h"? Medir com e-mails reais.
+- `icalendar` para convites; o Gmail já marca convites de evento?
+- Telegram pela API HTTP direto (`httpx`, que o projeto já tem) em vez de uma biblioteca de bot.
+- Cota gratuita da nuvem do Ollama com o modelo mais forte: quantas perguntas por dia aguenta.
+- Quanto as datas sem certeza aparecem: se forem raras, a fila de revisão basta e a IA nem entra.
+
+### Depois da v4.0
+
+- **Conta da Faccat** por um Apps Script na própria conta (gatilho de hora em hora, só leitura),
+  com os prazos do Classroom, que já vêm prontos na API (`dueDate`), e os anexos dos professores.
+  O Apps Script entrega ao PC só o que já passou pelo filtro da conta.
+- Outras contas pessoais, uma por vez.
 
 ## Horizonte
 
@@ -174,11 +285,9 @@ O que falta é seu: a senha de app do Gmail e o filtro do domínio da faculdade 
 
 Qualquer ideia entra aqui primeiro, sem compromisso; na hora de planejar uma versão, ela sobe para a tabela.
 
-- `/desfazer` — apagar a última troca da conversa (quando a pergunta saiu errada).
-- Mostrar no início da sessão quantas marcações `/ruim` estão esperando revisão.
-- Notificar quando o resumo do dia falhar em todas as tentativas (hoje só aparece no `journalctl`).
-- Calendário dos próximos dias também no `# Agora` da conversa (hoje só a consolidação recebe), para
-  ele não errar "que dia cai a sexta que vem" conversando.
+- ~~`/desfazer`~~ e ~~marcações `/ruim` esperando revisão~~: saem com o enxugamento da v4.
+- Notificar quando o resumo do dia falhar em todas as tentativas → entrou na etapa 1 da v4.
+- Calendário dos próximos dias na conversa → na v4, as datas saem do script (`dateparser`), não do modelo.
 
 ## Decisões
 
@@ -186,6 +295,7 @@ Qualquer ideia entra aqui primeiro, sem compromisso; na hora de planejar uma ver
 
 ## Relacionado
 
+- [[Tony - Regras do projeto]] — branches, produção e IA no mínimo, que a v4 segue
 - [[Tony - Briefing v1]] — o plano da v1, de onde saem as etapas 4 e 5
 - [[Tony - Como usar e evoluir]] — o ciclo de evolução que a v0.2 automatiza
 - [[Tony - Diário de bordo]] — o que já foi feito

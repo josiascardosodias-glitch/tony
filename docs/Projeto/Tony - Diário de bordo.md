@@ -10,6 +10,27 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-11-03 — Rumo da v4: assistente de e-mail em produção
+
+**Feito**
+- Mapa do estado atual (fluxogramas da conversa, do `tony dia` e do ciclo de evolução) publicado como página.
+- Novo objetivo: o Tony vira **só** assistente de e-mail (datas dos e-mails → agenda "Tony" no Google →
+  consulta pelo Telegram), e a v4 é a primeira versão de produção.
+- Regras novas em [[Tony - Regras do projeto]]: `main` é produção, todo trabalho vai na `develop`, merge
+  só com testes passando e sem conflito; IA no mínimo; dados e segredos no PC.
+- Branch `develop` criada no repositório (local, sem push).
+- Decisões: começar pelo Gmail pessoal (API, Python local), enxugar o que existe, agenda separada
+  "Tony", descrição feita por script (0 token). Plano detalhado em [[Tony - Próximas atualizações]].
+- v3.0.x (IMAP com a caixa real) cancelada: a v4 usa a API do Gmail.
+
+**Pendente**
+- Etapa 1 da v4: enxugamento e a correção que continua valendo (prometer o que não pode cumprir).
+- Seu: projeto no Google Cloud com o cliente OAuth "Em produção" e o bot no @BotFather.
+
+**Aprendi**
+- Tela de consentimento do Google "Em teste" faz a autorização expirar em 7 dias: para um robô que
+  roda sozinho, ela precisa ficar "Em produção".
+
 ## 2026-10-26 — Conversa de teste do Claude (sandbox)
 
 **Feito**

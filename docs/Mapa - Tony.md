@@ -16,8 +16,13 @@ Esta pasta (`08-Tony/`) é escrita à mão — o vault-sync não mexe aqui.
 > Código: [github.com/josiascardosodias-glitch/tony](https://github.com/josiascardosodias-glitch/tony) (público, MIT) ·
 > local em `~/projetos/tony` · rodar com `uv run tony`.
 
+> [!important] v4 em construção na branch `develop` (desde 2026-11-03)
+> O Tony vira assistente de e-mail: datas dos e-mails → agenda "Tony" no Google → consulta pelo
+> Telegram, com o mínimo de IA. Regras de branch e de produção em [[Tony - Regras do projeto]].
+
 ## Projeto — o que nós planejamos (o Tony não lê)
 
+0. [[Tony - Regras do projeto]] — branches `main`/`develop`, produção, IA no mínimo; ler antes de qualquer atualização
 1. [[Tony - Como usar e evoluir]] — comandos, onde fica cada coisa e o ciclo para melhorar o diálogo
 2. [[Tony - Próximas atualizações]] — roadmap vivo: a próxima versão detalhada, dúvidas e ideias soltas
 3. [[Tony - Briefing v1]] — o plano da v1: decisões, estrutura e etapas
