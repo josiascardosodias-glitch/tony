@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "deny": [
+      "WebSearch",
+      "WebFetch",
+      "Read(//home/josias/Documentos/My-Brain/Cofre/**)",
+      "Edit(//home/josias/Documentos/My-Brain/Cofre/**)",
+      "Read(//home/josias/Documentos/My-Brain/TheForge/**)",
+      "Edit(//home/josias/Documentos/My-Brain/TheForge/**)",
+      "Bash(*Cofre*)",
+      "Bash(*TheForge*)"
+    ]
+  },
+  "claudeMdExcludes": [
+    "/home/josias/Documentos/My-Brain/CLAUDE.md",
+    "/home/josias/Documentos/My-Brain/Cofre/**",
+    "/home/josias/Documentos/My-Brain/TheForge/**",
+    "/home/josias/.claude/CLAUDE.md",
+    "/home/josias/CLAUDE.md",
+    "/home/josias/Documentos/CLAUDE.md"
+  ]
+}
