@@ -1,5 +1,16 @@
 # Changelog
 
+## v5.1.0 — 2026-11-04
+
+- **Aviso não é compromisso:** frases de termos de serviço, mudança na conta, entrega e devolução de
+  compra, desconto, cupom e newsletter perdem 0.5 de confiança e são descartadas antes de virar
+  pergunta. Os 6 avisos reais que tinham sido aceitos e depois removidos agora caem; os compromissos
+  de verdade dos testes ficam iguais. Sem IA (`datas.NAO_COMPROMISSO`, no Python e no JavaScript).
+- **HTML cru:** "texto puro" de e-mail que traz tags (`<a href=…>`) passa pelo mesmo limpador do HTML,
+  inclusive o trecho do Gmail cortado no meio de uma tag. `limparHtml` arruma as descrições já
+  guardadas e os eventos no Google.
+- Teste diferencial com os casos novos: 5508 datas e 83 caixas de e-mail. 117 testes Python, 39 JS.
+
 ## v5.0.0 — 2026-11-04
 
 O Tony sai do notebook e roda no Google Apps Script, 24 horas, de graça e sem cartão.

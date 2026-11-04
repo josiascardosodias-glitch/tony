@@ -24,6 +24,7 @@ as ideias soltas. Quando uma versão sai, ela vai para o `CHANGELOG.md` e some d
 | v4.0.0   | Assistente de e-mail: datas → agenda → Telegram (produção) | ✅ publicada (56/56) |
 | v4.1.0   | `/remover` no Telegram; o mesmo compromisso uma vez só | ✅ publicada |
 | v5.0.0   | Tony no Google Apps Script: 24 h sem o notebook       | ✅ publicada (38 testes JS, falas 56/56) |
+| v5.1.0   | Aviso não é compromisso; sem HTML cru nas descrições  | ✅ publicada |
 
 > [!important] A partir da v4, siga [[Tony - Regras do projeto]]
 > Trabalho só na branch `develop`; a `main` é produção e só recebe o que passou nos testes e não
@@ -300,7 +301,8 @@ Cada item vira uma linha no `DECISOES.md`, com o resultado:
   mensagens esperam no Telegram e são respondidas quando o PC acorda). Caminhos: não suspender com a
   tampa fechada na tomada (`HandleLidSwitchExternalPower=ignore` no logind), ou uma máquina sempre
   ligada (o que esbarra na regra 4, dados no PC).
-- **Filtro de "não é compromisso".** Avisos de termos de serviço, limites de conta, entrega de compra e
+- ✅ v5.1.0: filtro de "não é compromisso" e HTML cru. (Plano original abaixo.)
+- ~~**Filtro de "não é compromisso".**~~ Avisos de termos de serviço, limites de conta, entrega de compra e
   newsletter ainda viram evento com confiança alta; dá para tirar com `/remover`, mas o certo é a
   pontuação de `datas.py` baixar essas frases ("vamos fazer mudanças", "chegará entre", "agenda da
   semana") e a descrição não começar com HTML cru.

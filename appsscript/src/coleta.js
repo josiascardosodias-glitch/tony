@@ -81,6 +81,14 @@ function _desescaparHtml(texto) {
   });
 }
 
+const TEM_HTML = /<\s*\/?\s*(a|br|p|div|span|img|table|tr|td|b|i|strong|em|font|ul|li)\b[^>]*>/i;
+
+/** O snippet do Gmail, sem tags que tenham vindo cruas no texto (nem a cortada no fim). */
+function _trecho(snippet) {
+  const trecho = _desescaparHtml(snippet).replace(/<\s*\/?\s*[a-z][^>]*$/i, '');
+  return TEM_HTML.test(trecho) ? _semHtml(trecho).split(/\s+/).filter(Boolean).join(' ') : trecho.trim();
+}
+
 function _semHtml(texto) {
   texto = texto.replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ');
   texto = texto.replace(/<br\s*\/?>|<\/p>|<\/div>|<\/li>|<\/tr>/gi, '\n');
@@ -109,11 +117,12 @@ function lerMensagem(gmail, bruta) {
     if (tipo === 'text/calendar' || (parte.filename || '').toLowerCase().endsWith('.ics')) convites.push(_decodificar(dados));
     else if (tipo in texto && !texto[tipo]) texto[tipo] = _decodificar(dados);
   }
-  const corpo = texto['text/plain'] || _semHtml(texto['text/html']);
+  let corpo = texto['text/plain'] || _semHtml(texto['text/html']);
+  if (TEM_HTML.test(corpo)) corpo = _semHtml(corpo); // "texto puro" que traz tags: elas não são do texto
   const recebido = new Date(Number(bruta.internalDate));
   return {
     id: bruta.id, de: endereco.toLowerCase(), nome, assunto: (cabecalhos.subject || '').trim(), recebido,
-    texto: corpo.replace(/[ \t\r\f\v]+/g, ' ').trim(), trecho: _desescaparHtml(bruta.snippet || ''), convites,
+    texto: corpo.replace(/[ \t\r\f\v]+/g, ' ').trim(), trecho: _trecho(bruta.snippet || ''), convites,
     emailDaConta: '',
     emMassa: 'list-unsubscribe' in cabecalhos || ['bulk', 'list'].includes((cabecalhos.precedence || '').toLowerCase()),
   };

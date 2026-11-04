@@ -43,11 +43,19 @@ FRASES = [
     "© 2026 Todos os direitos reservados. 12/12/2026.", "Evento: 7 de dezembro, das 14h às 16h.",
     "Palestra no 1º de dezembro às 19h30.", "Aula pra quarta que vem.", "Inscrições até esta sexta!",
     "Prova dia 12/11 às 19h.", "Show 🎉 dia 20/11 às 21h — ingressos.", "",
+    # avisos reais que não são compromisso (2026-11-04)
+    "Em 5 de novembro de 2026, vamos fazer mudanças nos Termos de Serviço do",
+    "Essa alteração será aplicada automaticamente a partir de 05/11/2026 .", "Chegará entre 2 e 5 de Novembro.",
+    "A semana de 02 a 06 de novembro será marcada por uma agenda relevante para os mercados globais.",
+    "Se tiver algum problema, você pode devolver ou trocar grátis sua compra até 14 de novembro.",
+    "O desconto é válido para viagens feitas até 22/11/2026, e se aplica a 1 única viagem.",
+    "Seu pedido foi enviado e chega dia 12/11. Previsão de entrega: 13/11.", "Cupom VALE10 até 30/11!",
 ]
 PEDACOS = ["prova", "reunião", "entrega", "boleto", "foto", "promoção", "evento", "aula", "consulta", "olá",
            "12/11", "5/1", "05/01", "31/04", "20 de novembro", "1º de jan", "2 de dez.", "15 de março de 2027",
            "hoje", "amanhã", "depois de amanhã", "sexta", "próxima segunda", "quinta-feira", "sábado", "domingo que vem",
-           "às 19h", "19:30", "8h15", "10 horas", "23h59", "às 7", "até", "na", "dia", ".", ",", "!", "\n", "segunda chamada"]
+           "às 19h", "19:30", "8h15", "10 horas", "23h59", "às 7", "até", "na", "dia", ".", ",", "!", "\n", "segunda chamada",
+           "desconto", "devolver", "chegará", "termos de serviço", "oferta", "a caminho", "Promoção", "newsletter"]
 
 
 def frases_geradas(n: int) -> list[str]:
@@ -121,6 +129,9 @@ def caixas(n: int) -> list[list[dict]]:
         [mensagem("c1", REMETENTES[4], "Seu ingresso para o Summit", "O evento será dia 05/11/2026 às 08:30."),
          mensagem("c2", REMETENTES[4], "Pedido confirmado", "O evento será dia 05/11/2026 às 08:30."),
          mensagem("c3", REMETENTES[4], "Re: [Lista] Outro dia", "Data: 06/11/2026 às 08:30", em_massa=True)],
+        [mensagem("h1", REMETENTES[0], "Confirmação de inscrição",
+                  "A palestra é dia 12/11 às 19h. <a href='https://calendar.google.com/x?dates=1'>Adicionar</a> &amp; mais."),
+         mensagem("h2", REMETENTES[2], "Sua compra", "Chegará entre 10 e 12 de novembro. <br>Cupom de desconto até 20/11.")],
     ]
     for c in range(n):
         caixa = []

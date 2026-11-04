@@ -98,7 +98,7 @@ class TestColeta(unittest.TestCase):
 
     def test_eventos_revisar_e_estado(self):
         r = coletar(self.cfg, self.gmail, AGORA)
-        self.assertEqual(r, {"emails": 4, "eventos": 3, "revisar": 1, "bloqueados": 0, "repetidos": 0})
+        self.assertEqual(r, {"emails": 4, "eventos": 2, "revisar": 2, "bloqueados": 0, "repetidos": 0})  # a promoção vai para revisar
         eventos = self.banco()["eventos"]
         prova = eventos["m1-1"]
         self.assertEqual((prova["titulo"], prova["data"], prova["hora"]), ("Prova remarcada", "2026-11-12", "19:00"))
@@ -106,7 +106,7 @@ class TestColeta(unittest.TestCase):
         entrevista = [e for e in eventos.values() if e["origem"] == "ics"][0]
         self.assertEqual((entrevista["titulo"], entrevista["data"], entrevista["hora"]),
                          ("Entrevista de estágio", "2026-11-18", "14:00"))
-        self.assertEqual([e["data"] for e in self.banco()["revisar"].values()], ["2026-11-15"])  # a foto, do HTML
+        self.assertEqual(sorted(e["data"] for e in self.banco()["revisar"].values()), ["2026-11-15", "2026-11-30"])  # a foto e a promoção
         estado = json.loads((self.pasta / "coleta.json").read_text(encoding="utf-8"))
         self.assertEqual(sorted(estado["vistos"]), ["m1", "m2", "m3", "m4"])
 
@@ -141,7 +141,7 @@ class TestColeta(unittest.TestCase):
 
     def test_em_massa_perde_confianca_e_passado_sai(self):
         self.gmail = GmailFalso([
-            mensagem("n1", "Curso <oi@curso.com>", "Últimos dias", "A oferta vai até 12/11 às 23h59.", em_massa=True),
+            mensagem("n1", "Curso <oi@curso.com>", "Últimos dias", "As inscrições vão até 12/11 às 23h59.", em_massa=True),
             mensagem("n2", "Barbearia <nao@barbearia.com>", "Lembrete", "Seu horário é dia 12/11 às 15h."),
             mensagem("n3", "Amigo <a@gmail.com>", "Prova", "A prova foi 01/11/2026, a entrega é 05/11 às 10h."),
         ])
@@ -166,6 +166,16 @@ class TestColeta(unittest.TestCase):
         self.assertEqual(eventos["outra.m9-1"]["conta"], "outra")
         self.assertEqual(eventos["outra.m9-1"]["link"], "https://mail.google.com/mail/u/?authuser=b@gmail.com#all/m9")
         self.assertTrue((self.pasta / "coleta-outra.json").is_file())
+
+    def test_texto_puro_com_tags_html_sai_limpo(self):
+        """Caso real: o text/plain da confirmação de inscrição trazia um <a href=...> cru."""
+        self.gmail = GmailFalso([mensagem(
+            "h1", "Faccat <noreply@faccat.br>", "Confirmação de inscrição",
+            "A palestra é dia 12/11 às 19h. <a href='https://calendar.google.com/x?dates=1'>Adicionar</a> &amp; mais.")])
+        coletar(self.cfg, self.gmail, AGORA)
+        descricao = self.banco()["eventos"]["h1-1"]["descricao"]
+        self.assertNotIn("<a", descricao)
+        self.assertNotIn("href", descricao)
 
     def test_mesmo_remetente_dia_e_hora_entra_uma_vez(self):
         """O convite e o ingresso do mesmo evento: dois e-mails, um compromisso, um aviso."""

@@ -4,7 +4,8 @@
  * Cada data achada vem com a frase onde apareceu e uma `confianca` de 0 a 1:
  * - convite `.ics`: 1.0 (a data vem pronta);
  * - no texto: 0.3 de base, +0.4 se a frase tem palavra de compromisso (prova, entrega, prazo, até…),
- *   +0.2 se tem hora, +0.2 se a data está no assunto.
+ *   +0.2 se tem hora, +0.2 se a data está no assunto, e -0.5 se a frase é de aviso que não é compromisso
+ *   (termos de serviço, mudança na conta, entrega e devolução de compra, desconto, newsletter).
  * Data no passado, mais de um ano à frente, em citação de resposta ("Em ... escreveu:") ou em rodapé
  * não conta, nem o dia do próprio e-mail sem uma hora depois da chegada.
  *
@@ -24,6 +25,15 @@ const COMPROMISSO = regex(
   'matr[íi]cula|pagamento|boleto|fatura|até|data limite|agendad[oa]|marcad[oa]|remarcad[oa]|adiad[oa]|' +
   'in[íi]cio|come[çc]a|termina|encerra|deadline|defesa|entrevista|agendamento|hor[áa]rio|compromisso|' +
   'lembrete|confirmad[oa]|confirma[çc][ãa]o)\\b', 'i');
+// Avisos com data que não são compromisso, tirados dos que foram aceitos e depois removidos (DECISOES.md).
+const NAO_COMPROMISSO = regex(
+  'termos de (servi[çc]o|uso)|pol[íi]tica de (privacidade|uso)|vamos (fazer )?mudan[çc]as|' +
+  'altera[çc](ão|ões) (ser[áa]|ser[ãa]o) aplicad|atualizar (alguns |os |seus )?limites|' +
+  '\\bchegar[áa]\\b|\\bentrega prevista|previs[ãa]o de entrega|a caminho|foi (enviad|despachad)[oa]|' +
+  '\\b(devolver|trocar|devolu[çc][ãa]o|reembolso)\\b|' +
+  '\\b(desconto|cupom|promo[çc][ãa]o|oferta|cashback|frete gr[áa]tis)\\b|' +
+  '\\bagenda da semana\\b|\\ba semana de \\d|\\bnewsletter\\b', 'i');
+const PENALIDADE_NAO_COMPROMISSO = 0.5;
 const RODAPE = regex('escreveu:|wrote:|enviado (em|do)|cancelar (a )?inscri|descadastr|unsubscribe|' +
   'pol[íi]tica de privacidade|todos os direitos|©', 'i');
 const CITACAO = regex('^(Em .{5,120}escreveu:|On .{5,120}wrote:|-{2,} ?Mensagem original|-{2,} ?Original Message|' +
@@ -121,8 +131,9 @@ function acharDatas(assunto, corpo, recebido) {
       if (dia < base || diasEntre(base, dia) > LIMITE_FUTURO) continue;
       const hora = _hora(frase);
       if (dia === base && (!hora || hora <= recebido.hora)) continue; // o próprio aviso, não um compromisso
-      const confianca = 0.3 + 0.4 * COMPROMISSO.test(frase) + 0.2 * Boolean(hora) + 0.2 * (origem === 'assunto');
-      const nova = { data: dia, hora, frase: fatiar(frase, 300), origem, confianca: Math.round(Math.min(confianca, 1) * 100) / 100, titulo: '' };
+      const bruta = 0.3 + 0.4 * COMPROMISSO.test(frase) + 0.2 * Boolean(hora) + 0.2 * (origem === 'assunto');
+      const confianca = Math.min(bruta, 1) - PENALIDADE_NAO_COMPROMISSO * NAO_COMPROMISSO.test(frase);
+      const nova = { data: dia, hora, frase: fatiar(frase, 300), origem, confianca: Math.round(Math.max(confianca, 0) * 100) / 100, titulo: '' };
       const atual = achadas[dia];
       if (!atual || nova.confianca > atual.confianca) {
         if (atual && !nova.hora) nova.hora = atual.hora;
