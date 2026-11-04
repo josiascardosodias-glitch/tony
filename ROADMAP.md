@@ -36,7 +36,7 @@ E-mail da faculdade por IMAP, só leitura, e o resumo do dia como notificação,
 Testes de código ao lado das falas. A conferência com a caixa real (v3.0.x) foi cancelada: a v4
 troca o IMAP pela API do Gmail.
 
-## 🚧 v4 — Assistente de e-mail (primeira versão de produção)
+## ✅ v4.0 — Assistente de e-mail (primeira versão de produção)
 
 O Tony passa a servir só como assistente de e-mail:
 
@@ -50,7 +50,14 @@ O Tony passa a servir só como assistente de e-mail:
 - **Enxugado:** saem as ferramentas das notas, a memória de conversas, o `/lembrar`, o
   `tony revisar` e o IMAP. Ficam a personalidade, as falas de teste e o resumo do dia.
 
-Desenvolvida na branch `develop`; a `main` passa a ser só produção.
+Publicada em 2026-11-03, com três contas: dois Gmails pela API e a Faccat pelo Apps Script (só os
+prazos do Classroom). A `main` passa a ser só produção; o trabalho segue na `develop`.
+
+## Depois da v4.0
+
+- Os e-mails da Faccat por um caminho com login (sem URL pública).
+- Publicar o app do Google (hoje "Em teste": a autorização vence a cada 7 dias).
+- `tony remover <id>`: tirar um evento da agenda sem apagar à mão.
 
 ## Depois
 

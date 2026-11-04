@@ -9,16 +9,16 @@ repositório do código, e aparece no vault como `My-Brain/Tony/`: um mundo pró
 próprias (o `CLAUDE.md` desta pasta) e nenhum conteúdo cruzando com as outras pastas. Este mapa é o
 ponto de entrada.
 
-> [!success] Em produção: v3.0.0 (2026-10-26), na `main`
-> Conversa, `tony testar` (placar 131/132), `tony dia` com notificação diária às 08:00.
-> Modelo: `gemma4:31b-cloud` (Ollama, plano gratuito).
+> [!success] Em produção: v4.0.0 (2026-11-03), na `main`, rodando de `~/projetos/tony-producao`
+> Assistente de e-mail: três contas (dois Gmails e a Faccat) → datas por código → agenda "Tony" no
+> Google → Telegram (`@tony_josias_bot`). Resumo do dia às 08:00. Falas 56/56, 100 testes de código.
+> Modelo: `gemma4:31b-cloud` (Ollama, plano gratuito), só nas perguntas livres.
 > Código: [github.com/josiascardosodias-glitch/tony](https://github.com/josiascardosodias-glitch/tony) (público, MIT) ·
 > local em `~/projetos/tony` · rodar com `uv run tony`.
 
-> [!important] v4 em construção na branch `develop` (desde 2026-11-03)
-> O Tony vira assistente de e-mail: datas dos e-mails → agenda "Tony" no Google → consulta pelo
-> Telegram, com o mínimo de IA. Regras de branch e de produção em [[Tony - Regras do projeto]].
-> Etapa 1 (enxugamento) pronta; Google e Telegram configurados. Próxima: etapa 2, o modelo novo.
+> [!important] Trabalho novo vai na branch `develop`
+> Regras de branch e de produção em [[Tony - Regras do projeto]]; o que vem depois, em
+> [[Tony - Próximas atualizações]].
 
 ## Projeto — o que nós planejamos (o Tony não lê)
 

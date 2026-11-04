@@ -21,7 +21,7 @@ as ideias soltas. Quando uma versão sai, ela vai para o `CHANGELOG.md` e some d
 | v2.0.0   | Ferramentas                                        | ✅ publicada (108/108) |
 | v3.0.0   | O mundo de fora                                    | ✅ publicada (131/132) |
 | ~~v3.0.x~~ | ~~E-mail testado com a caixa real (IMAP)~~     | ❌ substituída pela v4 |
-| **v4.0.0** | **Assistente de e-mail: datas → agenda → Telegram** (produção) | 🚧 em construção na `develop` |
+| v4.0.0   | Assistente de e-mail: datas → agenda → Telegram (produção) | ✅ publicada (56/56) |
 
 > [!important] A partir da v4, siga [[Tony - Regras do projeto]]
 > Trabalho só na branch `develop`; a `main` é produção e só recebe o que passou nos testes e não
@@ -254,7 +254,8 @@ Um registro de `eventos.json`:
    `/revisar` com botões, coleta de hora em hora, aviso de autorização vencida. Testado por você no
    Telegram. Junto: várias contas (`pessoal2`) e a Faccat por uma seção do TheForge (`tony.gs`).
 6. ✅ **`tony dia` novo** (2026-11-03): lista montada pelo código, sem modelo, e também no Telegram.
-7. **Produção:** testes de código + falas de teste + sem conflito → merge na `main` → `v4.0.0`.
+7. ✅ **Produção** (2026-11-03): 100 testes de código, falas 56/56, sem conflito → merge na `main` →
+   `v4.0.0`. Produção em `~/projetos/tony-producao` (bot do Telegram e resumo das 08:00).
 
 ### O que só você pode fazer
 

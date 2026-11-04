@@ -2,12 +2,13 @@
 
 Um agente de IA pessoal construído do zero em Python, para aprender como agentes funcionam por dentro.
 
-**v4 (em construção na branch `develop`): assistente de e-mail.** O Tony vai achar as datas nos seus
+**v4: assistente de e-mail.** O Tony vai achar as datas nos seus
 e-mails, gravar numa agenda "Tony" do Google Agenda e responder pelo Telegram o que está marcado, com
 o mínimo de IA: buscar, filtrar e achar datas é código; o modelo só entra no que o código não resolve.
-A primeira etapa enxugou o que veio das versões anteriores: ficaram a personalidade em arquivos de
-texto versionados, a conversa no terminal, as marcações `/bom` e `/ruim`, o resumo do dia e as falas
-de teste (placar da etapa 1: 51/52). O plano está no [ROADMAP.md](ROADMAP.md).
+Lê várias contas (Gmail pela API, a conta da faculdade pelo Apps Script), acha as datas com código,
+grava na agenda e responde pelo Telegram; o modelo só entra nas perguntas livres. Ficaram das versões
+anteriores a personalidade em arquivos versionados, a conversa no terminal e as falas de teste
+(placar da v4.0: 56/56).
 
 ## Instalar
 

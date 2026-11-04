@@ -1,9 +1,10 @@
 # Changelog
 
-## v4.0.0 — em construção (branch `develop`)
+## v4.0.0 — 2026-11-03
 
 O Tony vira assistente de e-mail: datas dos e-mails → agenda "Tony" → consulta pelo Telegram, com o
-mínimo de IA. Plano completo no `ROADMAP.md` e em `docs/Projeto/Tony - Próximas atualizações.md`.
+mínimo de IA. Primeira versão de produção: roda de `~/projetos/tony-producao` (a `main`), com o bot do
+Telegram como serviço e o resumo do dia às 08:00. Portão: 100 testes de código, falas 56/56. Plano completo no `ROADMAP.md` e em `docs/Projeto/Tony - Próximas atualizações.md`.
 
 **Etapa 5 — Telegram, várias contas e a Faccat**
 
