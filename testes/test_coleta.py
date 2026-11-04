@@ -83,7 +83,8 @@ class TestColeta(unittest.TestCase):
         self.pasta = Path(pasta.name)
         self.cfg = config.carregar()
         self.cfg["coleta"] = {**self.cfg["coleta"], "eventos": str(self.pasta / "eventos.json"),
-                              "estado": str(self.pasta / "coleta.json"), "bloqueados": str(self.pasta / "bloqueados.json")}
+                              "estado": str(self.pasta / "coleta.json"), "bloqueados": str(self.pasta / "bloqueados.json"),
+                              "contas": [{"nome": "pessoal", "email": ""}]}
         self.gmail = GmailFalso([
             mensagem("m1", "Secretaria <secretaria@faculdade.edu.br>", "Prova remarcada",
                      "A prova de Cálculo foi remarcada para 12/11, às 19h."),
@@ -149,6 +150,18 @@ class TestColeta(unittest.TestCase):
         self.assertEqual(banco["revisar"]["n1-1"]["confianca"], 0.5)  # 0.9 de compromisso com hora, menos 0.4
         self.assertIn("n2-1", banco["eventos"])
         self.assertEqual([e["data"] for e in banco["eventos"].values() if e["email"] == "n3"], ["2026-11-05"])
+
+    def test_segunda_conta_tem_prefixo_estado_proprio_e_link_da_conta(self):
+        self.cfg["coleta"]["contas"] = [{"nome": "pessoal", "email": "a@gmail.com"},
+                                        {"nome": "outra", "email": "b@gmail.com"}]
+        coletar(self.cfg, self.gmail, AGORA)
+        coletar(self.cfg, self.gmail, AGORA, conta=self.cfg["coleta"]["contas"][1])
+        eventos = self.banco()["eventos"]
+        self.assertIn("m1-1", eventos)
+        self.assertIn("outra.m1-1", eventos)
+        self.assertEqual(eventos["outra.m1-1"]["conta"], "outra")
+        self.assertEqual(eventos["outra.m1-1"]["link"], "https://mail.google.com/mail/u/?authuser=b@gmail.com#all/m1")
+        self.assertTrue((self.pasta / "coleta-outra.json").is_file())
 
     def test_proximos(self):
         coletar(self.cfg, self.gmail, AGORA)

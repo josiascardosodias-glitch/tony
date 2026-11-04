@@ -31,9 +31,15 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
 - Etapa 4: agenda "Tony" criada no Google Agenda, `tony agenda`, `aceitar` e `descartar`. Sem
   bloqueios por enquanto: o marketing cai em revisar e não vira evento.
 
+- Etapa 5: bot do Telegram (testado por você), resumo do dia sem modelo, várias contas e a Faccat por
+  uma seção do TheForge (`apps-script/tony.gs`, App da Web). Oktober Summit aceito e na agenda.
+
 **Pendente**
-- Decidir as 8 datas em revisar (o ingresso do Oktober Summit em 05/11 é o único compromisso real).
-- Etapa 5: Telegram.
+- Seu: cadastrar a segunda conta Gmail em "Usuários de teste" (o navegador travou nessa página)
+  e `uv run tony autorizar --conta pessoal2`.
+- Seu: instalar o `tony.gs` no Apps Script da Faccat (chave, escopo do Gmail, App da Web) e
+  `uv run tony faccat --url <url>`.
+- Etapa 7: produção (merge na `main`, `tony agendar` da pasta de produção).
 - Merge na `main` só no fim da v4 (ou antes, se você pedir), seguindo as regras.
 
 **Aprendi**
@@ -45,6 +51,8 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
 - Uma fala de teste nova só vale se reprovar a versão com o problema (`nao-promete`: 0/8 na antiga).
 - Testar o extrator com e-mails de verdade achou três defeitos que os 27 testes de exemplo não pegavam.
   Cada um virou teste antes da correção.
+- Teste que lê o `config.local.yaml` ou chama a API de verdade quebra quando a sua configuração muda:
+  os testes agora fixam as contas e trocam tudo de fora por falsos.
 - Com o acesso mínimo à Agenda (`calendar.app.created`), nem listar as agendas é permitido: o Tony
   guarda o id da dele. Menos acesso é mais estado para guardar.
 - O cabeçalho `List-Unsubscribe` separa newsletter de e-mail pessoal sem ler o texto: é o filtro de

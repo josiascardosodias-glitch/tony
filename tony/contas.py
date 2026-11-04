@@ -16,9 +16,20 @@ def linha(e: dict, com_id: bool = False) -> str:
     return f"{id_}{DIAS[dia.weekday()][:3]} {dia:%d/%m}{hora:6}  {e['titulo']}  ({e['remetente']}, {e['confianca']:.1f})"
 
 
-def _servico(cfg: dict, nome: str, versao: str):
+def fonte_da_conta(cfg: dict, conta: dict):
+    """De onde vêm os e-mails da conta: a API do Gmail (OAuth) ou o App da Web da Faccat."""
+    if conta.get("tipo") == "apps-script":
+        from .faccat import FonteAppsScript
+
+        return FonteAppsScript(conta)
+    from .coleta import FonteGmail
+
+    return FonteGmail(google.servico(cfg, "gmail", "v1", conta["nome"]))
+
+
+def _servico(cfg: dict, nome: str, versao: str, conta: str | None = None):
     try:
-        return google.servico(cfg, nome, versao)
+        return google.servico(cfg, nome, versao, conta)
     except google.AutorizacaoVencida as e:
         raise SystemExit(f"[autorização] {e}")
 
@@ -32,7 +43,16 @@ def _agenda(cfg: dict) -> str:
 
 def rodar(cfg: dict, args) -> None:
     if args.comando == "autorizar":
-        google.autorizar(cfg)
+        if google.conta(cfg, args.conta).get("tipo") == "apps-script":
+            raise SystemExit("essa conta usa o App da Web da Faccat, não o OAuth: rode `uv run tony faccat`")
+        google.autorizar(cfg, args.conta)
+    elif args.comando == "faccat":
+        from .faccat import configurar
+
+        contas_faccat = [c for c in google.contas(cfg) if c.get("tipo") == "apps-script"]
+        if not contas_faccat:
+            raise SystemExit("não há conta com tipo: apps-script em coleta.contas (no config.local.yaml)")
+        print(configurar(contas_faccat[0], args.url))
     elif args.comando == "bloquear":
         print(bloquear(config.caminho(cfg["coleta"]["bloqueados"]), args.alvo))
     elif args.comando == "eventos":
@@ -51,8 +71,15 @@ def rodar(cfg: dict, args) -> None:
     elif args.comando == "agenda":
         print(_agenda(cfg))
     else:
-        r = coletar(cfg, _servico(cfg, "gmail", "v1"))
-        bloqueados = f", {r['bloqueados']} bloqueado(s)" if r["bloqueados"] else ""
-        print(f"{r['emails']} e-mail(s) lido(s), {r['eventos']} evento(s) novo(s), "
-              f"{r['revisar']} para revisar{bloqueados}.")
+        for conta in google.contas(cfg):  # uma conta com a autorização vencida não para as outras
+            from .faccat import ErroDaFaccat
+
+            try:
+                r = coletar(cfg, fonte_da_conta(cfg, conta), conta=conta)
+            except (google.AutorizacaoVencida, ErroDaFaccat) as e:
+                print(f"{conta['nome']}: [conta] {e}")
+                continue
+            bloqueados = f", {r['bloqueados']} bloqueado(s)" if r["bloqueados"] else ""
+            print(f"{conta['nome']}: {r['emails']} e-mail(s) lido(s), {r['eventos']} evento(s) novo(s), "
+                  f"{r['revisar']} para revisar{bloqueados}.")
         print(_agenda(cfg))

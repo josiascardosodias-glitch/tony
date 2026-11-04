@@ -320,3 +320,25 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
    etapa 5, um sim pelo Telegram); `tony descartar <id>` joga fora de vez.
 89. **Apagar ou mudar o evento quando o e-mail muda: fora.** E-mail não é editado depois de enviado; uma
    remarcação chega como e-mail novo, com data nova. Se a data antiga ficar sobrando, você apaga na agenda.
+
+## 2026-11-03 — v4, etapa 5: Telegram, várias contas e a Faccat
+
+90. **Telegram pela API HTTP direta** (`httpx`, long polling), sem biblioteca de bot. Só responde ao
+   `TELEGRAM_CHAT_ID`; o token nunca aparece num erro (a URL é tirada da mensagem).
+91. **Pergunta de agenda é código** (`consulta.py`: hoje, amanhã, dias da semana, semana, mês, fim de
+   semana, "dia 12", datas): zero token. Só a pergunta livre vai ao modelo, com a agenda dos próximos
+   30 dias no prompt (título, data e a frase; nunca o e-mail).
+92. **O resumo do dia é código**, não mais o modelo: a lista do `eventos.json` para hoje e 7 dias,
+   mandada na notificação e no Telegram. *Por quê:* regra 3; a fala `dia-sem-email` caiu para 1/4
+   quando a personalidade passou a falar da agenda, e uma lista não precisa de modelo.
+93. **Muitas datas para revisar de uma vez (mais de 3) viram uma mensagem só**; o `/revisar` mostra cada
+   uma com os botões. *Por quê:* a primeira coleta mandaria 7 mensagens de marketing seguidas.
+94. **Várias contas:** `coleta.contas`; cada conta tem seu token (`google-token-<nome>.json`) e seu
+   estado (`coleta-<nome>.json`), e os ids das outras contas ganham o prefixo `<nome>.`. A primeira conta
+   guarda a agenda. Uma conta com problema não para as outras.
+95. **A Faccat pelo Apps Script, numa seção do TheForge** (`TheForge/apps-script/tony.gs`), a pedido
+   do usuário: o mesmo projeto do Apps Script que já tem o acesso de aluno ao Classroom, publicado como
+   App da Web com chave. Devolve os prazos do Classroom (prontos, confiança 1) e os e-mails da Faccat; o
+   filtro e os bloqueados vão na busca, e as datas dos e-mails são achadas no PC. *Por quê:* conta de
+   faculdade costuma bloquear apps de fora no OAuth, e esse caminho já funciona. O Tony não lê nenhum
+   arquivo do TheForge (exceção registrada no `CLAUDE.md` da raiz do My-Brain).

@@ -250,9 +250,10 @@ Um registro de `eventos.json`:
 4. ✅ **Agenda "Tony"** (2026-11-03). Criada no seu Google Agenda; `tony agenda`, `aceitar` e
    `descartar`; sem duplicar em três camadas. Apagar quando o e-mail muda ficou de fora (e-mail não é
    editado; remarcação chega como e-mail novo). 66 testes de código.
-5. **Telegram.** Bot por long polling num serviço do systemd, travado no seu `chat_id`.
-   Comandos `/hoje`, `/semana`, `/proximos` e perguntas livres.
-6. **`tony dia` novo**, lendo do `eventos.json` e mandando também no Telegram.
+5. ✅ **Telegram** (2026-11-03). `tony telegram`: perguntas de agenda pelo código, livres pelo modelo,
+   `/revisar` com botões, coleta de hora em hora, aviso de autorização vencida. Testado por você no
+   Telegram. Junto: várias contas (`pessoal2`) e a Faccat por uma seção do TheForge (`tony.gs`).
+6. ✅ **`tony dia` novo** (2026-11-03): lista montada pelo código, sem modelo, e também no Telegram.
 7. **Produção:** testes de código + falas de teste + sem conflito → merge na `main` → `v4.0.0`.
 
 ### O que só você pode fazer

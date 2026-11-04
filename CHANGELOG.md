@@ -5,6 +5,21 @@
 O Tony vira assistente de e-mail: datas dos e-mails → agenda "Tony" → consulta pelo Telegram, com o
 mínimo de IA. Plano completo no `ROADMAP.md` e em `docs/Projeto/Tony - Próximas atualizações.md`.
 
+**Etapa 5 — Telegram, várias contas e a Faccat**
+
+- `tony telegram`: o bot (só responde ao seu chat) e a coleta de hora em hora no mesmo processo.
+  Perguntas de agenda respondidas pelo código; perguntas livres vão ao modelo com a agenda no prompt.
+  `/hoje`, `/semana`, `/proximos`, `/revisar` (botões Aceitar e Descartar), `/coletar`, `/nova`. Avisa
+  quando a autorização do Google vence. `tony agendar` instala também o serviço `tony-telegram`.
+- `tony dia`: o resumo agora é montado pelo código (zero token) e vai também para o Telegram.
+- Várias contas em `coleta.contas`; `tony autorizar --conta <nome>`.
+- Conta Faccat pelo App da Web do Apps Script (`TheForge/apps-script/tony.gs`): prazos do Classroom e
+  e-mails; `tony faccat` cria a chave e guarda a URL.
+- Personalidade: é o assistente de e-mail e agenda; recebe a agenda e não inventa compromisso.
+  Falas novas `agenda-usa-o-que-tem` e `agenda-nao-inventa`; saiu `dia-sem-email` (o dia é código).
+  Placar: 56/56 nas 14 falas.
+- Testes de código: 100.
+
 **Etapa 4 — a agenda "Tony"**
 
 - `tony agenda`: cria a agenda "Tony" no Google Agenda (uma vez; o id fica em `dados/agenda.json`) e

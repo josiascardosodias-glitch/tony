@@ -25,20 +25,23 @@ RODADAS_DE_FERRAMENTA = 5  # numa resposta, no máximo 5 idas e voltas com ferra
 
 class Conversa:
     def __init__(self, cliente: Cliente, limite: int, personalidade: str, inteligencia: str,
-                 ferramentas: dict | None = None):
+                 ferramentas: dict | None = None, agenda: str = ""):
         self.cliente = cliente
         self.ferramentas = ferramentas or {}  # {nome: função}; vazio = só conversa
         self.limite = limite
         self.mensagens: list[dict] = []  # só usuário e Tony; o prompt de sistema é montado à parte
         self.resumo = ""                 # o começo desta conversa, quando ela fica longa
-        self._fixo = self._parte_fixa(personalidade, inteligencia)
+        self._fixo = self._parte_fixa(personalidade, inteligencia, agenda)
 
     @staticmethod
-    def _parte_fixa(personalidade: str, inteligencia: str) -> str:
+    def _parte_fixa(personalidade: str, inteligencia: str, agenda: str = "") -> str:
         agora = datetime.now()
         partes = [personalidade, f"# Agora\n\n{DIAS[agora.weekday()]}, {agora:%d/%m/%Y, %H:%M}."]
         if inteligencia:
             partes.append(f"# O que você sabe sobre quem está conversando com você\n\n{inteligencia}")
+        if agenda:
+            partes.append(f"# A agenda dela nos próximos 30 dias\n\n{agenda}\n\n(É o que o código achou nos "
+                          "e-mails dela. Você não lê os e-mails: o que não está aqui, você não sabe.)")
         return "\n\n".join(partes)
 
     def prompt_de_sistema(self) -> str:

@@ -53,10 +53,13 @@ class Mensagem:
     texto: str
     trecho: str      # o snippet que o próprio Gmail entrega
     convites: list[str] = field(default_factory=list)  # o texto de cada .ics
+    email_da_conta: str = ""  # para o link abrir na conta certa quando há mais de uma
     em_massa: bool = False  # tem List-Unsubscribe ou Precedence: bulk (newsletter, marketing, alerta de vaga)
 
     @property
     def link(self) -> str:
+        if self.email_da_conta:
+            return f"https://mail.google.com/mail/u/?authuser={self.email_da_conta}#all/{self.id}"
         return f"https://mail.google.com/mail/u/0/#all/{self.id}"
 
 
@@ -166,12 +169,12 @@ def titulo(assunto: str) -> str:
     return limpo or "(sem assunto)"
 
 
-def evento(msg: Mensagem, data: Data, n: int, conta: str) -> dict:
+def evento(msg: Mensagem, data: Data, n: int, conta: str, prefixo: str = "") -> dict:
     descricao = data.frase
     if msg.trecho and msg.trecho not in data.frase:
         descricao += f"\n\n{msg.trecho}"
     return {
-        "id": f"{msg.id}-{n}", "email": msg.id, "conta": conta, "remetente": msg.de, "nome": msg.nome,
+        "id": f"{prefixo}{msg.id}-{n}", "email": msg.id, "conta": conta, "remetente": msg.de, "nome": msg.nome,
         "titulo": data.titulo or titulo(msg.assunto), "data": data.data.isoformat(), "hora": data.hora,
         "descricao": descricao, "origem": data.origem, "confianca": data.confianca, "link": msg.link,
         "recebido": msg.recebido.isoformat(timespec="seconds"),
@@ -180,7 +183,7 @@ def evento(msg: Mensagem, data: Data, n: int, conta: str) -> dict:
 
 
 def processar(msg: Mensagem, conta: str, aceitar: float, revisar: float,
-              hoje: date | None = None) -> tuple[list[dict], list[dict]]:
+              hoje: date | None = None, prefixo: str = "") -> tuple[list[dict], list[dict]]:
     """(eventos, para revisar) de uma mensagem. Data antes de `hoje` não interessa à agenda."""
     datas = achar_datas(msg.assunto, msg.texto, msg.recebido)
     if msg.em_massa:
@@ -197,9 +200,9 @@ def processar(msg: Mensagem, conta: str, aceitar: float, revisar: float,
         if data.data < hoje:
             continue
         if data.confianca >= aceitar:
-            aceitos.append(evento(msg, data, n, conta))
+            aceitos.append(evento(msg, data, n, conta, prefixo))
         elif data.confianca >= revisar:
-            duvidosos.append(evento(msg, data, n, conta))
+            duvidosos.append(evento(msg, data, n, conta, prefixo))
     return aceitos, duvidosos
 
 
@@ -217,11 +220,41 @@ def salvar_json(arquivo: Path, dados: dict) -> None:
     temporario.replace(arquivo)
 
 
-def coletar(cfg: dict, servico, agora: datetime | None = None) -> dict:
-    """Uma rodada da coleta. Devolve o que aconteceu: {"emails", "eventos", "revisar", "bloqueados"}."""
+def arquivo_de_estado(cfg: dict, conta: dict) -> Path:
+    """O estado da primeira conta é o `coleta.estado`; o das outras, `coleta-<nome>.json` ao lado."""
+    base = config.caminho(cfg["coleta"]["estado"])
+    primeira = cfg["coleta"]["contas"][0]["nome"]
+    return base if conta["nome"] == primeira else base.with_name(f"{base.stem}-{conta['nome']}{base.suffix}")
+
+
+class FonteGmail:
+    """Os e-mails pela API do Gmail: a busca roda lá, e só os ids que o Tony não viu são baixados."""
+
+    def __init__(self, servico):
+        self.servico = servico
+
+    def mensagens(self, depois_de: datetime, filtro: str, vistos: set):
+        for id_ in buscar(self.servico, f"after:{int(depois_de.timestamp())} {filtro}".strip()):
+            if id_ not in vistos:
+                yield ler_mensagem(self.servico, executar(self.servico.users().messages().get(
+                    userId="me", id=id_, format="full")))
+
+    def prazos(self) -> list[dict]:
+        return []
+
+
+def coletar(cfg: dict, fonte, agora: datetime | None = None, conta: dict | None = None) -> dict:
+    """Uma rodada da coleta numa conta (sem conta: a primeira). `fonte` é uma `FonteGmail` (ou o serviço
+    do Gmail direto) ou a `FonteAppsScript` da Faccat. Devolve o que aconteceu:
+    {"emails", "eventos", "revisar", "bloqueados"}."""
+    if not hasattr(fonte, "prazos"):  # o serviço do Gmail direto
+        fonte = FonteGmail(fonte)
     c = cfg["coleta"]
+    conta = conta or c["contas"][0]
+    primeira = conta["nome"] == c["contas"][0]["nome"]
+    prefixo = "" if primeira else f"{conta['nome']}."  # ids do Gmail são por conta: o prefixo evita colisão
     agora = agora or datetime.now().astimezone()
-    arquivo_eventos, arquivo_estado = config.caminho(c["eventos"]), config.caminho(c["estado"])
+    arquivo_eventos, arquivo_estado = config.caminho(c["eventos"]), arquivo_de_estado(cfg, conta)
     banco = ler_json(arquivo_eventos, {"eventos": {}, "revisar": {}})
     estado = ler_json(arquivo_estado, {"ultima": None, "vistos": []})
     bloqueados = ler_bloqueados(config.caminho(c["bloqueados"]))
@@ -229,21 +262,30 @@ def coletar(cfg: dict, servico, agora: datetime | None = None) -> dict:
     # Uma hora de folga para trás: o `after:` do Gmail arredonda, e e-mail repetido é barrado pelos `vistos`.
     depois_de = (datetime.fromisoformat(estado["ultima"]) - timedelta(hours=1) if estado["ultima"]
                  else agora - timedelta(days=c["primeira_vez_dias"]))
+    filtro = consulta(c["filtro"], bloqueados, depois_de).split(" ", 1)[1] if (c["filtro"] or any(bloqueados.values())) else ""
     vistos = set(estado["vistos"])
     resumo = {"emails": 0, "eventos": 0, "revisar": 0, "bloqueados": 0}
-    for id_ in buscar(servico, consulta(c["filtro"], bloqueados, depois_de)):
-        if id_ in vistos:
+    if hasattr(fonte, "preparar"):  # a Faccat traz prazos e e-mails numa chamada só
+        fonte.preparar(depois_de, filtro)
+    for prazo in fonte.prazos():  # prazos do Classroom: a data vem pronta, confiança 1
+        evento_do_prazo = {**prazo, "id": f"{prefixo}{prazo['id']}", "conta": conta["nome"],
+                           "criado_em": agora.isoformat(timespec="seconds"), "evento_agenda": None}
+        if evento_do_prazo["id"] not in banco["eventos"] and evento_do_prazo["data"] >= agora.date().isoformat():
+            banco["eventos"][evento_do_prazo["id"]] = evento_do_prazo
+            resumo["eventos"] += 1
+    for msg in fonte.mensagens(depois_de, filtro, vistos):
+        if msg.id in vistos:
             continue
-        bruta = executar(servico.users().messages().get(userId="me", id=id_, format="full"))
-        msg = ler_mensagem(servico, bruta)
-        estado["vistos"].append(id_)
-        vistos.add(id_)
+        if not primeira:
+            msg.email_da_conta = conta.get("email", "")
+        estado["vistos"].append(msg.id)
+        vistos.add(msg.id)
         if bloqueado(msg.de, bloqueados):
             resumo["bloqueados"] += 1
             continue
         resumo["emails"] += 1
-        aceitos, duvidosos = processar(msg, c["conta"], c["aceitar_a_partir_de"], c["revisar_a_partir_de"],
-                                       agora.date())
+        aceitos, duvidosos = processar(msg, conta["nome"], c["aceitar_a_partir_de"], c["revisar_a_partir_de"],
+                                       agora.date(), prefixo)
         for e in aceitos:
             banco["eventos"].setdefault(e["id"], e)
         for e in duvidosos:

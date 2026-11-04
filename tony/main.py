@@ -126,13 +126,17 @@ def main() -> None:
     dia.add_argument("--notificar", action="store_true", help="também mostra como notificação na área de trabalho")
     agendar = comandos.add_parser("agendar", help="instala um timer do systemd que roda `tony dia --notificar` todo dia")
     agendar.add_argument("--hora", default="08:00", help="HH:MM (padrão 08:00)")
-    comandos.add_parser("autorizar", help="abre o navegador para autorizar o Tony no Gmail e na Agenda")
+    autorizar = comandos.add_parser("autorizar", help="abre o navegador para autorizar o Tony no Gmail e na Agenda")
+    autorizar.add_argument("--conta", help="o nome da conta em coleta.contas (padrão: a primeira)")
     comandos.add_parser("coletar", help="busca os e-mails novos e guarda as datas em eventos.json (sem IA)")
     eventos = comandos.add_parser("eventos", help="mostra as datas guardadas (sem IA)")
     eventos.add_argument("--dias", type=int, default=30, help="quantos dias à frente (padrão 30)")
     eventos.add_argument("--revisar", action="store_true", help="mostra as datas de confiança média, para decidir")
     bloquear = comandos.add_parser("bloquear", help="nunca mais lê e-mails de um endereço (x@y.com) ou domínio (@y.com)")
     bloquear.add_argument("alvo")
+    faccat = comandos.add_parser("faccat", help="configura a conta da Faccat (App da Web do Apps Script)")
+    faccat.add_argument("--url", help="a URL /exec do App da Web, depois de implantar")
+    comandos.add_parser("telegram", help="o Tony no Telegram, com a coleta de hora em hora")
     comandos.add_parser("agenda", help="leva os eventos para a agenda \"Tony\" do Google (o coletar já faz isso)")
     aceitar = comandos.add_parser("aceitar", help="uma data de revisar vira evento (e vai para a agenda)")
     aceitar.add_argument("id")
@@ -146,10 +150,14 @@ def main() -> None:
             from . import dia
 
             dia.dia(cfg, args.notificar) if args.comando == "dia" else dia.agendar(args.hora)
-        elif args.comando in ("autorizar", "coletar", "eventos", "bloquear", "agenda", "aceitar", "descartar"):
+        elif args.comando in ("autorizar", "coletar", "eventos", "bloquear", "agenda", "aceitar", "descartar", "faccat"):
             from . import contas
 
             contas.rodar(cfg, args)
+        elif args.comando == "telegram":
+            from .telegram import rodar as telegram
+
+            telegram(cfg)
         elif args.comando == "testar":
             from .testes import rodar
 

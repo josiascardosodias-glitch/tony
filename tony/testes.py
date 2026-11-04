@@ -3,7 +3,8 @@
 Cada fala roda várias vezes (a resposta varia a cada vez), sempre numa conversa nova e com a
 Inteligência de exemplo — assim o placar só muda quando a personalidade ou o modelo mudam.
 
-`tarefa: dia` julga o resumo do dia em vez de uma resposta. Ferramentas: `chama: [a, b]` exige que
+`agenda` (lista de {data, hora, titulo,
+descricao}, com datas como `{hoje+5}`) é o que está marcado na fala; sem ela, a agenda está vazia. Ferramentas: `chama: [a, b]` exige que
 ele chame ao menos uma delas; `chama: []`, que não chame nenhuma, com a confirmação "sim" (ou "não",
 com `confirma: false`); `lista: true`, que toda linha comece com "- " — conferidos no código, sem
 juiz. Em qualquer texto, `{hoje+3}` vira a data de daqui a 3 dias (dd/mm/aaaa), para os testes não
@@ -19,8 +20,8 @@ import yaml
 
 from . import config, ferramentas
 from .cliente import Chamada, Cliente
-from .conversa import DIAS, Conversa
-from .dia import pedido_do_dia
+from .consulta import para_o_modelo
+from .conversa import Conversa
 from .memoria import carregar_personalidade, ler_inteligencia, versao_personalidade
 
 ESQUEMA_VEREDITO = {
@@ -51,6 +52,13 @@ def _com_datas(valor):
     if isinstance(valor, dict):
         return {k: _com_datas(v) for k, v in valor.items()}
     return valor
+
+
+def agenda_da_fala(item: dict) -> str:
+    """A `agenda` da fala no formato do `eventos.json` (datas dd/mm/aaaa viram aaaa-mm-dd)."""
+    eventos = [{**e, "data": datetime.strptime(e["data"], "%d/%m/%Y").date().isoformat(), "hora": e.get("hora")}
+               for e in item.get("agenda", [])]
+    return para_o_modelo(eventos, datetime.now().date())
 
 
 def carregar_falas(arquivo: Path, ids: list[str]) -> list[dict]:
@@ -98,18 +106,15 @@ def produzir(item: dict, conversa: Conversa) -> tuple[str, str, list]:
         conversa.mensagens += [{"role": "user", "content": troca["pessoa"]},
                                {"role": "assistant", "content": troca["tony"]}]
     tarefa = item.get("tarefa", "fala")
-    if tarefa == "dia":
-        hoje = datetime.now()
-        resumo = "".join(p for p in conversa.responder(pedido_do_dia(hoje)) if isinstance(p, str))
-        return (f"Hoje é {DIAS[hoje.weekday()]}, {hoje:%d/%m/%Y}. O Tony escreveu sozinho a notificação "
-                "que abre o dia da pessoa, só com as notas que tem sobre ela (ele não lê e-mail)."), resumo.strip(), []
     if tarefa == "fala":
         pedacos, chamadas = [], []
         for parte in conversa.responder(item["fala"]):
             (chamadas if isinstance(parte, Chamada) else pedacos).append(parte)
         consultas = "".join(f"O Tony chamou {c.nome}({c.argumentos}) e recebeu:\n{c.resultado}\n\n" for c in chamadas)
-        return f"Fala da pessoa:\n{item['fala']}\n\n{consultas}".strip(), "".join(pedacos), chamadas
-    raise SystemExit(f"tarefa desconhecida na fala {item['id']}: {tarefa} (use fala ou dia)")
+        agenda = agenda_da_fala(item)
+        return (f"Agenda que o Tony tinha:\n{agenda}\n\nFala da pessoa:\n{item['fala']}\n\n{consultas}").strip(), \
+            "".join(pedacos), chamadas
+    raise SystemExit(f"tarefa desconhecida na fala {item['id']}: {tarefa} (só existe fala; o resumo do dia é código)")
 
 
 def ultimos_placares(cfg: dict) -> dict:
@@ -147,7 +152,9 @@ def rodar(cfg: dict, ids: list[str] = (), vezes: int | None = None, salvar: bool
         ferramentas.ambiente.confirmar = lambda pergunta, sim=item.get("confirma", True): sim
         todas = ferramentas.descobrir()
         for _ in range(n):
-            conversa = Conversa(tony, cfg["contexto"]["limite"], personalidade, inteligencia, ferramentas=todas)
+            agenda = agenda_da_fala(item)
+            conversa = Conversa(tony, cfg["contexto"]["limite"], personalidade, inteligencia, ferramentas=todas,
+                                agenda=agenda)
             situacao, resposta, chamadas = produzir(item, conversa)
             erro = conferir_no_codigo(item, resposta, chamadas)
             if erro or "espera" not in item:  # chamada errada já reprova: não gasta o juiz

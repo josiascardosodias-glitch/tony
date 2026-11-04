@@ -141,6 +141,34 @@ class TestTimer(unittest.TestCase):
         self.assertIn("WorkingDirectory=/x/tony-producao", servico)
         self.assertIn("notify-send", arquivos["tony-dia-falhou.service"])
         self.assertIn("OnCalendar=*-*-* 08:00:00", arquivos["tony-dia.timer"])
+        self.assertIn("ExecStart=/usr/bin/uv run tony telegram", arquivos["tony-telegram.service"])
+        self.assertIn("Restart=always", arquivos["tony-telegram.service"])
+
+
+class TestResumoDoDia(unittest.TestCase):
+    def test_hoje_proximos_e_revisar_sem_modelo(self):
+        from tony.dia import resumo_do_dia
+        with tempfile.TemporaryDirectory() as pasta:
+            arquivo = Path(pasta) / "eventos.json"
+            ev = lambda data, titulo, hora=None: {"data": data, "hora": hora, "titulo": titulo, "descricao": "frase"}
+            arquivo.write_text(json.dumps({"eventos": {"a": ev("2026-11-03", "Consulta", "16:00"),
+                                                       "b": ev("2026-11-05", "Summit", "08:30"),
+                                                       "c": ev("2026-11-20", "Longe")},
+                                           "revisar": {"r": ev("2026-11-06", "Talvez")}}))
+            cfg = config.carregar()
+            cfg["coleta"] = {**cfg["coleta"], "eventos": str(arquivo)}
+            texto = resumo_do_dia(cfg, datetime(2026, 11, 3).date())
+        self.assertTrue(texto.startswith("Hoje:\n• hoje, 16:00 — Consulta"))
+        self.assertIn("Nos próximos 7 dias:\n• qui 05/11, 08:30 — Summit", texto)
+        self.assertNotIn("Longe", texto)
+        self.assertIn("1 data(s) esperando você decidir", texto)
+
+    def test_nada(self):
+        from tony.dia import resumo_do_dia
+        cfg = config.carregar()
+        cfg["coleta"] = {**cfg["coleta"], "eventos": "/nao/existe.json"}
+        self.assertEqual(resumo_do_dia(cfg, datetime(2026, 11, 3).date()),
+                         "Nada marcado para hoje nem para os próximos 7 dias.")
 
 
 class TestFalas(unittest.TestCase):
@@ -150,7 +178,7 @@ class TestFalas(unittest.TestCase):
         self.assertEqual(len(ids), len(set(ids)))
         for fala in falas:
             self.assertTrue("espera" in fala or "chama" in fala, fala["id"])
-            self.assertTrue("fala" in fala or fala.get("tarefa") == "dia", fala["id"])
+            self.assertIn("fala", fala, fala["id"])
 
 
 if __name__ == "__main__":

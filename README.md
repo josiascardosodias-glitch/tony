@@ -66,6 +66,24 @@ Cada data recebe uma confiança de 0 a 1 (`tony/datas.py`): palavra de compromis
 assunto somam; e-mail em massa (com link de descadastro) perde. A partir de 0,6 vira evento; de 0,3 a
 0,6 fica para revisar. Os limites estão em `coleta` no `config.exemplo.yaml`.
 
+## Telegram (v4)
+
+```bash
+uv run tony telegram     # o bot e a coleta de hora em hora (o `tony agendar` instala como serviço)
+```
+
+Pergunte do jeito que quiser: "o que tenho amanhã?", "e sexta?", "semana que vem". Perguntas de agenda
+são respondidas pelo código, sem IA; as outras vão ao modelo, que recebe só a agenda (nunca o e-mail).
+Comandos: `/hoje`, `/semana`, `/proximos`, `/revisar` (com botões), `/coletar` e `/nova`. Ele só
+responde ao `TELEGRAM_CHAT_ID` de `~/.config/tony/assistente.env`.
+
+## Várias contas e a Faccat
+
+`coleta.contas` no `config.local.yaml` lista as caixas. Conta Gmail: `uv run tony autorizar --conta
+<nome>` (no modo de teste, cada conta precisa estar em "Usuários de teste" no Google Cloud). Conta de
+Google Workspace que bloqueia apps de fora (a da faculdade): `tipo: apps-script`, com o App da Web de
+`TheForge/apps-script/tony.gs` e `uv run tony faccat` para a chave e a URL.
+
 ## Usar
 
 ```bash
@@ -167,7 +185,10 @@ tony/
     ├── coleta.py         e-mails → datas → eventos.json, bloqueados
     ├── datas.py          o extrator de datas (sem IA)
     ├── agenda.py         a agenda "Tony" no Google Agenda, sem duplicar
-    ├── contas.py         os comandos autorizar, coletar, eventos e bloquear
+    ├── contas.py         os comandos autorizar, coletar, eventos, bloquear, agenda, aceitar e faccat
+    ├── consulta.py       perguntas de agenda respondidas sem IA
+    ├── telegram.py       o bot do Telegram e a coleta de hora em hora
+    ├── faccat.py         a conta da Faccat pelo App da Web do Apps Script
     ├── registro.py       log da sessão
     ├── testes.py         falas de teste e juiz
     └── config.py         leitura da configuração
