@@ -77,7 +77,8 @@ uv run tony telegram     # o bot e a coleta de hora em hora (o `tony agendar` in
 
 Pergunte do jeito que quiser: "o que tenho amanhã?", "e sexta?", "semana que vem". Perguntas de agenda
 são respondidas pelo código, sem IA; as outras vão ao modelo, que recebe só a agenda (nunca o e-mail).
-Comandos: `/hoje`, `/semana`, `/proximos`, `/revisar` (com botões), `/coletar` e `/nova`. Ele só
+Comandos: `/hoje`, `/semana`, `/proximos`, `/revisar` (com botões), `/remover` (tira da agenda um
+compromisso já aceito, com confirmação), `/coletar` e `/nova`. Ele só
 responde ao `TELEGRAM_CHAT_ID` de `~/.config/tony/assistente.env`.
 
 ## Várias contas e a Faccat

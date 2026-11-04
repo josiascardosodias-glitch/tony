@@ -1,7 +1,20 @@
 # Changelog
 
-## Na `develop` (próxima versão)
+## v4.1.0 — 2026-11-04
 
+Tirar da agenda o que você aceitou e se arrependeu, e o mesmo compromisso uma vez só.
+
+- **`/remover` no Telegram:** a lista dos compromissos de hoje em diante, um botão cada; o toque
+  pergunta "Tiro da agenda?" e só o "Sim, tirar" apaga. O aviso "Pus na agenda" e a mensagem de um
+  aceite também trazem o botão 🗑. O compromisso removido não volta, nem por outro e-mail.
+- **O mesmo compromisso entra uma vez só:** mesmo remetente, mesmo dia e mesma hora (o convite e o
+  ingresso do mesmo evento, o mesmo aviso nas duas contas) é um compromisso, com um aviso só. A regra
+  (`coleta.chave`) vale já na coleta, em `revisar`, no aceite pelo botão e na agenda; antes valia só
+  na agenda, e a lista do Telegram e o resumo do dia mostravam os dois. O `eventos.json` antigo é
+  arrumado na primeira coleta (fica o que já está no Google; um repetido que tinha ido para o Google
+  sozinho é apagado lá). Prazos do Classroom comparam também o título (todos têm o mesmo remetente).
+- Descartar ou remover guarda o compromisso em `chaves_fora`: outro e-mail sobre ele não entra.
+- Testes de código: 114.
 - `tony remover <id>`: apaga o evento da agenda "Tony" e do `eventos.json` e guarda o id em
   `removidos`, para a coleta não trazer de volta (inclusive os prazos do Classroom, que voltavam a cada
   coleta). Leva junto os eventos do mesmo compromisso (confirmação e lembrete) e não quebra se o

@@ -345,3 +345,17 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
    caminho com login (App da Web restrito a contas Google, ou OAuth se a Faccat permitir). *Por quê:* conta de
    faculdade costuma bloquear apps de fora no OAuth, e esse caminho já funciona. O Tony não lê nenhum
    arquivo do TheForge (exceção registrada no `CLAUDE.md` da raiz do My-Brain).
+
+## 2026-11-04 — v4.1: remover pelo Telegram e um compromisso por vez
+
+96. **O mesmo compromisso é remetente + dia + hora, e a regra vale na coleta.** *Por quê:* a mesma
+   regra já existia na agenda (decisão 86), mas a lista do Telegram, o resumo do dia e os avisos liam
+   o `eventos.json`, onde os dois e-mails continuavam. Comparar texto ou título com IA ficou de fora:
+   o convite e o ingresso têm títulos diferentes ("Seu ingresso…" e "Pedido confirmado…"), e a chave
+   resolve sem token. Nos prazos do Classroom o título entra na chave, porque todos vêm do mesmo
+   "remetente" e muitos vencem às 23:59.
+97. **Remover pede confirmação; descartar não.** *Por quê:* remover apaga no Google e não deixa voltar,
+   e a lista do `/remover` tem vários botões próximos; descartar é a resposta a uma pergunta sobre
+   uma data só.
+98. **Descartado e removido guardam a chave (`chaves_fora`), não só o id.** *Por quê:* o lembrete de um
+   compromisso que você tirou é outro e-mail, com outro id, e traria ele de volta.

@@ -98,7 +98,7 @@ class TestColeta(unittest.TestCase):
 
     def test_eventos_revisar_e_estado(self):
         r = coletar(self.cfg, self.gmail, AGORA)
-        self.assertEqual(r, {"emails": 4, "eventos": 3, "revisar": 1, "bloqueados": 0})
+        self.assertEqual(r, {"emails": 4, "eventos": 3, "revisar": 1, "bloqueados": 0, "repetidos": 0})
         eventos = self.banco()["eventos"]
         prova = eventos["m1-1"]
         self.assertEqual((prova["titulo"], prova["data"], prova["hora"]), ("Prova remarcada", "2026-11-12", "19:00"))
@@ -155,13 +155,55 @@ class TestColeta(unittest.TestCase):
         self.cfg["coleta"]["contas"] = [{"nome": "pessoal", "email": "a@gmail.com"},
                                         {"nome": "outra", "email": "b@gmail.com"}]
         coletar(self.cfg, self.gmail, AGORA)
+        self.gmail.mensagens["m9"] = mensagem("m9", "Clínica <c@clinica.com>", "Consulta", "Sua consulta é 20/11 às 9h.")
         coletar(self.cfg, self.gmail, AGORA, conta=self.cfg["coleta"]["contas"][1])
-        eventos = self.banco()["eventos"]
+        banco = self.banco()
+        eventos = banco["eventos"]
         self.assertIn("m1-1", eventos)
-        self.assertIn("outra.m1-1", eventos)
-        self.assertEqual(eventos["outra.m1-1"]["conta"], "outra")
-        self.assertEqual(eventos["outra.m1-1"]["link"], "https://mail.google.com/mail/u/?authuser=b@gmail.com#all/m1")
+        self.assertNotIn("outra.m1-1", eventos)  # o mesmo e-mail nas duas contas: o mesmo compromisso
+        self.assertIn("outra.m1-1", banco["repetidos"])
+        self.assertIn("outra.m9-1", eventos)
+        self.assertEqual(eventos["outra.m9-1"]["conta"], "outra")
+        self.assertEqual(eventos["outra.m9-1"]["link"], "https://mail.google.com/mail/u/?authuser=b@gmail.com#all/m9")
         self.assertTrue((self.pasta / "coleta-outra.json").is_file())
+
+    def test_mesmo_remetente_dia_e_hora_entra_uma_vez(self):
+        """O convite e o ingresso do mesmo evento: dois e-mails, um compromisso, um aviso."""
+        self.gmail = GmailFalso([
+            mensagem("c1", "Eventos <contato@eventos.com>", "Seu ingresso para o Summit", "O evento será dia 05/11/2026 às 08:30."),
+            mensagem("c2", "Eventos <contato@eventos.com>", "Pedido confirmado", "O evento será dia 05/11/2026 às 08:30."),
+            mensagem("c3", "Eventos <contato@eventos.com>", "Outro dia", "O evento será dia 06/11/2026 às 08:30."),
+            mensagem("c4", "Outra <x@outra.com>", "Mesma hora, outro remetente", "O evento será dia 05/11/2026 às 08:30."),
+        ])
+        r = coletar(self.cfg, self.gmail, AGORA)
+        banco = self.banco()
+        self.assertEqual(sorted(banco["eventos"]), ["c1-1", "c3-1", "c4-1"])
+        self.assertEqual((r["eventos"], r["repetidos"], banco["repetidos"]), (3, 1, ["c2-1"]))
+
+    def test_eventos_json_antigo_com_repetidos_e_arrumado(self):
+        coletar(self.cfg, self.gmail, AGORA)
+        banco = self.banco()
+        copia = dict(banco["eventos"]["m1-1"], id="velho-1", recebido="2026-11-01T10:00:00-03:00", evento_agenda="ev-9")
+        banco["eventos"]["velho-1"] = copia
+        banco["revisar"]["duvida-1"] = dict(copia, id="duvida-1", evento_agenda=None)
+        (self.pasta / "eventos.json").write_text(json.dumps(banco))
+        self.assertEqual(coletar(self.cfg, self.gmail, AGORA)["repetidos"], 2)
+        banco = self.banco()
+        self.assertIn("velho-1", banco["eventos"])  # fica o que já está no Google
+        self.assertNotIn("m1-1", banco["eventos"])
+        self.assertNotIn("duvida-1", banco["revisar"])  # a dúvida sobre o que já está na agenda sai
+        self.assertEqual(banco.get("apagar_no_google", []), [])  # o m1 não tinha ido para o Google
+
+    def test_compromisso_removido_nao_volta_por_outro_email(self):
+        coletar(self.cfg, self.gmail, AGORA)
+        banco = self.banco()
+        banco["eventos"].pop("m1-1")
+        banco["chaves_fora"] = [["secretaria@faculdade.edu.br", "2026-11-12", "19:00"]]
+        (self.pasta / "eventos.json").write_text(json.dumps(banco))
+        self.gmail.mensagens["m5"] = mensagem("m5", "Secretaria <secretaria@faculdade.edu.br>", "Lembrete",
+                                              "Lembrete: prova dia 12/11, às 19h.")
+        coletar(self.cfg, self.gmail, AGORA)
+        self.assertNotIn("m5-1", self.banco()["eventos"])
 
     def test_proximos(self):
         coletar(self.cfg, self.gmail, AGORA)

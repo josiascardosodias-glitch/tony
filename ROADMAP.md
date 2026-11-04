@@ -57,7 +57,9 @@ prazos do Classroom). A `main` passa a ser só produção; o trabalho segue na `
 
 - Os e-mails da Faccat por um caminho com login (sem URL pública).
 - Publicar o app do Google (hoje "Em teste": a autorização vence a cada 7 dias).
-- ✅ `tony remover <id>` (na `develop`): tirar um evento da agenda sem apagar à mão.
+- ✅ v4.1.0: `tony remover <id>` e `/remover` no Telegram (tirar um compromisso já aceito); o mesmo
+  compromisso (remetente, dia e hora) entra uma vez só.
+- Rodar 24 horas: hoje o Tony para quando o notebook suspende (tampa fechada).
 
 ## Depois
 
