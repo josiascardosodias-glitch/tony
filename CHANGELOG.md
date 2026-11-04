@@ -13,8 +13,8 @@ mínimo de IA. Plano completo no `ROADMAP.md` e em `docs/Projeto/Tony - Próxima
   quando a autorização do Google vence. `tony agendar` instala também o serviço `tony-telegram`.
 - `tony dia`: o resumo agora é montado pelo código (zero token) e vai também para o Telegram.
 - Várias contas em `coleta.contas`; `tony autorizar --conta <nome>`.
-- Conta Faccat pelo App da Web do Apps Script (`TheForge/apps-script/tony.gs`): prazos do Classroom e
-  e-mails; `tony faccat` cria a chave e guarda a URL.
+- Conta Faccat pelo App da Web do Apps Script (`TheForge/apps-script/tony.gs`): só os prazos do
+  Classroom (os e-mails da Faccat ficam para um caminho com login); `tony faccat` cria a chave e guarda a URL.
 - Personalidade: é o assistente de e-mail e agenda; recebe a agenda e não inventa compromisso.
   Falas novas `agenda-usa-o-que-tem` e `agenda-nao-inventa`; saiu `dia-sem-email` (o dia é código).
   Placar: 56/56 nas 14 falas.

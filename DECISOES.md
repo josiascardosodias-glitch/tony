@@ -338,7 +338,10 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
    guarda a agenda. Uma conta com problema não para as outras.
 95. **A Faccat pelo Apps Script, numa seção do TheForge** (`TheForge/apps-script/tony.gs`), a pedido
    do usuário: o mesmo projeto do Apps Script que já tem o acesso de aluno ao Classroom, publicado como
-   App da Web com chave. Devolve os prazos do Classroom (prontos, confiança 1) e os e-mails da Faccat; o
-   filtro e os bloqueados vão na busca, e as datas dos e-mails são achadas no PC. *Por quê:* conta de
+   App da Web com chave. Devolve só os prazos do Classroom (prontos, confiança 1). **Sem o Gmail da
+   Faccat:** a primeira versão também devolvia os e-mails, mas o App da Web fica numa URL pública
+   protegida só pela chave, e a permissão do Claude Code bloqueou dar a ele leitura do Gmail com acesso
+   anônimo. Se a URL vazar, o que aparece é a lista de entregas. Os e-mails da Faccat ficam para um
+   caminho com login (App da Web restrito a contas Google, ou OAuth se a Faccat permitir). *Por quê:* conta de
    faculdade costuma bloquear apps de fora no OAuth, e esse caminho já funciona. O Tony não lê nenhum
    arquivo do TheForge (exceção registrada no `CLAUDE.md` da raiz do My-Brain).
