@@ -12,3 +12,4 @@ __pycache__/
 docs/Inteligência/*
 !docs/Inteligência/modelos/
 appsscript/testes/casos.json
+appsscript/.clasp.json

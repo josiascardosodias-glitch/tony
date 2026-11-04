@@ -4,12 +4,16 @@ Tony no Apps Script (o JavaScript tem que responder igual).
     uv run python scripts/casos_appsscript.py
 """
 
+import copy
 import json
 import random
+import sys
+import tempfile
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-from tony.coleta import juntar_repetidos
+from tony import config
+from tony.coleta import coletar, juntar_repetidos
 from tony.consulta import eh_de_agenda, linha, para_o_modelo, periodo, responder
 from tony.datas import achar_datas, limpar_corpo
 
@@ -97,6 +101,55 @@ def bancos(n: int) -> list[dict]:
     return casos
 
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "testes"))
+from test_coleta import ICS, GmailFalso, mensagem  # noqa: E402  (o Gmail falso dos testes Python)
+
+AGORA_COLETA = datetime(2026, 11, 3, 13, 0, tzinfo=timezone.utc).astimezone(BRT)
+REMETENTES = ["Secretaria <secretaria@faculdade.edu.br>", "Loja <ofertas@loja.com>", "RH <rh@empresa.com>",
+              "amigo@gmail.com", '"Eventos, SA" <contato@eventos.com>', "Bloqueado <spam@chato.com>",
+              "x@sub.spam.org"]
+
+
+def caixas(n: int) -> list[list[dict]]:
+    """Caixas de e-mail: a dos testes Python, a dos repetidos e outras sorteadas."""
+    sorteio = random.Random(3)
+    fixas = [
+        [mensagem("m1", REMETENTES[0], "Prova remarcada", "A prova de Cálculo foi remarcada para 12/11, às 19h."),
+         mensagem("m2", REMETENTES[1], "Promoção até 30/11", "Compre já, a oferta vai até 30/11."),
+         mensagem("m3", REMETENTES[2], "Convite: Entrevista", "Você foi convidado.", ics=ICS),
+         mensagem("m4", REMETENTES[3], "Fotos", "<p>Olha a foto de <b>15/11</b> &amp; mais.</p>", html=True)],
+        [mensagem("c1", REMETENTES[4], "Seu ingresso para o Summit", "O evento será dia 05/11/2026 às 08:30."),
+         mensagem("c2", REMETENTES[4], "Pedido confirmado", "O evento será dia 05/11/2026 às 08:30."),
+         mensagem("c3", REMETENTES[4], "Re: [Lista] Outro dia", "Data: 06/11/2026 às 08:30", em_massa=True)],
+    ]
+    for c in range(n):
+        caixa = []
+        for i in range(sorteio.randint(1, 8)):
+            corpo = " ".join(sorteio.choice(PEDACOS) for _ in range(sorteio.randint(3, 12)))
+            caixa.append(mensagem(f"s{c}x{i}", sorteio.choice(REMETENTES), " ".join(sorteio.choice(PEDACOS) for _ in range(3)),
+                                  corpo, html=sorteio.random() < 0.3, em_massa=sorteio.random() < 0.3,
+                                  ics=ICS if sorteio.random() < 0.1 else ""))
+        fixas.append(caixa)
+    return fixas
+
+
+def coletas() -> list[dict]:
+    casos = []
+    for caixa in caixas(80):
+        with tempfile.TemporaryDirectory() as pasta:
+            cfg = config.carregar()
+            cfg["coleta"] = {**cfg["coleta"], "eventos": f"{pasta}/eventos.json", "estado": f"{pasta}/coleta.json",
+                             "bloqueados": f"{pasta}/bloqueados.json", "contas": [{"nome": "pessoal", "email": ""}]}
+            Path(f"{pasta}/bloqueados.json").write_text(json.dumps({"enderecos": ["spam@chato.com"], "dominios": ["spam.org"]}))
+            resumo = coletar(cfg, GmailFalso(copy.deepcopy(caixa)), AGORA_COLETA)
+            banco = json.loads(Path(f"{pasta}/eventos.json").read_text())
+            for secao in ("eventos", "revisar"):
+                for e in banco[secao].values():
+                    e.pop("criado_em")
+            casos.append({"caixa": caixa, "resumo": resumo, "banco": banco})
+    return casos
+
+
 def principal() -> None:
     datas = []
     for frase in FRASES + frases_geradas(400):
@@ -126,7 +179,8 @@ def principal() -> None:
         saiu = juntar_repetidos(banco)
         repetidos.append({"banco": entrada, "saiu": saiu, "depois": banco})
     SAIDA.write_text(json.dumps({"datas": datas, "limpeza": limpeza, "consultas": consultas, "linhas": linhas,
-                                 "modelo": modelo, "repetidos": repetidos}, ensure_ascii=False), encoding="utf-8")
+                                 "modelo": modelo, "repetidos": repetidos,
+                                 "coletas": coletas(), "agora_coleta": AGORA_COLETA.isoformat()}, ensure_ascii=False), encoding="utf-8")
     print(f"{SAIDA}: {len(datas)} datas, {len(consultas)} consultas, {len(repetidos)} bancos")
 
 
