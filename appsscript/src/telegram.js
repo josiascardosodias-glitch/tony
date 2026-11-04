@@ -3,8 +3,8 @@
  *
  * - As mensagens chegam por webhook (`doPost` do App da Web). O segredo vai na URL (`?k=...`), porque o
  *   `doPost` não lê cabeçalhos; e só o seu chat (`TELEGRAM_CHAT_ID`) é atendido.
- * - O App da Web responde ao Telegram com um redirecionamento (302), e o Telegram pode reenviar a mesma
- *   atualização: o Tony guarda o maior `update_id` já tratado e ignora o que vier repetido.
+ * - O webhook responde em HTML (200): a resposta de texto do Apps Script é um 302, que trava a fila do
+ *   Telegram. Mesmo assim, o Tony guarda o maior `update_id` já tratado e ignora o que vier repetido.
  * - Pergunta de agenda é respondida pelo código (zero token); pergunta livre vai ao modelo.
  * - Data de confiança média chega com Aceitar e Descartar; `/remover` (ou o 🗑) tira um compromisso já
  *   aceito, com confirmação.
@@ -270,7 +270,9 @@ function _comTrava(fn) {
 }
 
 function doPost(e) {
-  const resposta = () => ContentService.createTextOutput('ok');
+  // Para o Telegram, HTML: a resposta de texto (ContentService) vem como um redirecionamento 302, que o
+  // Telegram trata como erro e reenvia sem parar, travando a fila. O HtmlService responde 200 direto.
+  const resposta = () => HtmlService.createHtmlOutput('ok');
   if (e && e.parameter && e.parameter.admin) { // o PC (appsscript/configurar.py), não o Telegram
     const admin = _propriedades().getProperty('ADMIN_SEGREDO');
     if (!admin || e.parameter.admin !== admin || !e.postData) return resposta();

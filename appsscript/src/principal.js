@@ -82,6 +82,8 @@ function administrar(pedido) {
       const banco = ler('eventos', { eventos: {}, revisar: {} });
       return { eventos: Object.keys(banco.eventos).length, revisar: Object.keys(banco.revisar).length,
         repetidos: (banco.repetidos || []).length, espaco: espacoUsado(),
+        na_agenda: Object.values(banco.eventos).filter(e => e.evento_agenda).length,
+        agenda: Boolean(ler('agenda', {}).id),
         segredos: SEGREDOS_ACEITOS.filter(n => props.getProperty(n)),
         gatilhos: typeof ScriptApp !== 'undefined' ? ScriptApp.getProjectTriggers().map(g => g.getHandlerFunction()) : [] };
     },

@@ -187,7 +187,7 @@ function montarContexto(tony) {
 test('webhook: segredo errado não faz nada; reenvio do mesmo update_id é ignorado', () => {
   const { tony, s } = montar();
   const post = (k, atualizacao) => ({ parameter: { k }, postData: { contents: JSON.stringify(atualizacao) } });
-  const contexto = carregar({ ...montarContexto(tony), ContentService: { createTextOutput: t => t } });
+  const contexto = carregar({ ...montarContexto(tony), HtmlService: { createHtmlOutput: t => t } });
   assert.equal(contexto.doPost(post('errado', mensagem('/ajuda', MEU_CHAT, 10))), 'ok');
   assert.equal(contexto.__enviadas.length, 0);
   contexto.doPost(post('abc', mensagem('/ajuda', MEU_CHAT, 10)));
