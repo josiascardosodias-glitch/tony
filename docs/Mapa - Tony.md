@@ -9,10 +9,11 @@ repositório do código, e aparece no vault como `My-Brain/Tony/`: um mundo pró
 próprias (o `CLAUDE.md` desta pasta) e nenhum conteúdo cruzando com as outras pastas. Este mapa é o
 ponto de entrada.
 
-> [!success] Em produção: v4.0.0 (2026-11-03), na `main`, rodando de `~/projetos/tony-producao`
+> [!success] Em produção: v5.0.0 (2026-11-04), no Google Apps Script, 24 horas, sem o notebook
 > Assistente de e-mail: três contas (dois Gmails e a Faccat) → datas por código → agenda "Tony" no
-> Google → Telegram (`@tony_josias_bot`). Resumo do dia às 08:00. Falas 56/56, 100 testes de código.
-> Modelo: `gemma4:31b-cloud` (Ollama, plano gratuito), só nas perguntas livres.
+> Google → Telegram (`@tony_josias_bot`, por webhook). Coleta de hora em hora e resumo às 08:00 por
+> gatilhos. Código em `appsscript/` (JavaScript); o Python fica para as falas de teste e como reserva.
+> Modelo: `gemma4:31b` na nuvem do Ollama, só nas perguntas livres.
 > Código: [github.com/josiascardosodias-glitch/tony](https://github.com/josiascardosodias-glitch/tony) (público, MIT) ·
 > local em `~/projetos/tony` · rodar com `uv run tony`.
 

@@ -29,8 +29,13 @@ nos testes (ver a regra 2).
      (ou um `git merge main` dentro da `develop` sai limpo).
 - Só então: `git switch main && git merge --no-ff develop`, tag e release. Depois, a `develop` volta a
   acompanhar a `main` (`git switch develop && git merge main`).
-- **A produção roda de uma pasta presa à `main`:** `~/projetos/tony-producao` (`git worktree`). O
-  timer do resumo do dia roda de lá. Depois de um merge, `git pull` nessa pasta. Nunca agende o timer
+- **Desde a v5, a produção roda no Google Apps Script** (projeto "Tony" da conta pessoal, App da Web
+  publicado). Para levar a `main` à produção: `appsscript/enviar.sh` (testes, `_conhecimento.js` e
+  `clasp push`) e `npx @google/clasp update-deployment <id>` (o id fica em
+  `~/.config/tony/appsscript-implantacao`). Para o merge, `appsscript/testar.sh` também tem que passar.
+- **Reserva:** `~/projetos/tony-producao` (`git worktree` da `main`) guarda a v4 em Python, com os
+  serviços `tony-telegram` e `tony-dia` desligados. Voltar para ela: apagar o webhook do Telegram
+  (`deleteWebhook`) e `systemctl --user enable --now tony-telegram tony-dia.timer`. Nunca agende o timer
   da pasta de trabalho, que está na `develop`.
 - Push só com pedido. Por HTTPS:
   `git -c credential.helper= -c credential.helper="!gh auth git-credential" push origin develop`.
@@ -48,7 +53,13 @@ respostas de agenda são código. O modelo fica como **gerenciador**, para o que
 - O contraexemplo é um fluxo em que a IA faz o que um script faria: cada rodada gasta muito, e o
   Tony roda dezenas de vezes por dia.
 
-## 4. Dados e segredos ficam no PC
+## 4. Dados e segredos ficam na conta Google pessoal ou no PC
+
+**Desde a v5 (decidido em 2026-11-04):** os dados do Tony (eventos, estados da coleta, conversa) ficam
+nas propriedades do script, na conta Google pessoal, e os segredos também; no PC ficam as cópias
+dos segredos em `~/.config/tony/` (chmod 600). Nada disso vai para o repositório. O texto abaixo é o
+da v4, que continua valendo para a reserva em Python.
+
 
 - O repositório é **público**: e-mails, eventos, logs e configuração pessoal ficam em `dados/`,
   `logs/` e `config.local.yaml`, fora do git.

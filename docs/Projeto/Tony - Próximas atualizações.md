@@ -23,7 +23,7 @@ as ideias soltas. Quando uma versão sai, ela vai para o `CHANGELOG.md` e some d
 | ~~v3.0.x~~ | ~~E-mail testado com a caixa real (IMAP)~~     | ❌ substituída pela v4 |
 | v4.0.0   | Assistente de e-mail: datas → agenda → Telegram (produção) | ✅ publicada (56/56) |
 | v4.1.0   | `/remover` no Telegram; o mesmo compromisso uma vez só | ✅ publicada |
-| v5.0.0   | Tony no Google Apps Script: 24 h sem o notebook       | 📝 planejada |
+| v5.0.0   | Tony no Google Apps Script: 24 h sem o notebook       | ✅ publicada (38 testes JS, falas 56/56) |
 
 > [!important] A partir da v4, siga [[Tony - Regras do projeto]]
 > Trabalho só na branch `develop`; a `main` é produção e só recebe o que passou nos testes e não
@@ -311,7 +311,10 @@ Cada item vira uma linha no `DECISOES.md`, com o resultado:
   O Apps Script entrega ao PC só o que já passou pelo filtro da conta.
 - Outras contas pessoais, uma por vez.
 
-## v5 — Tony no Google Apps Script 📝
+## v5 — Tony no Google Apps Script ✅
+
+> [!success] Publicada em 2026-11-04 como v5.0.0. O que saiu está no `CHANGELOG.md`; esta seção fica
+> como registro de como foi planejada.
 
 > [!abstract] Decidido em 2026-11-04
 > O Tony para de depender do notebook. VPS grátis pede cartão, e as hospedagens de bot sem cartão

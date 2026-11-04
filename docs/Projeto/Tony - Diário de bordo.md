@@ -10,6 +10,29 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-11-04 (fim da tarde) — v5.0.0: a virada para o Apps Script
+
+**Feito**
+- Etapa 3: Telegram por webhook, comandos, botões e conversa com o modelo direto na nuvem do Ollama.
+- Etapa 4: pessoal2 pelo token OAuth, Faccat pelo App da Web, gatilhos, rota de administração e
+  `configurar.py`. Repetidos conferidos com os dados reais (o JavaScript tira os mesmos 3 que o Python)
+  e entre as contas.
+- App do Google publicado (Branding com página inicial, `PRIVACIDADE.md` e domínio `github.com`).
+- Virada: serviços do notebook desligados, dados importados (6 eventos), agenda nova, webhook e
+  gatilhos. Testado no Telegram: `/hoje`, pergunta livre, `/remover` → Deixar.
+
+**Travou**
+- A autorização da conta pessoal caiu no meio da virada (App da Web 403, token do Python revogado);
+  aceita de novo no editor, já com o app em produção.
+- Com o webhook, o 302 do `ContentService` travou a fila do Telegram (5 mensagens). Resposta em HTML.
+- A agenda "Tony" antiga (da v4) não foi apagada por aqui: exclusão permanente fica com o dono.
+
+**Aprendi**
+- O `clasp push` não apaga no Google um arquivo que só sumiu do PC: o `enviar.sh` muda o
+  `_conhecimento.js` a cada envio para mandar tudo.
+- Testar o webhook com mensagens falsas não pega o 302: só uma mensagem de verdade, com a fila do
+  Telegram, mostra o problema.
+
 ## 2026-11-04 (tarde) — v5, etapas 1 e 2: o Tony no Apps Script
 
 **Feito**
