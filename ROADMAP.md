@@ -61,6 +61,12 @@ prazos do Classroom). A `main` passa a ser só produção; o trabalho segue na `
   compromisso (remetente, dia e hora) entra uma vez só.
 - Rodar 24 horas: hoje o Tony para quando o notebook suspende (tampa fechada).
 
+## 📝 v5 — Tony no Google Apps Script
+
+Rodar 24 horas sem o notebook e sem cartão: coleta, agenda, repetidos e Telegram (webhook) em
+JavaScript no Apps Script, com Gmail e Agenda acessados pela própria conta (sem token que vence). As
+falas de teste continuam em Python no PC.
+
 ## Depois
 
 - **Mais contas:** a da faculdade (Apps Script na própria conta, com os prazos do Classroom) e outras
