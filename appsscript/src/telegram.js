@@ -273,6 +273,17 @@ function doPost(e) {
   // Para o Telegram, HTML: a resposta de texto (ContentService) vem como um redirecionamento 302, que o
   // Telegram trata como erro e reenvia sem parar, travando a fila. O HtmlService responde 200 direto.
   const resposta = () => HtmlService.createHtmlOutput('ok');
+  if (e && e.parameter && e.parameter.faccat) { // o script da Faccat mandando prazos e e-mails
+    const segredoDaFaccat = _propriedades().getProperty('FACCAT_SEGREDO');
+    if (!segredoDaFaccat || e.parameter.faccat !== segredoDaFaccat || !e.postData) return resposta();
+    let saida;
+    try {
+      saida = _comTrava(() => ({ ok: true, ...receberFaccat(JSON.parse(e.postData.contents), new Date()) })) || { ok: false, erro: 'ocupado' };
+    } catch (erro) {
+      saida = { ok: false, erro: String(erro.message || erro) };
+    }
+    return ContentService.createTextOutput(JSON.stringify(saida)).setMimeType(ContentService.MimeType.JSON);
+  }
   if (e && e.parameter && e.parameter.admin) { // o PC (appsscript/configurar.py), não o Telegram
     const admin = _propriedades().getProperty('ADMIN_SEGREDO');
     if (!admin || e.parameter.admin !== admin || !e.postData) return resposta();

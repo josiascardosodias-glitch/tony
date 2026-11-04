@@ -391,3 +391,13 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
 106. **Texto puro com tags passa pelo limpador de HTML.** *Por quê:* alguns remetentes mandam o
    `text/plain` com HTML dentro; a frase da data ia para a agenda com `<a href=…>`.
 
+## 2026-11-04 — v5.2: a Faccat envia, o Tony não busca
+
+107. **Inverter a Faccat: ela envia ao Tony.** *Por quê:* a URL pública da Faccat, protegida só pela
+   chave, entregava a lista de prazos a quem a tivesse, e foi por ser pública que a leitura dos e-mails
+   da Faccat foi barrada. Com o envio, a Faccat não tem endereço aberto; o Tony recebe numa rota com
+   segredo, como o Telegram.
+108. **O arquivo novo da Faccat chama o `doGet` que já existe.** *Por quê:* o script da Faccat fica no
+   TheForge, fora do isolamento do Tony; o usuário decidiu colar o arquivo ele mesmo. Reaproveitando o
+   `doGet`, o arquivo funciona sem conhecer (nem mudar) o resto do script.
+

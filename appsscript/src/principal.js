@@ -57,7 +57,7 @@ function instalarGatilhos() {
 // --- Administração pelo PC (appsscript/configurar.py) ---------------------------------------------
 
 const SEGREDOS_ACEITOS = ['TELEGRAM_TOKEN', 'TELEGRAM_CHAT_ID', 'OLLAMA_CHAVE', 'WEBHOOK_SEGREDO', 'GOOGLE_CLIENTE_ID',
-  'GOOGLE_CLIENTE_SEGREDO', 'TOKEN_PESSOAL2', 'FACCAT_URL', 'FACCAT_CHAVE'];
+  'GOOGLE_CLIENTE_SEGREDO', 'TOKEN_PESSOAL2', 'FACCAT_SEGREDO', 'FACCAT_URL', 'FACCAT_CHAVE'];
 const DADOS_ACEITOS = ['eventos', 'coleta-pessoal', 'coleta-pessoal2', 'coleta-faccat', 'bloqueados', 'telegram', 'agenda'];
 
 /**
@@ -124,6 +124,10 @@ function administrar(pedido) {
     },
     coletar: () => { rodarColeta(new Date(), false); return 'ok'; },
     instalarGatilhos: () => instalarGatilhos(),
+    esquecerFaccatAntiga: () => { // a URL e a chave da Faccat de antes da v5.2: não servem mais
+      for (const n of ['FACCAT_URL', 'FACCAT_CHAVE']) props.deleteProperty(n);
+      return 'ok';
+    },
     removerGatilhos: () => { for (const g of ScriptApp.getProjectTriggers()) ScriptApp.deleteTrigger(g); return []; },
   };
   for (const acao of pedido.acoes || []) {

@@ -10,6 +10,14 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-11-04 (noite) — v5.2.0: a Faccat envia
+
+**Feito**
+- `appsscript/faccat/enviar_ao_tony.gs`: arquivo novo para o script da Faccat (colado pelo usuário, sem
+  abrir o TheForge daqui), que chama o `doGet` existente e manda o resultado ao Tony de hora em hora.
+- No Tony: rota `?faccat=`, caixa da Faccat, aviso de 3 horas sem envio e o caminho antigo só como
+  transição. 42 testes JS.
+
 ## 2026-11-04 (noite) — v5.1.0: aviso não é compromisso
 
 **Feito**

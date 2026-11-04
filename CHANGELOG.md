@@ -1,5 +1,14 @@
 # Changelog
 
+## v5.2.0 — 2026-11-04
+
+- **Faccat sem URL pública:** o script da Faccat passa a enviar os prazos e os e-mails para o Tony de
+  hora em hora (`appsscript/faccat/enviar_ao_tony.gs`, que reaproveita o `doGet` que já existia lá), e o
+  Tony guarda numa caixa (`receberFaccat`, rota `?faccat=` com segredo próprio). A implantação pública
+  da Faccat pode ser arquivada. Enquanto a Faccat não manda nada, a coleta usa o caminho antigo.
+- Se a Faccat ficar mais de 3 horas sem mandar, o `/coletar` avisa.
+- `configurar.py --faccat` gera o segredo e grava a URL para o script da Faccat num arquivo (chmod 600).
+
 ## v5.1.0 — 2026-11-04
 
 - **Aviso não é compromisso:** frases de termos de serviço, mudança na conta, entrega e devolução de
