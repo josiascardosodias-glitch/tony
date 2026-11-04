@@ -4,6 +4,8 @@
  * - `conferir()`: não grava nada. Lê os e-mails dos últimos 3 dias, roda o extrator de datas e testa a
  *   agenda criando e apagando uma agenda de teste. Serve para ver que o Tony funciona aqui e para dar
  *   as permissões na primeira vez.
+ *
+ * O webhook do Telegram (`doPost`) está no `telegram.js`.
  */
 
 function conferir() {

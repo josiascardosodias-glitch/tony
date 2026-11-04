@@ -13,3 +13,5 @@ docs/Inteligência/*
 !docs/Inteligência/modelos/
 appsscript/testes/casos.json
 appsscript/.clasp.json
+appsscript/src/_conhecimento.js
+appsscript/src/_configurar.js
