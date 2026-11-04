@@ -34,11 +34,12 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
 - Etapa 5: bot do Telegram (testado por você), resumo do dia sem modelo, várias contas e a Faccat por
   uma seção do TheForge (`apps-script/tony.gs`, App da Web). Oktober Summit aceito e na agenda.
 
+- As três contas funcionando: `pessoal2` autorizada; Faccat pelo `tony.gs` só com os prazos (o
+  Gmail da Faccat foi barrado pela permissão do Claude Code: URL pública com leitura de e-mail). A
+  primeira implantação pedia login: estava "Usuário com acesso" e "Qualquer pessoa com Conta do
+  Google"; com "Eu" e "Qualquer pessoa", o primeiro prazo do Classroom entrou na agenda.
+
 **Pendente**
-- Seu: cadastrar a segunda conta Gmail em "Usuários de teste" (o navegador travou nessa página)
-  e `uv run tony autorizar --conta pessoal2`.
-- Seu: instalar o `tony.gs` no Apps Script da Faccat (chave, escopo do Gmail, App da Web) e
-  `uv run tony faccat --url <url>`.
 - Etapa 7: produção (merge na `main`, `tony agendar` da pasta de produção).
 - Merge na `main` só no fim da v4 (ou antes, se você pedir), seguindo as regras.
 
@@ -51,6 +52,8 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
 - Uma fala de teste nova só vale se reprovar a versão com o problema (`nao-promete`: 0/8 na antiga).
 - Testar o extrator com e-mails de verdade achou três defeitos que os 27 testes de exemplo não pegavam.
   Cada um virou teste antes da correção.
+- App da Web do Apps Script que responde com a tela de login do Google: o acesso não está anônimo.
+  "Executar como: Eu" e "Quem pode acessar: Qualquer pessoa" resolvem, com a mesma URL.
 - Teste que lê o `config.local.yaml` ou chama a API de verdade quebra quando a sua configuração muda:
   os testes agora fixam as contas e trocam tudo de fora por falsos.
 - Com o acesso mínimo à Agenda (`calendar.app.created`), nem listar as agendas é permitido: o Tony
