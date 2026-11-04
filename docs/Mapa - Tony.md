@@ -20,6 +20,27 @@ ponto de entrada.
 > Regras de branch e de produção em [[Tony - Regras do projeto]]; o que vem depois, em
 > [[Tony - Próximas atualizações]].
 
+## Como a v4 funciona
+
+```mermaid
+flowchart LR
+  G1[("Gmail pessoal")] --> C
+  G2[("Gmail pessoal2")] --> C
+  F[("Classroom da Faccat<br/>pelo tony.gs")] --> C
+  C["Coleta de hora em hora<br/>(dentro do bot, sem IA)"] --> E[("dados/eventos.json<br/>eventos · revisar")]
+  E --> A[("Agenda Tony<br/>no Google Agenda")]
+  E --> T["Bot do Telegram<br/>tony-telegram.service"]
+  E --> D["Resumo do dia 08:00<br/>tony-dia.timer"]
+  D --> N["Notificação no PC"]
+  D --> T
+  T <--> U([Você])
+```
+
+Tudo roda da pasta de produção (`~/projetos/tony-producao`). As datas saem dos e-mails por código
+(`tony/datas.py`): a partir de 0,6 de confiança viram evento, de 0,3 a 0,6 vão para o `/revisar` do
+Telegram. No Telegram, pergunta de agenda é respondida pelo código; só a pergunta livre vai ao modelo,
+que recebe a agenda e nunca o e-mail.
+
 ## Projeto — o que nós planejamos (o Tony não lê)
 
 0. [[Tony - Regras do projeto]] — branches `main`/`develop`, produção, IA no mínimo; ler antes de qualquer atualização
