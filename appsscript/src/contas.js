@@ -7,7 +7,7 @@
  *   mesmo formato da API avançada. Propriedades: `GOOGLE_CLIENTE_ID`, `GOOGLE_CLIENTE_SEGREDO`,
  *   `TOKEN_PESSOAL2` (o refresh token).
  * - `faccat`: o script da Faccat envia os prazos e os e-mails de hora em hora (`receberFaccat`); a Faccat
- *   não tem URL pública. Propriedade: `FACCAT_SEGREDO` (o que ela põe na URL do Tony).
+ *   não tem URL pública. Ela se identifica com a chave de sempre (`FACCAT_CHAVE`), dentro do envio.
  *
  * Os ids da pessoal2 levam o prefixo `pessoal2.` e os da Faccat `faccat.`, como no Python.
  */
