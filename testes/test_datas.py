@@ -4,7 +4,7 @@
 """
 
 import unittest
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 
 from tony.datas import achar_datas, datas_do_ics, limpar_corpo
 
@@ -144,6 +144,33 @@ class TestIcs(unittest.TestCase):
             (date(2026, 11, 20), None, "Feriado da empresa", 1.0),
         ])
         self.assertEqual(eventos[0].frase, "Sala 3")
+
+
+
+class TestNaoCompromisso(unittest.TestCase):
+    """Avisos com data que foram aceitos e depois removidos (casos reais, 2026-11-04): caem abaixo de 0.3."""
+
+    RECEBIDO = datetime(2026, 11, 3, 10, 0, tzinfo=timezone(timedelta(hours=-3)))
+
+    def confianca(self, frase: str):
+        return max((d.confianca for d in achar_datas("", frase, self.RECEBIDO)), default=None)
+
+    def test_avisos_sao_descartados(self):
+        for frase in ["Em 5 de novembro de 2026, vamos fazer mudanças nos Termos de Serviço do",
+                      "Essa alteração será aplicada automaticamente a partir de 05/11/2026 .",
+                      "Chegará entre 2 e 5 de Novembro.",
+                      "A semana de 02 a 06 de novembro será marcada por uma agenda relevante para os mercados.",
+                      "Se tiver algum problema, você pode devolver ou trocar grátis sua compra até 14 de novembro.",
+                      "O desconto é válido para viagens feitas até 22/11/2026, e se aplica a 1 única viagem."]:
+            with self.subTest(frase=frase):
+                self.assertLess(self.confianca(frase), 0.3)
+
+    def test_compromissos_continuam(self):
+        for frase, esperada in [("A prova de Cálculo foi remarcada para 12/11, às 19h.", 0.9),
+                                ("Entrega do trabalho até 20/11 pelo portal.", 0.7),
+                                ("A fatura vence dia 10/11.", 0.7), ("Data: 05/11/2026 às 08:30", 0.5)]:
+            with self.subTest(frase=frase):
+                self.assertEqual(self.confianca(frase), esperada)
 
 
 if __name__ == "__main__":

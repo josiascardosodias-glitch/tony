@@ -110,10 +110,19 @@ def _decodificar(dados: str) -> str:
     return base64.urlsafe_b64decode(dados + "=" * (-len(dados) % 4)).decode("utf-8", errors="replace")
 
 
+TEM_HTML = re.compile(r"<\s*/?\s*(a|br|p|div|span|img|table|tr|td|b|i|strong|em|font|ul|li)\b[^>]*>", re.I)
+
+
 def _sem_html(texto: str) -> str:
     texto = re.sub(r"<(script|style).*?</\1>", " ", texto, flags=re.S | re.I)
     texto = re.sub(r"<br\s*/?>|</p>|</div>|</li>|</tr>", "\n", texto, flags=re.I)
     return html.unescape(re.sub(r"<[^>]+>", " ", texto))
+
+
+def _trecho(snippet: str) -> str:
+    """O snippet do Gmail, sem tags que tenham vindo cruas no texto."""
+    trecho = re.sub(r"<\s*/?\s*[a-z][^>]*$", "", html.unescape(snippet), flags=re.I)  # tag cortada no fim
+    return " ".join(_sem_html(trecho).split()) if TEM_HTML.search(trecho) else trecho.strip()
 
 
 def _partes(parte: dict):
@@ -141,10 +150,12 @@ def ler_mensagem(servico, bruta: dict) -> Mensagem:
         elif tipo in texto and not texto[tipo]:
             texto[tipo] = _decodificar(dados)
     corpo = texto["text/plain"] or _sem_html(texto["text/html"])
+    if TEM_HTML.search(corpo):  # "texto puro" que traz tags: elas não são do texto
+        corpo = _sem_html(corpo)
     return Mensagem(
         id=bruta["id"], de=endereco.lower(), nome=nome, assunto=cabecalhos.get("subject", "").strip(),
         recebido=datetime.fromtimestamp(int(bruta["internalDate"]) / 1000, tz=timezone.utc).astimezone(),
-        texto=re.sub(r"[ \t\r\f\v]+", " ", corpo).strip(), trecho=html.unescape(bruta.get("snippet", "")),
+        texto=re.sub(r"[ \t\r\f\v]+", " ", corpo).strip(), trecho=_trecho(bruta.get("snippet", "")),
         convites=convites,
         em_massa="list-unsubscribe" in cabecalhos or cabecalhos.get("precedence", "").lower() in ("bulk", "list"),
     )

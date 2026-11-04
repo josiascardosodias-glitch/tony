@@ -380,3 +380,14 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
    dias, o que derruba um Tony que roda sozinho. Sem verificação, vale para até 100 usuários, com o
    aviso de "não verificado"; o único usuário é o dono.
 
+## 2026-11-04 — v5.1: aviso não é compromisso
+
+105. **Lista de "não é compromisso" com penalidade de 0.5, sem IA.** *Por quê:* os falsos compromissos
+   reais (termos de serviço, limites de conta, entrega e devolução de compra, desconto, newsletter)
+   chegavam a "revisar" com 0.3–0.5, ou entravam sozinhos com 0.7 por causa de "até" e "evento", e eram
+   aceitos no botão por engano. Com -0.5 eles caem abaixo de 0.3 e nem viram pergunta. Um modelo
+   classificando cada frase gastaria token a cada e-mail (regra 3); a lista veio dos casos reais e o
+   teste diferencial confere que o resto não mudou. Cada novo falso positivo entra na lista e no teste.
+106. **Texto puro com tags passa pelo limpador de HTML.** *Por quê:* alguns remetentes mandam o
+   `text/plain` com HTML dentro; a frase da data ia para a agenda com `<a href=…>`.
+

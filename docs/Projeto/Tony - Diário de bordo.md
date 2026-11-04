@@ -10,6 +10,17 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-11-04 (noite) — v5.1.0: aviso não é compromisso
+
+**Feito**
+- Os 13 eventos da cópia de antes da v4.1 mostraram o padrão: avisos de 0.3–0.5 aceitos no botão, e
+  "devolver… até 14 de novembro" entrando sozinho com 0.7. Lista `NAO_COMPROMISSO` com -0.5: os 6
+  avisos caem, os compromissos ficam.
+- Texto puro com tags limpo (frase e trecho do Gmail); `limparHtml` arrumou o que já estava guardado.
+
+**Aprendi**
+- Os casos reais valem mais que inventar regras: cada padrão da lista veio de um e-mail que entrou.
+
 ## 2026-11-04 (fim da tarde) — v5.0.0: a virada para o Apps Script
 
 **Feito**

@@ -271,3 +271,18 @@ test('pessoal2: token renovado, guardado, e autorização vencida vira aviso cla
   vencido = true;
   assert.throws(() => tony.tokenDeAcesso({ nome: 'pessoal2' }), /venceu: no PC, uv run tony autorizar --conta pessoal2/);
 });
+
+test('limparHtml tira as tags das descrições guardadas e corrige no Google', () => {
+  const { tony, cal } = tonyComAgenda();
+  const sujo = { ...ev('h1-1', '2026-11-12'), descricao: "Para adicionar o evento, <a href='https://x.com/a'>clique</a> &amp; pronto.\n\nTrecho <b>forte</b> <a href='" };
+  tony.guardar('eventos', { eventos: { 'h1-1': sujo }, revisar: {} });
+  tony.sincronizar('2026-11-03');
+  const patches = [];
+  cal.Events.patch = (body, agenda, id) => { patches.push([id, body.description]); return {}; };
+  const limpos = tony.administrar({ acoes: ['limparHtml'] }).acoes.limparHtml;
+  assert.deepEqual(json(limpos), ['h1-1']);
+  const descricao = tony.ler('eventos').eventos['h1-1'].descricao;
+  assert.equal(descricao, 'Para adicionar o evento, clique & pronto.\n\nTrecho forte');
+  assert.equal(patches.length, 1);
+  assert.doesNotMatch(patches[0][1], /<a|href/);
+});

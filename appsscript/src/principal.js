@@ -106,6 +106,22 @@ function administrar(pedido) {
       }
     })),
     sincronizar: () => sincronizar(),
+    limparHtml: () => { // descrições guardadas antes da v5.1 com tags cruas: limpa aqui e no Google
+      const banco = ler('eventos', { eventos: {}, revisar: {} });
+      const limpos = [];
+      for (const secao of ['eventos', 'revisar']) {
+        for (const e of Object.values(banco[secao])) {
+          if (!TEM_HTML.test(e.descricao) && !/<\s*[a-z][^>]*$/i.test(e.descricao)) continue;
+          e.descricao = e.descricao.split('\n').map(l => _trecho(l)).join('\n');
+          if (secao === 'eventos' && e.evento_agenda) {
+            executar(() => _calendario().Events.patch({ description: corpoDoEvento(e).description }, idDaAgenda(), e.evento_agenda));
+          }
+          limpos.push(e.id);
+        }
+      }
+      guardar('eventos', banco);
+      return limpos;
+    },
     coletar: () => { rodarColeta(new Date(), false); return 'ok'; },
     instalarGatilhos: () => instalarGatilhos(),
     removerGatilhos: () => { for (const g of ScriptApp.getProjectTriggers()) ScriptApp.deleteTrigger(g); return []; },
