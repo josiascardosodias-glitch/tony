@@ -17,6 +17,12 @@ Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o 
   abrir o TheForge daqui), que chama o `doGet` existente e manda o resultado ao Tony de hora em hora.
 - No Tony: rota `?faccat=`, caixa da Faccat, aviso de 3 horas sem envio e o caminho antigo só como
   transição. 42 testes JS.
+- v5.2.1: a Faccat se identifica com a chave de sempre, dentro do envio (sem segredo novo para digitar).
+- Instalado no projeto da Faccat pelo navegador (arquivo novo `enviar_ao_tony.gs`, conteúdo posto pela
+  API do editor para ele não mexer no código): gatilho de hora em hora, primeiro envio com 2 prazos,
+  implantação pública arquivada (a URL antiga dá 404) e `FACCAT_URL` apagada do Tony.
+- O arquivo novo existe só no projeto da Faccat no Google; o `tony.gs` do TheForge no PC não foi
+  aberto nem mudado (a fonte fica em `appsscript/faccat/enviar_ao_tony.gs`).
 
 ## 2026-11-04 (noite) — v5.1.0: aviso não é compromisso
 
