@@ -208,3 +208,140 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
     defeito já existia e só aparecia em alguns dias da semana). Uma regra em texto ("sexta que vem é a
     primeira sexta depois da conversa") não mudou nada (4/8) e saiu; a marca calculada pelo código
     deu 8/8. Mesma lição da decisão 34: conta de calendário é do código.
+
+## 2026-11-03 — v4: assistente de e-mail em produção
+
+65. **A v4 é a primeira versão de produção, e a `main` passa a ser só produção.** Todo trabalho vai
+   na branch `develop`; ela entra na `main` quando os testes de código passam, o placar das falas não
+   piora e não há conflito (`git merge-tree --write-tree main develop`). Releases só da `main`.
+   *Por quê:* o Tony vai rodar sozinho todo dia; o que está em uso não pode quebrar por uma mudança
+   pela metade. *Fora:* uma branch por feature (por enquanto, uma secundária basta).
+66. **O Tony vira só assistente de e-mail:** datas dos e-mails → agenda "Tony" no Google →
+   consulta pelo Telegram. Saem as ferramentas das notas, a memória de conversas, o `/lembrar`, o
+   `tony revisar` e o IMAP; ficam a personalidade, as falas de teste, o cliente do Ollama e o timer.
+   *Fora:* manter o Tony conversacional ao lado; recomeçar do zero.
+67. **IA no mínimo.** Buscar, filtrar, achar datas, gravar na agenda e responder perguntas de agenda
+   são código; o modelo só entra no que o código não resolve. Antes de pôr a IA num passo, pesquisar se
+   um script ou uma API resolve, e registrar aqui. *Por quê:* ele roda dezenas de vezes por dia, o mês
+   inteiro. *Fora:* deixar o modelo ler os e-mails e achar as datas.
+68. **Primeira conta: o Gmail pessoal, pela API do Gmail (só leitura) num script Python local**, não
+   por IMAP nem por Apps Script. *Por quê:* bloqueados, eventos e filtro ficam todos no PC; a API dá
+   busca incremental (`historyId`) e categorias. A conta da faculdade vem depois, por Apps Script
+   (lá, os prazos do Classroom já vêm prontos). *Fora:* IMAP com senha de app (v3.0.x cancelada).
+69. **Agenda separada "Tony"**, criada pela API da Agenda, com o id do e-mail guardado no evento para
+   não duplicar. *Por quê:* fica junto das outras, dá para compartilhar e, se ele errar, apaga-se só ela.
+70. **Descrição do evento feita por script:** assunto, a frase com a data e o `snippet` do Gmail.
+   *Por quê:* zero token por e-mail. *Fora:* resumo pelo modelo.
+71. **Bloqueados em `dados/bloqueados.json`, local**, aplicados na própria busca do Gmail (`-from:`):
+   o e-mail bloqueado nem é baixado.
+
+## 2026-11-03 — Documentação dentro do repositório
+
+72. **As notas do Tony saem do vault e vão para `docs/`, com o histórico.** O vault mostra a pasta por
+   um link (`My-Brain/Tony` → `docs/`). *Por quê:* o Tony é um projeto só, e o vault (Cofre) ficou só
+   para documentos de estudo; código e documentação passam a subir no mesmo push.
+   *Fora:* um repositório privado só para as notas; o Tony numa branch do repositório do vault.
+73. **Informação pessoal fica fora do git.** `docs/Inteligência/` está no `.gitignore`, menos
+   `docs/Inteligência/modelos/`, com as notas pessoais vazias para cada pessoa preencher.
+   *Por quê:* o repositório é público. O histórico antigo (perfil de estudo e um lembrete) foi
+   conferido, não tem nada sensível e ficou como está. *Fora:* reescrever o histórico.
+
+## 2026-11-03 — v4, etapa 1: produção separada e enxugamento
+
+74. **Produção numa pasta presa à `main`** (`git worktree`: `~/projetos/tony-producao`), com o timer
+   rodando de lá. *Por quê:* o timer rodava a pasta de trabalho, que está na `develop`: o código em
+   construção entraria no resumo do dia sem passar pelos testes. *Fora:* um clone separado (dois
+   históricos para manter em dia).
+75. **Google em modo de teste, com o próprio usuário como testador.** *Por quê:* publicar exige página
+   inicial e Política de Privacidade num domínio autorizado, e não há garantia de que o acesso ao Gmail
+   sem verificação seja liberado. *Custo:* a autorização expira a cada 7 dias; o Tony vai avisar pelo
+   Telegram com o link para reautorizar. *Fora, por enquanto:* publicar com uma página no GitHub Pages.
+76. **Sem memória entre conversas.** Cada conversa começa só com a personalidade e a Inteligência.
+   *Por quê:* no assistente de e-mail, o que importa lembrar são as datas, e elas vão ficar no
+   `eventos.json`; resumir e consolidar cada conversa gastava duas chamadas ao modelo por sessão.
+77. **A Inteligência continua inteira no prompt**, sem ferramenta para ler sob demanda. *Por quê:* são
+   duas notas curtas (menos de 500 caracteres); ler sob demanda custava chamadas e errava (lia notas que
+   já estavam no prompt).
+
+## 2026-11-03 — v4, etapa 2: o modelo
+
+78. **O modelo continua o `gemma4:31b-cloud`.** Dos 25 modelos de nuvem do Ollama, só 6 respondem no
+   plano gratuito; os mais fortes (glm-5.3, kimi-k3, deepseek-v4-pro, mistral-large-4, minimax-m3,
+   mimo-v2.6-pro) pedem crédito pago. Os candidatos gratuitos mais fortes, nas 13 falas × 4:
+
+   | Modelo | Juiz gpt-oss:120b | Juiz nemotron-3-ultra |
+   |---|---|---|
+   | gemma4:31b (atual) | **51/52** | 32/32 nas 8 primeiras falas (a rodada foi cortada) |
+   | nemotron-3-ultra | 44/52 | (é o juiz) |
+   | nemotron-3-super | 44/52 | — |
+   | gpt-oss:120b | (é o juiz) | 44/52 |
+
+   Os três erram no jeito: respostas longas, "Boa ideia" no começo, "depende" em vez de discordar,
+   terceira pessoa com o Josias. Todos têm chamada de ferramentas. *Por quê:* na v4 a IA quase não
+   entra (datas e agenda são código), e onde entra é a conversa, em que o gemma4 é o melhor dos
+   gratuitos. *Fora:* pagar crédito por um modelo maior agora; volta a ser avaliado na etapa 5, com
+   falas de teste que chamam as ferramentas da agenda.
+
+## 2026-11-03 — v4, etapa 3: coleta e datas sem IA
+
+79. **Extrator de datas próprio, com expressões regulares** (`tony/datas.py`), não o `dateparser`.
+   *Por quê:* testado em frases de e-mail, o `dateparser` leu "12/11, às 19h" como 04/11 às 05:00, não
+   achou "20 de novembro" e separou "sexta" de "às 14h". O próprio cobre dd/mm(/aa), "20 de novembro",
+   "2 de dez.", hoje/amanhã/depois de amanhã, dias da semana com "-feira", "próxima" ou "que vem", e
+   horas como 19h, 23h59 e 14:30, com 30 testes de código.
+80. **Confiança por pontos, sem IA:** 0,3 de base, +0,4 com palavra de compromisso, +0,2 com hora,
+   +0,2 no assunto, −0,4 em e-mail em massa (`List-Unsubscribe` ou `Precedence: bulk`). A partir de 0,6
+   vira evento; de 0,3 a 0,6 vai para revisar. *Por quê:* na primeira coleta real (276 e-mails), o
+   marketing ("até amanhã às 23h59!") virava evento; o cabeçalho de descadastro separa newsletter de
+   e-mail pessoal sem ler o conteúdo.
+81. **Descartados:** datas antes de hoje, o dia do próprio e-mail sem hora depois da chegada ("novo
+   login em 03/11 às 09:12"), citações de resposta, rodapés, "3/4" sem ano (fração) e data sem ano que
+   só caberia no ano seguinte depois de 6 meses ("29/09" escrito em novembro já passou).
+82. **Busca por `after:` + ids já vistos**, não o `history.list`. *Por quê:* o `history.list` não aceita
+   busca, então os bloqueados (`-from:`) e o filtro de categorias teriam que ser aplicados depois de baixar
+   o e-mail; com `after:`, o e-mail bloqueado nem é baixado. Uma hora de folga para trás e os ids vistos
+   cobrem o arredondamento do `after:`.
+83. **Limite por minuto do Gmail:** a primeira coleta (30 dias) estourou a cota de consultas por minuto.
+   A coleta espera e tenta de novo (2 s, 5 s, 15 s, 30 s, 60 s, 60 s) e salva o progresso a cada 25
+   e-mails. 276 e-mails levaram 2,5 min.
+84. **Escopos mínimos do Google:** `gmail.readonly` e `calendar.app.created` (só as agendas que o Tony
+   criar). *Fora:* `calendar` inteiro, que enxergaria todas as suas agendas.
+
+## 2026-11-03 — v4, etapa 4: a agenda
+
+85. **O id da agenda "Tony" fica em `dados/agenda.json`.** *Por quê:* com `calendar.app.created`, o
+   Tony não consegue listar as suas agendas (a API responde 403), então não tem como achar a dele pelo
+   nome. É o preço do acesso mínimo, e vale: ele não enxerga nada seu além do que criou.
+86. **Sem duplicar, em três camadas:** o id do Google guardado no evento; o id do Tony em
+   `extendedProperties.private.tony_id`, procurado antes de criar (para quando o `eventos.json` se
+   perde); e o mesmo remetente no mesmo dia e hora vira um evento só (confirmação e lembrete).
+87. **Evento com hora dura 1 hora; sem hora, é de dia inteiro.** O e-mail quase nunca diz quando termina.
+88. **Só os eventos aceitos vão para a agenda.** Os de "revisar" esperam `tony aceitar <id>` (ou, na
+   etapa 5, um sim pelo Telegram); `tony descartar <id>` joga fora de vez.
+89. **Apagar ou mudar o evento quando o e-mail muda: fora.** E-mail não é editado depois de enviado; uma
+   remarcação chega como e-mail novo, com data nova. Se a data antiga ficar sobrando, você apaga na agenda.
+
+## 2026-11-03 — v4, etapa 5: Telegram, várias contas e a Faccat
+
+90. **Telegram pela API HTTP direta** (`httpx`, long polling), sem biblioteca de bot. Só responde ao
+   `TELEGRAM_CHAT_ID`; o token nunca aparece num erro (a URL é tirada da mensagem).
+91. **Pergunta de agenda é código** (`consulta.py`: hoje, amanhã, dias da semana, semana, mês, fim de
+   semana, "dia 12", datas): zero token. Só a pergunta livre vai ao modelo, com a agenda dos próximos
+   30 dias no prompt (título, data e a frase; nunca o e-mail).
+92. **O resumo do dia é código**, não mais o modelo: a lista do `eventos.json` para hoje e 7 dias,
+   mandada na notificação e no Telegram. *Por quê:* regra 3; a fala `dia-sem-email` caiu para 1/4
+   quando a personalidade passou a falar da agenda, e uma lista não precisa de modelo.
+93. **Muitas datas para revisar de uma vez (mais de 3) viram uma mensagem só**; o `/revisar` mostra cada
+   uma com os botões. *Por quê:* a primeira coleta mandaria 7 mensagens de marketing seguidas.
+94. **Várias contas:** `coleta.contas`; cada conta tem seu token (`google-token-<nome>.json`) e seu
+   estado (`coleta-<nome>.json`), e os ids das outras contas ganham o prefixo `<nome>.`. A primeira conta
+   guarda a agenda. Uma conta com problema não para as outras.
+95. **A Faccat pelo Apps Script, numa seção do TheForge** (`TheForge/apps-script/tony.gs`), a pedido
+   do usuário: o mesmo projeto do Apps Script que já tem o acesso de aluno ao Classroom, publicado como
+   App da Web com chave. Devolve só os prazos do Classroom (prontos, confiança 1). **Sem o Gmail da
+   Faccat:** a primeira versão também devolvia os e-mails, mas o App da Web fica numa URL pública
+   protegida só pela chave, e a permissão do Claude Code bloqueou dar a ele leitura do Gmail com acesso
+   anônimo. Se a URL vazar, o que aparece é a lista de entregas. Os e-mails da Faccat ficam para um
+   caminho com login (App da Web restrito a contas Google, ou OAuth se a Faccat permitir). *Por quê:* conta de
+   faculdade costuma bloquear apps de fora no OAuth, e esse caminho já funciona. O Tony não lê nenhum
+   arquivo do TheForge (exceção registrada no `CLAUDE.md` da raiz do My-Brain).

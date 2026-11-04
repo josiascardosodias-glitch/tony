@@ -1,84 +1,65 @@
 """O Tony fala primeiro: `tony dia` escreve o resumo do dia; `tony agendar` instala um timer do systemd
-(do seu usuário, sem sudo) que roda `tony dia --notificar` todo dia, como notificação na área de trabalho.
+(do seu usuário, sem sudo) que roda `tony dia --notificar` todo dia, como notificação na área de trabalho
+e mensagem no Telegram.
+
+Desde a v4 o resumo é montado pelo código, com o `eventos.json`: zero token. É uma lista do que está
+marcado para hoje e os próximos 7 dias, e quantas datas esperam a sua decisão.
 """
 
 import subprocess
-from datetime import datetime
+from datetime import date, timedelta
 from pathlib import Path
 
 from . import config
-from .cliente import Cliente
-from .conversa import Conversa, calendario
-from .memoria import carregar_personalidade, inteligencia_para_prompt, ler_memoria, ultimo_resumo
+from .coleta import ler_json
+from .consulta import linha
 from .registro import Registro
 
-DIAS_DE_EMAIL = 3
-PEDIDO_DIA = (
-    "[Mensagem agendada: a pessoa não falou nada; você é quem começa.] Escreva a notificação que abre "
-    "o dia dela: em até 3 frases, o que importa hoje e nos próximos 7 dias (provas, entregas, "
-    "pendências), tirado só do que está {fontes}. "
-    "Use o calendário abaixo para as datas; não calcule de cabeça. Se não houver "
-    "nada marcado, diga isso em uma frase curta. Sem saudação longa e sem pergunta no fim."
-)
+DIAS_A_FRENTE = 7
 
 
-def caixa_de_email(cfg: dict):
-    """A caixa do config, ou None se o e-mail não está configurado (aí a ferramenta nem aparece)."""
-    email = cfg["email"]
-    if not email["usuario"]:
-        return None
-    from .ferramentas._email import caixa_imap
-    arquivo = config.caminho(email["senha_arquivo"])
-    if not arquivo or not arquivo.is_file():
-        raise SystemExit(f"e-mail configurado, mas falta o arquivo da senha de app: {email['senha_arquivo']}")
-    return caixa_imap(email["servidor"], email["usuario"], arquivo.read_text(encoding="utf-8").strip(), email["filtro"])
-
-
-def pedido_do_dia(emails: list[dict] | None, hoje: datetime) -> str:
-    datas = f"Calendário:\n{calendario(hoje, 8)}"
-    if emails is None:  # sem dizer isso, ele escrevia "não achei nada nas notas e e-mails" (5/8)
-        pedido = PEDIDO_DIA.format(fontes="nas suas notas, lembretes, memória e última conversa")
-        return f"{pedido} Você não tem acesso a e-mail (não está configurado): não diga que olhou e-mails.\n\n{datas}"
-    if not emails:
-        trecho = f"(nenhum e-mail nos últimos {DIAS_DE_EMAIL} dias)"
-    else:
-        trecho = "\n\n".join(f"[{m['data']}] de {m['de']}\nAssunto: {m['assunto']}\n{m['texto']}" for m in emails)
-    pedido = PEDIDO_DIA.format(fontes="nas suas notas, lembretes, memória, última conversa e nos e-mails abaixo")
-    return f"{pedido}\n\n{datas}\n\nE-mails recentes:\n{trecho}"
-
-
-def resumo_do_dia(cfg: dict) -> str:
-    cliente = Cliente(cfg)
-    pasta = config.caminho(cfg["memoria"]["inteligencia"])
-    conversa = Conversa(
-        cliente, cfg["contexto"]["limite"], carregar_personalidade(config.caminho(cfg["personalidade"])),
-        inteligencia_para_prompt(pasta, cfg["memoria"]["inteligencia_inteira_ate"]),
-        ultima_conversa=ultimo_resumo(config.caminho(cfg["memoria"]["resumos"])),
-        memoria=ler_memoria(config.caminho(cfg["memoria"]["memoria"]))[0],
-    )
-    caixa = caixa_de_email(cfg)
-    try:
-        emails = caixa(DIAS_DE_EMAIL) if caixa else None
-    except Exception as e:  # sem rede ou senha errada: o resumo sai sem os e-mails, e avisa
-        print(f"[aviso] não consegui ler o e-mail: {e}")
-        emails = None
-    return "".join(conversa.responder(pedido_do_dia(emails, datetime.now()))).strip()
+def resumo_do_dia(cfg: dict, hoje: date | None = None) -> str:
+    hoje = hoje or date.today()
+    banco = ler_json(config.caminho(cfg["coleta"]["eventos"]), {"eventos": {}, "revisar": {}})
+    fim = (hoje + timedelta(days=DIAS_A_FRENTE)).isoformat()
+    proximos = sorted((e for e in banco["eventos"].values() if hoje.isoformat() <= e["data"] <= fim),
+                      key=lambda e: (e["data"], e["hora"] or ""))
+    de_hoje = [e for e in proximos if e["data"] == hoje.isoformat()]
+    depois = [e for e in proximos if e["data"] != hoje.isoformat()]
+    partes = []
+    if de_hoje:
+        partes.append("Hoje:\n" + "\n".join(linha(e, hoje) for e in de_hoje))
+    if depois:
+        partes.append(f"Nos próximos {DIAS_A_FRENTE} dias:\n" + "\n".join(linha(e, hoje) for e in depois))
+    if not partes:
+        partes.append(f"Nada marcado para hoje nem para os próximos {DIAS_A_FRENTE} dias.")
+    revisar = sum(e["data"] >= hoje.isoformat() for e in banco["revisar"].values())
+    if revisar:
+        partes.append(f"{revisar} data(s) esperando você decidir: /revisar no Telegram.")
+    return "\n\n".join(partes)
 
 
 def dia(cfg: dict, notificar: bool) -> None:
     texto = resumo_do_dia(cfg)
     print(texto)
     Registro(config.caminho(cfg["logs"]), origem="dia").anotar("dia", texto=texto)
-    if notificar:
-        subprocess.run(["notify-send", "--app-name=Tony", "Tony", texto], check=False)
+    if not notificar:
+        return
+    subprocess.run(["notify-send", "--app-name=Tony", "Tony", texto], check=False)
+    if config.caminho(cfg["telegram"]["token_arquivo"]).is_file():
+        from .telegram import Telegram, credenciais
+
+        Telegram(*credenciais(cfg)).enviar(f"Bom dia.\n\n{texto}")
 
 
 # Restart: ao ligar o PC (Persistent=true), o timer dispara antes de a rede subir e o modelo na nuvem
-# não responde. O systemd tenta de novo a cada 2 minutos, até 6 vezes na hora.
+# não responde. O systemd tenta de novo a cada 2 minutos, até 6 vezes na hora. OnFailure: só quando as
+# 6 falham a unidade fica "failed" e o aviso sai; antes, a falha só aparecia no journalctl.
 SERVICO = """[Unit]
 Description=Tony: resumo do dia
 StartLimitIntervalSec=1h
 StartLimitBurst=6
+OnFailure=tony-dia-falhou.service
 
 [Service]
 Type=oneshot
@@ -86,6 +67,28 @@ Restart=on-failure
 RestartSec=2min
 WorkingDirectory={raiz}
 ExecStart={uv} run tony dia --notificar
+"""
+AVISO_DE_FALHA = """[Unit]
+Description=Tony: aviso de que o resumo do dia falhou
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/notify-send --app-name=Tony --urgency=critical "Tony" "Não consegui fazer o resumo do dia: as 6 tentativas falharam. Para ver o motivo: journalctl --user -u tony-dia"
+"""
+# O bot fica sempre no ar (a coleta de hora em hora roda dentro dele); Restart=always cobre queda de
+# rede e erro inesperado. default.target: sobe quando você entra na sessão.
+BOT = """[Unit]
+Description=Tony: Telegram e coleta dos e-mails
+After=network-online.target
+
+[Service]
+Restart=always
+RestartSec=30
+WorkingDirectory={raiz}
+ExecStart={uv} run tony telegram
+
+[Install]
+WantedBy=default.target
 """
 TIMER = """[Unit]
 Description=Tony: resumo do dia às {hora}
@@ -99,6 +102,16 @@ WantedBy=timers.target
 """
 
 
+def unidades(hora: str, raiz: Path, uv: str) -> dict[str, str]:
+    """{nome do arquivo: conteúdo} das unidades do systemd que o `agendar` instala."""
+    return {
+        "tony-dia.service": SERVICO.format(raiz=raiz, uv=uv),
+        "tony-dia-falhou.service": AVISO_DE_FALHA,
+        "tony-dia.timer": TIMER.format(hora=hora),
+        "tony-telegram.service": BOT.format(raiz=raiz, uv=uv),
+    }
+
+
 def agendar(hora: str) -> None:
     """Instala (ou atualiza) o timer. Persistent=true: se o PC estava desligado na hora, roda ao ligar."""
     uv = subprocess.run(["which", "uv"], capture_output=True, text=True).stdout.strip()
@@ -106,9 +119,12 @@ def agendar(hora: str) -> None:
         raise SystemExit("não achei o uv no PATH.")
     pasta = Path.home() / ".config/systemd/user"
     pasta.mkdir(parents=True, exist_ok=True)
-    (pasta / "tony-dia.service").write_text(SERVICO.format(raiz=config.RAIZ, uv=uv), encoding="utf-8")
-    (pasta / "tony-dia.timer").write_text(TIMER.format(hora=hora), encoding="utf-8")
+    for nome, conteudo in unidades(hora, config.RAIZ, uv).items():
+        (pasta / nome).write_text(conteudo, encoding="utf-8")
     subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
     subprocess.run(["systemctl", "--user", "enable", "--now", "tony-dia.timer"], check=True)
-    print(f"Agendado: todo dia às {hora}. Ver: systemctl --user list-timers tony-dia.timer · "
+    print(f"Agendado: todo dia às {hora}, a partir de {config.RAIZ}. Ver: systemctl --user list-timers tony-dia.timer · "
           f"Desligar: systemctl --user disable --now tony-dia.timer")
+    if config.caminho(config.carregar()["telegram"]["token_arquivo"]).is_file():
+        subprocess.run(["systemctl", "--user", "enable", "--now", "tony-telegram.service"], check=True)
+        print("Telegram no ar: systemctl --user status tony-telegram · logs: journalctl --user -u tony-telegram")

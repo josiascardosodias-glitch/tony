@@ -18,16 +18,35 @@ contexto:
 
 memoria:
   inteligencia: ""             # pasta de notas .md que o Tony lê no início de cada conversa (vazio = nenhuma)
-  inteligencia_inteira_ate: 6000   # caracteres; acima disso, só a lista das notas vai no prompt e ele lê sob demanda
-  resumos: "dados/resumos"     # onde ficam os resumos das conversas
-  memoria: "dados/memoria.md"  # o que ele lembra das conversas antigas (os resumos, consolidados)
-  lembretes: "Tony - Lembretes.md"   # nota dentro da pasta inteligencia onde o /lembrar escreve
 
-email:                         # e-mail da faculdade, só leitura (IMAP); o conteúdo vai para o modelo na nuvem
-  servidor: "imap.gmail.com"
-  usuario: ""                  # vazio = sem e-mail (a ferramenta ler_emails nem aparece)
-  senha_arquivo: "~/.config/tony/senha-email"   # senha de app do Google, fora do repositório (chmod 600)
-  filtro: ""                   # critério IMAP extra, ex.: 'FROM "faculdade.edu.br"': só esses e-mails vão para o modelo
+google:
+  pasta: "~/.config/tony"      # cliente OAuth (google-cliente.json) e token: fora do repositório, chmod 600
+
+coleta:                        # `tony coletar`: e-mails → datas → eventos.json, sem IA
+  contas:                      # as caixas que o Tony lê; a primeira também guarda a agenda "Tony"
+    - nome: "pessoal"          # gravado em cada evento; cada conta tem o seu token e o seu estado
+      email: ""                # o endereço: sugere a conta certa na hora de autorizar
+    # A Faccat (ou outra conta Google Workspace que bloqueie apps de fora) vai pelo Apps Script:
+    # - nome: "faccat"
+    #   tipo: "apps-script"     # ver TheForge/apps-script/tony.gs e `tony faccat`
+    #   arquivo: "~/.config/tony/faccat.env"
+  filtro: "-category:promotions -category:social"   # busca do Gmail que vale sempre; bloqueados entram sozinhos
+  primeira_vez_dias: 30        # na primeira coleta, quantos dias para trás
+  aceitar_a_partir_de: 0.6     # confiança da data para virar evento (ver tony/datas.py)
+  revisar_a_partir_de: 0.3     # entre um e outro, vai para "revisar"; abaixo, é descartada
+  eventos: "dados/eventos.json"
+  estado: "dados/coleta.json"  # última coleta e e-mails já vistos (as outras contas: coleta-<nome>.json)
+  bloqueados: "dados/bloqueados.json"   # {"enderecos": [...], "dominios": [...]}: nunca são lidos
+
+agenda:
+  arquivo: "dados/agenda.json" # id da agenda "Tony" no Google (o Tony não consegue listar as suas agendas)
+
+telegram:                      # `tony telegram`: o bot e a coleta de hora em hora
+  token_arquivo: "~/.config/tony/telegram-token"
+  contas_arquivo: "~/.config/tony/assistente.env"   # TELEGRAM_CHAT_ID: o único chat que ele responde
+  estado: "dados/telegram.json"
+  coletar_a_cada_min: 60
+  conversa_esquece_apos_min: 30  # sem mensagem nesse tempo, a próxima começa uma conversa nova
 
 personalidade: "personalidade"
 logs: "logs"
@@ -38,7 +57,3 @@ testes:
   juiz: "gpt-oss:120b-cloud"        # outro modelo: quem julga a si mesmo tende a ser bonzinho
   inteligencia: "exemplos/inteligencia"   # memória de exemplo: o placar não depende das suas notas
   resultados: "dados/testes"        # placares e respostas de cada rodada (fora do git)
-
-revisao:
-  revisor: "gpt-oss:120b-cloud"     # quem propõe as mudanças na personalidade (outro modelo, como o juiz)
-  registro: "dados/revisoes.jsonl"  # o que já foi revisado, para não propor de novo

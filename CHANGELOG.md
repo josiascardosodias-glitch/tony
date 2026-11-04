@@ -1,5 +1,73 @@
 # Changelog
 
+## v4.0.0 — 2026-11-03
+
+O Tony vira assistente de e-mail: datas dos e-mails → agenda "Tony" → consulta pelo Telegram, com o
+mínimo de IA. Primeira versão de produção: roda de `~/projetos/tony-producao` (a `main`), com o bot do
+Telegram como serviço e o resumo do dia às 08:00. Portão: 100 testes de código, falas 56/56. Plano completo no `ROADMAP.md` e em `docs/Projeto/Tony - Próximas atualizações.md`.
+
+**Etapa 5 — Telegram, várias contas e a Faccat**
+
+- `tony telegram`: o bot (só responde ao seu chat) e a coleta de hora em hora no mesmo processo.
+  Perguntas de agenda respondidas pelo código; perguntas livres vão ao modelo com a agenda no prompt.
+  `/hoje`, `/semana`, `/proximos`, `/revisar` (botões Aceitar e Descartar), `/coletar`, `/nova`. Avisa
+  quando a autorização do Google vence. `tony agendar` instala também o serviço `tony-telegram`.
+- `tony dia`: o resumo agora é montado pelo código (zero token) e vai também para o Telegram.
+- Várias contas em `coleta.contas`; `tony autorizar --conta <nome>`.
+- Conta Faccat pelo App da Web do Apps Script (`TheForge/apps-script/tony.gs`): só os prazos do
+  Classroom (os e-mails da Faccat ficam para um caminho com login); `tony faccat` cria a chave e guarda a URL.
+- Personalidade: é o assistente de e-mail e agenda; recebe a agenda e não inventa compromisso.
+  Falas novas `agenda-usa-o-que-tem` e `agenda-nao-inventa`; saiu `dia-sem-email` (o dia é código).
+  Placar: 56/56 nas 14 falas.
+- Testes de código: 100.
+
+**Etapa 4 — a agenda "Tony"**
+
+- `tony agenda`: cria a agenda "Tony" no Google Agenda (uma vez; o id fica em `dados/agenda.json`) e
+  leva para lá os eventos de hoje em diante. O `tony coletar` faz isso sozinho no fim.
+- Sem duplicar: id do Google no evento, `tony_id` no Google e um evento só para o mesmo remetente, dia
+  e hora. Título e data aparecem; a descrição (frase, remetente e link do e-mail) fica no corpo.
+- `tony aceitar <id>` e `tony descartar <id>` para as datas em revisar; `tony eventos --revisar` mostra os ids.
+- Testes de código: 66 (7 da agenda, com uma API falsa).
+
+**Etapa 3 — coleta e datas, sem IA**
+
+- `tony autorizar`: OAuth do Google (só leitura no Gmail; na Agenda, só as agendas do Tony). Token em
+  `~/.config/tony/google-token.json`, chmod 600. Em teste, vence a cada 7 dias.
+- `tony coletar`: e-mails novos (`after:` da última coleta; 30 dias na primeira), sem os bloqueados e
+  sem Promoções/Social, para `dados/eventos.json` (eventos e revisar). Espera e tenta de novo no limite
+  por minuto do Gmail; salva a cada 25 e-mails.
+- `tony eventos [--dias N] [--revisar]` e `tony bloquear <x@y.com | @dominio>`.
+- `tony/datas.py`: extrator próprio (o `dateparser` errava as frases de e-mail), convites `.ics` e
+  pontuação de confiança, com penalidade para e-mail em massa.
+- Primeira coleta real: 276 e-mails em 2,5 min; 0 eventos e 8 para revisar (um deles, um ingresso de
+  evento de verdade). Antes dos ajustes, eram 14 eventos de marketing e 62 datas para revisar.
+- Testes de código: 59 (30 do extrator, 14 da coleta com um Gmail falso).
+
+**Etapa 2 — o modelo**
+
+- Continua o `gemma4:31b-cloud` (51/52); os gratuitos maiores fizeram 44/52. Detalhes no `DECISOES.md`.
+
+**Etapa 1 — enxugamento e pendências**
+
+- Saem as ferramentas das notas (`listar_notas`, `ler_nota`, `buscar_notas`, `lembrar`), o `/lembrar`,
+  a memória entre conversas (resumos, `dados/memoria.md`, consolidação e recuperação de conversa sem
+  `/sair`), o `tony revisar` e o IMAP (`ler_emails`, `email` no config). Os arquivos que já existem em
+  `dados/` ficam onde estão, sem uso. A pasta `tony/ferramentas/` continua, vazia, para a agenda.
+- Ficam a personalidade, a conversa no terminal (`/bom`, `/ruim`, `/nova`, `/prompt`), a Inteligência
+  inteira no prompt, o `tony dia` (agora só com as notas) e as falas de teste.
+- Personalidade: não promete o que não depende dele ("eu aviso quando o sistema liberar") e sabe que
+  cada conversa começa do zero. Fala nova `nao-promete`: 0/8 com a personalidade antiga, 4/4 com a nova.
+- `tony dia`: quando as 6 tentativas falham, chega uma notificação (`OnFailure` no systemd); antes, a
+  falha só aparecia no `journalctl`. Quem já agendou: rode `tony agendar` de novo, da pasta de produção.
+- Documentação em `docs/` (notas do Obsidian, com o histórico); dados pessoais em
+  `docs/Inteligência/`, fora do git, com modelos vazios em `docs/Inteligência/modelos/`.
+- Assistentes `scripts/assistente-google.sh` e `scripts/assistente-telegram.sh`.
+- Falas de teste: de 33 para 13 (saíram as de memória, ferramentas das notas e e-mail). Placar
+  51/52; a falha (`sem-pergunta-de-praxe`) foi variação: 8/8 na repetição.
+- Testes de código: os de IMAP e recuperação saíram com o código; 16 novos (notas, calendário,
+  ferramentas, log, conversa com um modelo falso, timer e as falas).
+
 ## v3.0.0 — 2026-10-26
 
 O mundo de fora: o Tony lê o e-mail da faculdade e fala primeiro, com o resumo do dia.

@@ -3,41 +3,31 @@
 import argparse
 import readline  # noqa: F401 — só importar já dá setas e histórico ao input()
 import time
-from datetime import datetime
 
 from . import config
 from . import ferramentas
 from .cliente import Chamada, Cliente, ErroDoModelo
-from .conversa import TEMPERATURA_MEMORIA, Conversa, consolidar_memoria
-from .memoria import (carregar_personalidade, data_do_resumo, inteligencia_para_prompt, lembrar, ler_memoria,
-                      resumos_pendentes, salvar_memoria, salvar_resumo, ultimo_resumo, versao_personalidade)
-from .dia import caixa_de_email
-from .registro import Registro, anotar, conversa_sem_resumo
+from .conversa import Conversa
+from .memoria import carregar_personalidade, ler_inteligencia, versao_personalidade
+from .registro import Registro
 
 AJUDA = """Comandos:
   /bom              marca a última resposta como boa
   /ruim <motivo>    marca a última resposta como ruim (o motivo é o que mais ajuda a corrigir)
-  /lembrar <fato>   guarda um fato na nota de lembretes da Inteligência (pede confirmação)
-  /nova             encerra esta conversa (com resumo) e começa outra
+  /nova             começa uma conversa nova
   /prompt           mostra o prompt de sistema que o Tony está usando agora
   /sair             encerra (Ctrl+D também)"""
 
 
 class Sessao:
-    """Liga as peças: config, cliente, memória, conversa e registro."""
+    """Liga as peças: config, cliente, conversa e registro."""
 
     def __init__(self, cfg: dict):
         self.cfg = cfg
         self.cliente = Cliente(cfg)
-        self.pasta_resumos = config.caminho(cfg["memoria"]["resumos"])
-        self.arquivo_memoria = config.caminho(cfg["memoria"]["memoria"])
-        self.pasta_inteligencia = config.caminho(cfg["memoria"]["inteligencia"])
-        self.organizador = Cliente(cfg, temperatura=TEMPERATURA_MEMORIA)
-        ferramentas.ambiente.inteligencia = self.pasta_inteligencia
-        ferramentas.ambiente.lembretes = self.pasta_inteligencia / cfg["memoria"]["lembretes"] if self.pasta_inteligencia else None
+        self.inteligencia = ler_inteligencia(config.caminho(cfg["memoria"]["inteligencia"]))
         ferramentas.ambiente.confirmar = self._confirmar
-        ferramentas.ambiente.caixa_de_email = caixa_de_email(cfg)
-        self.ferramentas = ferramentas.descobrir()  # depois do ambiente: ler_emails só aparece com a caixa configurada
+        self.ferramentas = ferramentas.descobrir()
         pasta_personalidade = config.caminho(cfg["personalidade"])
         self.personalidade = carregar_personalidade(pasta_personalidade)
         self.registro = Registro(
@@ -45,92 +35,21 @@ class Sessao:
             modelo=self.cliente.modelo,
             personalidade=versao_personalidade(pasta_personalidade),
         )
-        self.recuperar_conversa()
         self.conversa = self._nova_conversa()
 
     def _nova_conversa(self) -> Conversa:
-        return Conversa(
-            self.cliente,
-            limite=self.cfg["contexto"]["limite"],
-            personalidade=self.personalidade,
-            inteligencia=inteligencia_para_prompt(self.pasta_inteligencia, self.cfg["memoria"]["inteligencia_inteira_ate"]),
-            ultima_conversa=ultimo_resumo(self.pasta_resumos),
-            memoria=ler_memoria(self.arquivo_memoria)[0],
-            ferramentas=self.ferramentas,
-        )
+        return Conversa(self.cliente, limite=self.cfg["contexto"]["limite"], personalidade=self.personalidade,
+                        inteligencia=self.inteligencia, ferramentas=self.ferramentas)
 
     @staticmethod
     def _confirmar(pergunta: str) -> bool:
         """Pergunta de uma ferramenta que escreve: só um "s" explícito autoriza."""
-        print(f"\n{pergunta}\n(essa pasta vai para o modelo na nuvem)")
+        print(f"\n{pergunta}")
         try:
             return input("confirma? [s/N] ").strip().lower() == "s"
         except (EOFError, KeyboardInterrupt):
             print()
             return False
-
-    def encerrar_conversa(self) -> None:
-        if not self.conversa.mensagens:
-            return
-        print("(guardando um resumo para a próxima conversa...)")
-        try:
-            resumo = self.conversa.resumir_para_proxima()
-        except ErroDoModelo as e:
-            print(f"[erro] não consegui resumir: {e}")
-            return
-        salvar_resumo(self.pasta_resumos, resumo)
-        self.registro.anotar("resumo", texto=resumo)
-        self.atualizar_memoria()
-
-    def recuperar_conversa(self) -> None:
-        """Se a conversa anterior acabou sem resumo (o terminal fechou, por exemplo), resume agora, pelo log."""
-        perdida = conversa_sem_resumo(self.registro.arquivo.parent)
-        if not perdida:
-            return
-        log, turnos = perdida
-        quando = datetime.fromisoformat(turnos[-1]["hora"])
-        print(f"(a conversa de {quando:%d/%m às %H:%M} terminou sem resumo; guardando agora...)")
-        conversa = self._nova_conversa()
-        for turno in turnos:
-            conversa.mensagens += [{"role": "user", "content": turno["usuario"]},
-                                   {"role": "assistant", "content": turno["tony"]}]
-        try:
-            resumo = conversa.resumir_para_proxima()
-        except ErroDoModelo as e:
-            print(f"[aviso] não consegui resumir a conversa anterior: {e}")
-            return
-        salvar_resumo(self.pasta_resumos, resumo, quando)
-        anotar(log, "resumo", texto=resumo, recuperado=True)
-        self.atualizar_memoria()
-
-    def atualizar_memoria(self) -> None:
-        """O resumo que deixou de ser o último entra na memória das conversas antigas."""
-        memoria, ate = ler_memoria(self.arquivo_memoria)
-        for resumo in resumos_pendentes(self.pasta_resumos, ate):
-            try:
-                memoria = consolidar_memoria(self.organizador, memoria, resumo.read_text(encoding="utf-8"),
-                                             data_do_resumo(resumo))
-            except ErroDoModelo as e:
-                print(f"[aviso] não consegui atualizar a memória ({e}); tento de novo na próxima conversa.")
-                return
-            salvar_memoria(self.arquivo_memoria, memoria, resumo.stem)
-            self.registro.anotar("memoria", resumo=resumo.stem, texto=memoria)
-
-    def lembrar(self, fato: str) -> None:
-        if not fato:
-            print("uso: /lembrar <fato>  (ex.: /lembrar minha prova de cálculo é dia 12/11)")
-            return
-        if not self.pasta_inteligencia or not self.pasta_inteligencia.is_dir():
-            print("não há pasta de Inteligência configurada (memoria.inteligencia no config.local.yaml).")
-            return
-        arquivo = ferramentas.ambiente.lembretes
-        if not self._confirmar(f"vou guardar em {arquivo.name}:\n  - {fato}"):
-            print("não guardei.")
-            return
-        lembrar(arquivo, fato)
-        self.conversa.lembrados.append(fato)
-        self.registro.anotar("lembrete", fato=fato)
-        print("guardado.")
 
     def comando(self, texto: str) -> bool:
         """Executa um comando /. Devolve False quando é hora de sair."""
@@ -140,10 +59,7 @@ class Sessao:
         if nome in ("/bom", "/ruim"):
             marcou = self.registro.marcar(nome[1:], resto.strip())
             print("marcado." if marcou else "ainda não há resposta para marcar.")
-        elif nome == "/lembrar":
-            self.lembrar(resto.strip())
         elif nome == "/nova":
-            self.encerrar_conversa()
             self.conversa = self._nova_conversa()
             self.registro.anotar("nova_conversa")
             print("conversa nova.")
@@ -198,7 +114,6 @@ def conversar(cfg: dict) -> None:
                 break
         else:
             sessao.falar(texto)
-    sessao.encerrar_conversa()
 
 
 def main() -> None:
@@ -207,35 +122,50 @@ def main() -> None:
     testar = comandos.add_parser("testar", help="roda as falas de teste e mostra o placar")
     testar.add_argument("ids", nargs="*", help="só estas falas (padrão: todas)")
     testar.add_argument("--vezes", type=int, help="quantas vezes cada fala roda")
-    revisar = comandos.add_parser("revisar", help="propõe uma mudança na personalidade a partir das marcações /ruim")
-    revisar.add_argument("--logs", type=config.caminho, help="pasta de logs (padrão: a do config)")
     dia = comandos.add_parser("dia", help="o Tony fala primeiro: o resumo do dia")
     dia.add_argument("--notificar", action="store_true", help="também mostra como notificação na área de trabalho")
     agendar = comandos.add_parser("agendar", help="instala um timer do systemd que roda `tony dia --notificar` todo dia")
     agendar.add_argument("--hora", default="08:00", help="HH:MM (padrão 08:00)")
+    autorizar = comandos.add_parser("autorizar", help="abre o navegador para autorizar o Tony no Gmail e na Agenda")
+    autorizar.add_argument("--conta", help="o nome da conta em coleta.contas (padrão: a primeira)")
+    comandos.add_parser("coletar", help="busca os e-mails novos e guarda as datas em eventos.json (sem IA)")
+    eventos = comandos.add_parser("eventos", help="mostra as datas guardadas (sem IA)")
+    eventos.add_argument("--dias", type=int, default=30, help="quantos dias à frente (padrão 30)")
+    eventos.add_argument("--revisar", action="store_true", help="mostra as datas de confiança média, para decidir")
+    bloquear = comandos.add_parser("bloquear", help="nunca mais lê e-mails de um endereço (x@y.com) ou domínio (@y.com)")
+    bloquear.add_argument("alvo")
+    faccat = comandos.add_parser("faccat", help="configura a conta da Faccat (App da Web do Apps Script)")
+    faccat.add_argument("--url", help="a URL /exec do App da Web, depois de implantar")
+    comandos.add_parser("telegram", help="o Tony no Telegram, com a coleta de hora em hora")
+    comandos.add_parser("agenda", help="leva os eventos para a agenda \"Tony\" do Google (o coletar já faz isso)")
+    aceitar = comandos.add_parser("aceitar", help="uma data de revisar vira evento (e vai para a agenda)")
+    aceitar.add_argument("id")
+    descartar = comandos.add_parser("descartar", help="uma data de revisar é jogada fora")
+    descartar.add_argument("id")
     args = parser.parse_args()
 
     cfg = config.carregar()
-    if args.comando in ("dia", "agendar"):
-        from . import dia
+    try:
+        if args.comando in ("dia", "agendar"):
+            from . import dia
 
-        try:
             dia.dia(cfg, args.notificar) if args.comando == "dia" else dia.agendar(args.hora)
-        except ErroDoModelo as e:
-            raise SystemExit(f"\n[erro] {e}")
-    elif args.comando in ("testar", "revisar"):
-        from .revisao import revisar
-        from .testes import rodar
+        elif args.comando in ("autorizar", "coletar", "eventos", "bloquear", "agenda", "aceitar", "descartar", "faccat"):
+            from . import contas
 
-        try:
-            if args.comando == "testar":
-                rodar(cfg, args.ids, args.vezes)
-            else:
-                revisar(cfg, args.logs)
-        except ErroDoModelo as e:
-            raise SystemExit(f"\n[erro] {e}")
-    else:
-        conversar(cfg)
+            contas.rodar(cfg, args)
+        elif args.comando == "telegram":
+            from .telegram import rodar as telegram
+
+            telegram(cfg)
+        elif args.comando == "testar":
+            from .testes import rodar
+
+            rodar(cfg, args.ids, args.vezes)
+        else:
+            conversar(cfg)
+    except ErroDoModelo as e:
+        raise SystemExit(f"\n[erro] {e}")
 
 
 if __name__ == "__main__":
