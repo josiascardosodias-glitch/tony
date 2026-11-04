@@ -1,5 +1,25 @@
 # Changelog
 
+## v5.0.0 — 2026-11-04
+
+O Tony sai do notebook e roda no Google Apps Script, 24 horas, de graça e sem cartão.
+
+- **Tudo em JavaScript (`appsscript/`):** datas, consulta, resumo do dia, repetidos, coleta, agenda e
+  Telegram. Um teste diferencial confere o JavaScript contra o Python: 5412 casos de datas, 552
+  consultas, 300 bancos de repetidos e 82 caixas de e-mail dão o mesmo resultado. 38 testes no
+  `node --test`.
+- **Contas:** a pessoal pela API avançada do Gmail (sem token), a pessoal2 pela API REST com o token
+  OAuth do projeto, a Faccat pelo App da Web dela.
+- **Telegram por webhook** (`doPost`), com segredo na URL e reenvios ignorados. A resposta é HTML: a
+  de texto do Apps Script é um 302, que trava a fila do Telegram.
+- **Gatilhos:** coleta de hora em hora e resumo às 08:00 (com a folga de ~15 min do Google).
+- **Dados nas propriedades do script** (sem acesso ao Drive); `configurar.py` leva segredos e dados do
+  PC pela rota de administração, sem passar pela tela.
+- **App do Google publicado** ("Em produção"): a autorização não vence mais a cada 7 dias.
+  `PRIVACIDADE.md` com a política exigida.
+- Agenda "Tony" nova, criada pelo Apps Script (o acesso `calendar.app.created` só enxerga o que o próprio
+  app cria).
+
 ## v4.1.0 — 2026-11-04
 
 Tirar da agenda o que você aceitou e se arrependeu, e o mesmo compromisso uma vez só.

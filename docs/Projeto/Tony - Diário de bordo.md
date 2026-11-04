@@ -10,6 +10,52 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-11-04 (fim da tarde) — v5.0.0: a virada para o Apps Script
+
+**Feito**
+- Etapa 3: Telegram por webhook, comandos, botões e conversa com o modelo direto na nuvem do Ollama.
+- Etapa 4: pessoal2 pelo token OAuth, Faccat pelo App da Web, gatilhos, rota de administração e
+  `configurar.py`. Repetidos conferidos com os dados reais (o JavaScript tira os mesmos 3 que o Python)
+  e entre as contas.
+- App do Google publicado (Branding com página inicial, `PRIVACIDADE.md` e domínio `github.com`).
+- Virada: serviços do notebook desligados, dados importados (6 eventos), agenda nova, webhook e
+  gatilhos. Testado no Telegram: `/hoje`, pergunta livre, `/remover` → Deixar.
+
+**Travou**
+- A autorização da conta pessoal caiu no meio da virada (App da Web 403, token do Python revogado);
+  aceita de novo no editor, já com o app em produção.
+- Com o webhook, o 302 do `ContentService` travou a fila do Telegram (5 mensagens). Resposta em HTML.
+- A agenda "Tony" antiga (da v4) não foi apagada por aqui: exclusão permanente fica com o dono.
+
+**Aprendi**
+- O `clasp push` não apaga no Google um arquivo que só sumiu do PC: o `enviar.sh` muda o
+  `_conhecimento.js` a cada envio para mandar tudo.
+- Testar o webhook com mensagens falsas não pega o 302: só uma mensagem de verdade, com a fila do
+  Telegram, mostra o problema.
+
+## 2026-11-04 (tarde) — v5, etapas 1 e 2: o Tony no Apps Script
+
+**Feito**
+- Decidido sair do notebook: VPS grátis pede cartão; hospedagens de bot sem cartão guardariam o token
+  do Gmail com terceiros. Fica o Google Apps Script (plano no [[Tony - Próximas atualizações]]).
+- Etapa 1: datas, consulta, resumo do dia e repetidos em JavaScript (`appsscript/src/`). Etapa 2:
+  coleta pela API avançada do Gmail, dados nas propriedades do script, agenda com `calendar.app.created`.
+- Teste diferencial: o Python gera as respostas (5412 datas, 552 consultas, 300 bancos de repetidos,
+  82 caixas de e-mail) e o JavaScript tem que responder igual. 19 testes no `node --test`.
+- No Google: `conferir()` leu 25 e-mails dos últimos 3 dias (0 para a agenda, 2 para revisar), igual
+  ao Python nos mesmos e-mails, e criou e apagou uma agenda de teste.
+
+**Travou**
+- O Google barrava as permissões ("Autorização obrigatória" sem saída): o script estava no projeto
+  "Padrão" do Apps Script, onde a leitura do Gmail é bloqueada. Resolvido ligando o script ao projeto
+  `tony-513620` (Configurações do projeto > Projeto do GCP), em que o dono é usuário de teste.
+- O app continua "Testando": o "Publicar app" pede o Branding completo. Em teste, a autorização pode
+  vencer em 7 dias; resolver antes da virada.
+
+**Aprendi**
+- `\b` do JavaScript não entende acento ("amanhã"); o do Python entende. Limite Unicode próprio.
+- Objetos criados num contexto do `vm` do Node não passam no `deepEqual` estrito (outro protótipo).
+
 ## 2026-11-04 — v4.1.0: `/remover` e um compromisso por vez
 
 **Diagnóstico do "bot travado"**

@@ -11,3 +11,7 @@ __pycache__/
 # Dados pessoais da documentação: cada pessoa preenche os seus a partir de docs/Inteligência/modelos/
 docs/Inteligência/*
 !docs/Inteligência/modelos/
+appsscript/testes/casos.json
+appsscript/.clasp.json
+appsscript/src/_conhecimento.js
+appsscript/src/_configurar.js

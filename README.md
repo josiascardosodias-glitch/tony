@@ -10,6 +10,19 @@ grava na agenda e responde pelo Telegram; o modelo só entra nas perguntas livre
 anteriores a personalidade em arquivos versionados, a conversa no terminal e as falas de teste
 (placar da v4.0: 56/56).
 
+## v5: o Tony no Google Apps Script
+
+Desde a v5.0.0 o Tony roda no Google Apps Script, 24 horas, sem depender do computador: coleta das
+três contas de hora em hora, agenda "Tony", Telegram por webhook e resumo às 08:00. O código fica em
+[`appsscript/`](appsscript/README.md) (JavaScript, com testes que conferem o resultado contra o
+Python). O Python continua para as falas de teste (`tony testar`) e como reserva.
+
+```bash
+appsscript/testar.sh                                   # testes (node --test, diferencial contra o Python)
+appsscript/enviar.sh                                   # testes + envio (clasp push)
+uv run python appsscript/configurar.py --acao conferir # estado do Tony na nuvem (só números)
+```
+
 ## Instalar
 
 Requisitos: [uv](https://docs.astral.sh/uv/) e [Ollama](https://ollama.com).

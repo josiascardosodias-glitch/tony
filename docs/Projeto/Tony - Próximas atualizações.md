@@ -23,6 +23,7 @@ as ideias soltas. Quando uma versão sai, ela vai para o `CHANGELOG.md` e some d
 | ~~v3.0.x~~ | ~~E-mail testado com a caixa real (IMAP)~~     | ❌ substituída pela v4 |
 | v4.0.0   | Assistente de e-mail: datas → agenda → Telegram (produção) | ✅ publicada (56/56) |
 | v4.1.0   | `/remover` no Telegram; o mesmo compromisso uma vez só | ✅ publicada |
+| v5.0.0   | Tony no Google Apps Script: 24 h sem o notebook       | ✅ publicada (38 testes JS, falas 56/56) |
 
 > [!important] A partir da v4, siga [[Tony - Regras do projeto]]
 > Trabalho só na branch `develop`; a `main` é produção e só recebe o que passou nos testes e não
@@ -309,6 +310,55 @@ Cada item vira uma linha no `DECISOES.md`, com o resultado:
   com os prazos do Classroom, que já vêm prontos na API (`dueDate`), e os anexos dos professores.
   O Apps Script entrega ao PC só o que já passou pelo filtro da conta.
 - Outras contas pessoais, uma por vez.
+
+## v5 — Tony no Google Apps Script ✅
+
+> [!success] Publicada em 2026-11-04 como v5.0.0. O que saiu está no `CHANGELOG.md`; esta seção fica
+> como registro de como foi planejada.
+
+> [!abstract] Decidido em 2026-11-04
+> O Tony para de depender do notebook. VPS grátis pede cartão, e as hospedagens de bot sem cartão
+> guardariam o token que lê o Gmail com empresas pequenas e anônimas. O Apps Script é grátis, sem
+> cartão, roda nos servidores do Google e acessa Gmail e Agenda da própria conta, **sem token** (some
+> também a autorização que vence a cada 7 dias). Custo: o núcleo vira JavaScript.
+
+**O que muda**
+
+| Peça | v4 (notebook, Python) | v5 (Apps Script, JavaScript) |
+|---|---|---|
+| Coleta | API do Gmail com OAuth, de hora em hora no processo do bot | `GmailApp`, gatilho de hora em hora |
+| Datas, repetidos, consulta, resumo | `datas.py`, `coleta.chave`, `consulta.py`, `dia.py` | os mesmos algoritmos em JS (só regex: o `dateparser` já saiu na v4) |
+| Agenda "Tony" | API da Agenda com OAuth | `CalendarApp` |
+| Telegram | long polling (`getUpdates`) | webhook no `doPost` do App da Web |
+| Modelo (perguntas livres) | Ollama local, que repassa à nuvem | API da nuvem do Ollama direto (`UrlFetchApp`, chave nas propriedades do script) |
+| Dados | `dados/*.json` no PC | um JSON numa pasta privada do Drive da conta pessoal |
+| Segredos | `~/.config/tony/` | Propriedades do script (não vão para o repositório) |
+| Resumo do dia | timer do systemd 08:00 | gatilho diário 08:00 |
+| pessoal2 e Faccat | duas autorizações OAuth e o App da Web da Faccat | um script mínimo em cada conta, chamado pelo principal (a técnica da Faccat) |
+
+**Fica no PC (Python):** `tony testar` (falas e juiz, contra a mesma personalidade) e a v4 inteira
+como reserva, desligada.
+
+**Cuidados conhecidos do Apps Script**
+- O App da Web responde ao Telegram com um redirecionamento (302): o Telegram pode reenviar a mesma
+  atualização. Guardar os últimos `update_id` e ignorar repetidos.
+- O `doPost` não lê cabeçalhos: o segredo do webhook vai na URL, e o `chat_id` continua conferido.
+- Cotas da conta gratuita: 90 min/dia de gatilhos, 6 min por execução, 20 mil `UrlFetch`/dia. O Tony
+  usa bem menos (coleta de hora em hora ≈ segundos).
+
+**Etapas**
+0. **Você:** ativar a API do Apps Script (script.google.com/home/usersettings), `clasp login` uma vez e
+   criar uma chave de API no ollama.com.
+1. Lógica pura em JS (`appsscript/`): datas, chave e repetidos, consulta, resumo do dia. Testes no
+   `node --test`, com os mesmos casos dos testes Python.
+2. Coleta pelo `GmailApp` (bloqueados, filtro, vistos), o JSON no Drive e a agenda pelo `CalendarApp`.
+3. Telegram por webhook: comandos, botões (aceitar, descartar, remover), perguntas livres no modelo.
+4. Gatilhos (coleta de hora em hora, resumo às 08:00) e as contas pessoal2 e Faccat.
+5. Virada: importar o `eventos.json` atual, desligar `tony-telegram` e `tony-dia` no notebook, apontar
+   o webhook. Os dois juntos não dá: polling e webhook brigam pelas mensagens.
+
+**Regras que mudam com a v5** (autorizado pelo usuário): a regra 4 passa a ser "dados e segredos na
+conta Google pessoal (Drive privado e propriedades do script), nunca no repositório".
 
 ## Horizonte
 

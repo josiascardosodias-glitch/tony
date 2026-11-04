@@ -359,3 +359,24 @@ Cada decisão: o que foi decidido, por quê e o que ficou de fora. A mais recent
    uma data só.
 98. **Descartado e removido guardam a chave (`chaves_fora`), não só o id.** *Por quê:* o lembrete de um
    compromisso que você tirou é outro e-mail, com outro id, e traria ele de volta.
+
+## 2026-11-04 — v5: o Tony no Google Apps Script
+
+99. **Apps Script em vez de VPS.** *Por quê:* VPS grátis pede cartão; as hospedagens de bot sem cartão
+   guardariam o token que lê o Gmail com empresas pequenas e anônimas. O Apps Script é grátis, sem
+   cartão, e acessa Gmail e Agenda da própria conta sem token. Custo: o núcleo virou JavaScript.
+100. **Teste diferencial contra o Python.** *Por quê:* reescrever o extrator de datas num idioma novo é
+   o lugar mais fácil de errar sem perceber. O Python gera as respostas certas para milhares de casos e
+   o JavaScript tem que responder igual; o `\b` com acento foi o primeiro erro que ele pegou.
+101. **Dados nas propriedades do script, não no Drive.** *Por quê:* o Drive pelo Apps Script pede acesso
+   ao Drive inteiro; as propriedades guardam 500 KB, só o script lê, e o Tony usa uns 20 KB.
+102. **Webhook responde em HTML.** *Por quê:* a resposta de texto (`ContentService`) é um 302, que o
+   Telegram trata como erro: ele reenvia a mesma atualização e a fila trava. Visto na virada, com 5
+   mensagens presas.
+103. **pessoal2 pelo token OAuth do projeto, não por um script na conta dela.** *Por quê:* um script lá
+   precisaria do mesmo ajuste de projeto do Google Cloud; o token já existia e a API REST devolve o
+   mesmo formato da API avançada.
+104. **App do Google "Em produção" sem verificação.** *Por quê:* em teste a autorização vence a cada 7
+   dias, o que derruba um Tony que roda sozinho. Sem verificação, vale para até 100 usuários, com o
+   aviso de "não verificado"; o único usuário é o dono.
+
