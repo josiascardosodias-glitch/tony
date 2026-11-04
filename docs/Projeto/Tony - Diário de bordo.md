@@ -10,6 +10,25 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-11-04 — v4.1.0: `/remover` e um compromisso por vez
+
+**Diagnóstico do "bot travado"**
+- O serviço e a coleta estavam bem, a autorização do Google e o modelo (`gemma4:31b-cloud`) também.
+  O notebook suspende quando a tampa fecha (ontem das 22:53 às 09:05, hoje das 12:03 às 13:06), e o
+  bot para junto. As mensagens enviadas nesse tempo ficam no Telegram e são respondidas ao acordar
+  (as duas de 09:06 chegaram juntas). Rodar 24 h depende de não suspender ou de outra máquina.
+
+**Feito**
+- `/remover` no Telegram, com confirmação, e o botão 🗑 no "Pus na agenda" e depois de um aceite.
+- O mesmo compromisso (remetente, dia e hora) entra uma vez só, já na coleta; o `eventos.json` da
+  produção perdeu 3 repetidos (Oktober Summit em dois e-mails, Google Play nas duas contas, Mercado
+  Livre). Prazos do Classroom comparam também o título.
+- 114 testes de código.
+
+**Aprendi**
+- A regra de repetidos já existia, mas só na agenda; quem lê o `eventos.json` (Telegram, resumo do
+  dia) via os dois. Regra de dado vale na entrada, não na saída.
+
 ## 2026-11-03 (noite) — Google, Telegram e a etapa 1 da v4
 
 **Feito**

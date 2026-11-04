@@ -4,7 +4,7 @@
 from datetime import date
 
 from . import config, google
-from .agenda import decidir, sincronizar
+from .agenda import decidir, remover, sincronizar
 from .coleta import bloquear, coletar, ler_json, proximos
 from .conversa import DIAS
 
@@ -61,13 +61,15 @@ def rodar(cfg: dict, args) -> None:
             lista = sorted(duvidosos, key=lambda e: e["data"])
         else:
             lista = proximos(cfg, args.dias)
-        print("\n".join(linha(e, args.revisar) for e in lista) or "nada por aqui.")
+        print("\n".join(linha(e, args.revisar or args.ids) for e in lista) or "nada por aqui.")
         if args.revisar and lista:
             print("\npara decidir: uv run tony aceitar <id>  ·  uv run tony descartar <id>")
     elif args.comando in ("aceitar", "descartar"):
         print(decidir(cfg, args.id, args.comando == "aceitar"))
         if args.comando == "aceitar":
             print(_agenda(cfg))
+    elif args.comando == "remover":
+        print(remover(cfg, _servico(cfg, "calendar", "v3"), args.id))
     elif args.comando == "agenda":
         print(_agenda(cfg))
     else:

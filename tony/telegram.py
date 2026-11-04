@@ -4,6 +4,7 @@
 - Pergunta de agenda ("o que tenho sexta?") é respondida pelo código (`consulta.py`): zero token.
 - Pergunta livre vai ao modelo, com a personalidade e a agenda dos próximos 30 dias (nunca o e-mail).
 - Data de confiança média chega com os botões Aceitar e Descartar.
+- `/remover` (ou o botão 🗑 depois de aceitar) tira da agenda um compromisso já aceito, com confirmação.
 - Se a autorização do Google vencer, avisa (uma vez por dia) como renovar.
 
 A API do Telegram é chamada direto por HTTP (`httpx`): long polling no `getUpdates`, sem biblioteca de
@@ -16,7 +17,7 @@ from datetime import date, datetime, timedelta
 import httpx
 
 from . import config, google
-from .agenda import decidir, sincronizar
+from .agenda import decidir, remover, sincronizar
 from .cliente import Cliente, ErroDoModelo
 from .coleta import coletar, ler_json, salvar_json
 from .consulta import eh_de_agenda, para_o_modelo, responder
@@ -28,6 +29,7 @@ AJUDA = """Pode perguntar do jeito que quiser: "o que tenho amanhã?", "e sexta?
 
 /hoje · /semana · /proximos — o que está marcado
 /revisar — as datas que eu não tive certeza
+/remover — tirar da agenda um compromisso que já aceitei
 /coletar — olhar os e-mails agora
 /nova — esquecer esta conversa"""
 
@@ -74,9 +76,22 @@ def credenciais(cfg: dict) -> tuple[str, int]:
 MAXIMO_DE_UMA_VEZ = 3  # mais datas novas que isso numa coleta viram uma mensagem só
 
 
+REMOVER_NO_MAXIMO = 30  # botões do /remover: os compromissos mais próximos
+
+
 def botoes(id_: str) -> list:
     return [[{"text": "✅ Aceitar", "callback_data": f"aceitar:{id_}"},
              {"text": "🗑 Descartar", "callback_data": f"descartar:{id_}"}]]
+
+
+def quando(e: dict) -> str:
+    return f"{e['data'][8:]}/{e['data'][5:7]}{' ' + e['hora'] if e['hora'] else ''}"
+
+
+def botao_remover(e: dict, com_titulo: bool = True) -> list:
+    """Uma linha com o botão que pede para remover (a confirmação vem depois)."""
+    texto = f"🗑 {quando(e)} · {e['titulo']}" if com_titulo else "🗑 Remover da agenda"
+    return [{"text": texto[:60], "callback_data": f"remover:{e['id']}"}]
 
 
 class Bot:
@@ -143,9 +158,13 @@ class Bot:
         banco = self.eventos()
         novos = [e for i, e in banco["eventos"].items() if i not in antes]
         if novos:
-            linhas = "\n".join(f"• {e['data'][8:]}/{e['data'][5:7]}{', ' + e['hora'] if e['hora'] else ''} — {e['titulo']}"
-                               for e in sorted(novos, key=lambda e: (e["data"], e["hora"] or "")))
-            self.telegram.enviar(f"Pus na agenda:\n{linhas}")
+            novos.sort(key=lambda e: (e["data"], e["hora"] or ""))
+            linhas = "\n".join(f"• {quando(e)} — {e['titulo']}" for e in novos)
+            if len(novos) <= REMOVER_NO_MAXIMO:
+                self.telegram.enviar(f"Pus na agenda:\n{linhas}\n\nNão é compromisso? Toque para tirar.",
+                                     [botao_remover(e) for e in novos])
+            else:
+                self.telegram.enviar(f"Pus na agenda:\n{linhas}\n\n/remover tira o que não for compromisso.")
         self.avisar_revisar(banco)
         if avisar_vazio and not novos:
             self.telegram.enviar(f"Olhei {lidos} e-mail(s) novo(s): nada para a agenda.")
@@ -213,6 +232,8 @@ class Bot:
         if comando == "/coletar":
             self.rodar_coleta(agora, avisar_vazio=True)
             return ""
+        if comando == "/remover":
+            return self.listar_para_remover(agora)
         if comando == "/nova":
             self.conversa = None
             return "Conversa nova."
@@ -236,21 +257,62 @@ class Bot:
         except ErroDoModelo as e:
             return f"Não consegui falar com o modelo agora ({e}). Perguntas de agenda continuam funcionando."
 
+    def listar_para_remover(self, agora: datetime) -> str:
+        """Os compromissos de hoje em diante, um botão cada; o toque pede confirmação."""
+        hoje = agora.date().isoformat()
+        futuros = sorted((e for e in self.eventos()["eventos"].values() if e["data"] >= hoje),
+                         key=lambda e: (e["data"], e["hora"] or ""))
+        if not futuros:
+            return "Não tenho nenhum compromisso na agenda para tirar."
+        extra = f"\n(os {REMOVER_NO_MAXIMO} mais próximos; tem {len(futuros)})" if len(futuros) > REMOVER_NO_MAXIMO else ""
+        self.telegram.enviar(f"Qual compromisso eu tiro da agenda?{extra}",
+                             [botao_remover(e) for e in futuros[:REMOVER_NO_MAXIMO]])
+        return ""
+
     def botao(self, clique: dict) -> None:
         mensagem = clique.get("message") or {}
         if mensagem.get("chat", {}).get("id") != self.telegram.chat_id:
             return
         acao, _, id_ = clique.get("data", "").partition(":")
-        resultado = decidir(self.cfg, id_, acao == "aceitar")
-        if acao == "aceitar" and resultado.startswith("aceito"):
+        botoes_depois = None
+        if acao == "remover":  # primeiro toque: só pergunta
+            e = self.eventos()["eventos"].get(id_)
+            self.telegram.chamar("answerCallbackQuery", callback_query_id=clique["id"],
+                                 text="" if e else "esse já não está na agenda.")
+            if not e:  # a lista continua com os outros botões
+                return
+            self.telegram.enviar(f"Tiro da agenda?\n\n{e['titulo']}\n{quando(e)}\n(de {e['remetente']})\n\n"
+                                 "Outro e-mail sobre o mesmo compromisso também não volta.",
+                                 [[{"text": "🗑 Sim, tirar", "callback_data": f"tirar:{id_}"},
+                                   {"text": "↩ Deixar", "callback_data": f"deixar:{id_}"}]])
+            return
+        if acao == "deixar":
+            resultado = "ficou na agenda."
+        elif acao == "tirar":
             try:
-                sincronizar(self.cfg, self.agenda())
-                resultado += " Está na agenda."
+                resultado = remover(self.cfg, self.agenda(), id_)
             except google.AutorizacaoVencida:
-                resultado += " Vai para a agenda quando a autorização do Google for renovada."
+                resultado = "não consegui falar com a Agenda: a autorização do Google venceu (uv run tony autorizar)."
+        else:
+            resultado = decidir(self.cfg, id_, acao == "aceitar")
+            if acao == "aceitar" and resultado.startswith("aceito"):
+                try:
+                    sincronizar(self.cfg, self.agenda())
+                    resultado += " Está na agenda."
+                except google.AutorizacaoVencida:
+                    resultado += " Vai para a agenda quando a autorização do Google for renovada."
+                e = self.eventos()["eventos"].get(id_)
+                if e:  # mudou de ideia depois? dá para tirar daqui mesmo
+                    botoes_depois = [botao_remover(e, com_titulo=False)]
+        self.responder_botao(clique, mensagem, resultado, botoes_depois)
+
+    def responder_botao(self, clique: dict, mensagem: dict, resultado: str, botoes: list | None = None) -> None:
         self.telegram.chamar("answerCallbackQuery", callback_query_id=clique["id"], text=resultado[:190])
-        self.telegram.chamar("editMessageText", chat_id=self.telegram.chat_id, message_id=mensagem["message_id"],
-                             text=f"{mensagem.get('text', '')}\n\n→ {resultado}")
+        dados = {"chat_id": self.telegram.chat_id, "message_id": mensagem["message_id"],
+                 "text": f"{mensagem.get('text', '')}\n\n→ {resultado}"[:4000]}
+        if botoes:
+            dados["reply_markup"] = {"inline_keyboard": botoes}
+        self.telegram.chamar("editMessageText", **dados)
 
     # --- Laço --------------------------------------------------------------------------------------
 

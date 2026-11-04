@@ -114,6 +114,49 @@ class TestBot(unittest.TestCase):
         self.assertEqual((banco["revisar"], banco["descartados"]), ({}, ["r1-1"]))
         self.assertEqual([m for m, _ in self.telegram.chamadas], ["answerCallbackQuery", "editMessageText"])
 
+    def clicar(self, dados: str, n: int = 2):
+        clique = {"id": f"c{n}", "data": dados, "message": {"chat": {"id": MEU_CHAT}, "message_id": 9, "text": "?"}}
+        self.bot.tratar({"update_id": n, "callback_query": clique}, AGORA)
+
+    def test_remover_pede_confirmacao_e_tira_da_agenda(self):
+        self.apagados = []
+        self.bot.agenda = lambda: AgendaQueApaga(self.apagados)
+        (self.pasta / "agenda.json").write_text(json.dumps({"id": "agenda-1"}))
+        self.cfg["agenda"] = {**self.cfg["agenda"], "arquivo": str(self.pasta / "agenda.json")}
+        self.gravar({"m1-1": dict(evento("m1-1", "2026-11-05", "Oktober Summit", "08:30"), evento_agenda="ev-1")}, {})
+        self.assertEqual(self.bot.responder("/remover", AGORA), "")
+        lista = self.telegram.enviadas[-1]
+        self.assertEqual(lista["botoes"][0][0]["callback_data"], "remover:m1-1")
+        self.assertIn("Oktober Summit", lista["botoes"][0][0]["text"])
+        self.clicar("remover:m1-1")
+        confirmar = self.telegram.enviadas[-1]
+        self.assertIn("Tiro da agenda?", confirmar["texto"])
+        self.assertIn("m1-1", json.loads((self.pasta / "eventos.json").read_text())["eventos"])  # ainda não saiu
+        self.assertEqual([b["callback_data"] for b in confirmar["botoes"][0]], ["tirar:m1-1", "deixar:m1-1"])
+        self.clicar("tirar:m1-1", 3)
+        banco = json.loads((self.pasta / "eventos.json").read_text())
+        self.assertEqual((banco["eventos"], banco["removidos"], self.apagados), ({}, ["m1-1"], ["ev-1"]))
+        self.assertIn("removido", self.telegram.chamadas[-1][1]["text"])
+
+    def test_deixar_nao_remove(self):
+        self.clicar("deixar:m1-1")
+        self.assertIn("m1-1", json.loads((self.pasta / "eventos.json").read_text())["eventos"])
+        self.assertIn("ficou na agenda", self.telegram.chamadas[-1][1]["text"])
+
+    def test_remover_sem_nada_na_agenda(self):
+        self.gravar({}, {})
+        self.assertIn("nenhum compromisso", self.bot.responder("/remover", AGORA))
+
+    def test_aceitar_deixa_o_botao_de_remover(self):
+        self.bot.agenda = lambda: None
+        import tony.telegram as modulo
+        original = modulo.sincronizar
+        modulo.sincronizar = lambda cfg, servico: {}
+        self.addCleanup(setattr, modulo, "sincronizar", original)
+        self.clicar("aceitar:r1-1")
+        editada = self.telegram.chamadas[-1][1]
+        self.assertEqual(editada["reply_markup"]["inline_keyboard"][0][0]["callback_data"], "remover:r1-1")
+
     def test_botao_de_outro_chat_nao_faz_nada(self):
         clique = {"id": "c1", "data": "aceitar:r1-1", "message": {"chat": {"id": 666}, "message_id": 9}}
         self.bot.tratar({"update_id": 2, "callback_query": clique}, AGORA)
@@ -132,6 +175,7 @@ class TestBot(unittest.TestCase):
 
     def test_comandos(self):
         self.assertIn("/revisar", self.bot.responder("/ajuda", AGORA))
+        self.assertIn("/remover", self.bot.responder("/ajuda", AGORA))
         self.assertIn("Oktober Summit", self.bot.responder("/semana", AGORA))
         self.assertEqual(self.bot.responder("/nova", AGORA), "Conversa nova.")
         self.assertIn("Não conheço", self.bot.responder("/xyz", AGORA))
@@ -141,6 +185,20 @@ class TestBot(unittest.TestCase):
         self.assertTrue(self.bot.hora_de_coletar(AGORA))
         self.bot.estado["ultima_coleta"] = AGORA.isoformat()
         self.assertFalse(self.bot.hora_de_coletar(AGORA))
+
+
+class AgendaQueApaga:
+    """Só o que o `remover` usa da API da Agenda."""
+
+    def __init__(self, apagados: list):
+        self.apagados = apagados
+
+    def events(self):
+        return self
+
+    def delete(self, calendarId, eventId):
+        self.apagados.append(eventId)
+        return type("Pedido", (), {"execute": lambda _: None})()
 
 
 class TestTelegram(unittest.TestCase):

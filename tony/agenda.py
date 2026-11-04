@@ -7,13 +7,14 @@ Sem duplicar, em três camadas:
 1. o evento já sincronizado guarda o id do Google em `evento_agenda`;
 2. no Google, cada evento leva o id do Tony em `extendedProperties.private.tony_id`, e antes de criar o
    Tony procura por ele (para o caso de o `eventos.json` ter se perdido);
-3. dois e-mails do mesmo remetente sobre o mesmo dia e hora (confirmação e lembrete) viram um evento só.
+3. dois e-mails do mesmo remetente sobre o mesmo dia e hora (confirmação e lembrete) viram um evento só
+   (`coleta.chave`; a coleta já guarda um só, e isto cobre o `eventos.json` de antes).
 """
 
 from datetime import date, datetime, timedelta
 
 from . import config
-from .coleta import executar, ler_json, salvar_json
+from .coleta import chave, executar, juntar_repetidos, ler_json, salvar_json
 
 NOME = "Tony"
 DESCRICAO = "Datas encontradas pelo Tony nos seus e-mails. Pode apagar a agenda inteira se quiser recomeçar."
@@ -54,9 +55,15 @@ def _ja_existe(servico, agenda: str, tony_id: str) -> str | None:
     return itens[0]["id"] if itens else None
 
 
-def chave(evento: dict) -> tuple:
-    """O mesmo compromisso, mesmo vindo em dois e-mails."""
-    return evento["remetente"], evento["data"], evento["hora"]
+def _apagar(servico, agenda: str, evento_agenda: str) -> None:
+    """Apaga um evento da agenda; o que já foi apagado à mão (404/410) não é erro."""
+    from googleapiclient.errors import HttpError
+
+    try:
+        executar(servico.events().delete(calendarId=agenda, eventId=evento_agenda))
+    except HttpError as e:
+        if e.resp.status not in (404, 410):
+            raise
 
 
 def sincronizar(cfg: dict, servico, hoje: date | None = None) -> dict:
@@ -65,7 +72,14 @@ def sincronizar(cfg: dict, servico, hoje: date | None = None) -> dict:
     banco = ler_json(arquivo, {"eventos": {}, "revisar": {}})
     hoje = (hoje or date.today()).isoformat()
     agenda = id_da_agenda(cfg, servico)
-    resumo = {"criados": 0, "repetidos": 0, "ja_estavam": 0}
+    resumo = {"criados": 0, "repetidos": juntar_repetidos(banco), "ja_estavam": 0}
+    em_uso = {e.get("evento_agenda") for e in banco["eventos"].values()}
+    while banco.get("apagar_no_google"):  # repetido que já tinha ido para o Google sozinho
+        evento_agenda = banco["apagar_no_google"][0]
+        if evento_agenda not in em_uso:
+            _apagar(servico, agenda, evento_agenda)
+        banco["apagar_no_google"].pop(0)
+        salvar_json(arquivo, banco)
     no_google = {chave(e): e["evento_agenda"] for e in banco["eventos"].values() if e.get("evento_agenda")}
     for evento in sorted(banco["eventos"].values(), key=lambda e: e["id"]):
         if evento.get("evento_agenda") or evento["data"] < hoje:
@@ -93,9 +107,49 @@ def decidir(cfg: dict, id_: str, aceitar: bool) -> str:
     evento = banco["revisar"].pop(id_, None)
     if not evento:
         return f"não há {id_} em revisar (veja os ids com `tony eventos --revisar`)."
+    if aceitar and any(chave(e) == chave(evento) for e in banco["eventos"].values()):
+        banco.setdefault("repetidos", []).append(id_)
+        salvar_json(arquivo, banco)
+        return f"aceito: {evento['titulo']} ({evento['data']}) já estava na agenda por outro e-mail."
     if aceitar:
         banco["eventos"][id_] = evento
     else:
         banco["descartados"].append(id_)
+        _guardar_fora(banco, evento)
     salvar_json(arquivo, banco)
     return f"{'aceito' if aceitar else 'descartado'}: {evento['titulo']} ({evento['data']})."
+
+
+def _guardar_fora(banco: dict, evento: dict) -> None:
+    """O compromisso inteiro (não só este e-mail) não volta: veja `coleta.chaves_fora`."""
+    fora = banco.setdefault("chaves_fora", [])
+    if list(chave(evento)) not in fora:
+        fora.append(list(chave(evento)))
+
+
+def remover(cfg: dict, servico, id_: str) -> str:
+    """Apaga o evento da agenda "Tony" e do `eventos.json`, e guarda o id em `removidos`, para a coleta
+    não trazer de volta. Os eventos que dividem o mesmo evento do Google (o mesmo compromisso vindo em
+    dois e-mails) saem juntos: senão ficariam apontando para um evento que não existe mais. Outro e-mail
+    sobre o mesmo compromisso também não traz ele de volta."""
+    arquivo = config.caminho(cfg["coleta"]["eventos"])
+    banco = ler_json(arquivo, {"eventos": {}, "revisar": {}})
+    evento = banco["eventos"].get(id_)
+    if not evento:
+        return f"não há {id_} nos eventos (veja os ids com `tony eventos --ids`)."
+    juntos = [i for i, e in banco["eventos"].items()
+              if i == id_ or chave(e) == chave(evento)
+              or (evento.get("evento_agenda") and e.get("evento_agenda") == evento["evento_agenda"])]
+    no_google = {banco["eventos"][i].get("evento_agenda") for i in juntos} - {None}
+    if no_google:
+        agenda = id_da_agenda(cfg, servico)
+        for evento_agenda in sorted(no_google):
+            _apagar(servico, agenda, evento_agenda)
+    banco.setdefault("removidos", [])
+    _guardar_fora(banco, evento)
+    for i in juntos:
+        banco["eventos"].pop(i)
+        banco["removidos"].append(i)
+    salvar_json(arquivo, banco)
+    extra = f" (e mais {len(juntos) - 1} e-mail(s) do mesmo compromisso)" if len(juntos) > 1 else ""
+    return f"removido: {evento['titulo']} ({evento['data']}){extra}."

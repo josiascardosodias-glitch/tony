@@ -132,6 +132,7 @@ def main() -> None:
     eventos = comandos.add_parser("eventos", help="mostra as datas guardadas (sem IA)")
     eventos.add_argument("--dias", type=int, default=30, help="quantos dias à frente (padrão 30)")
     eventos.add_argument("--revisar", action="store_true", help="mostra as datas de confiança média, para decidir")
+    eventos.add_argument("--ids", action="store_true", help="mostra o id de cada evento (para o `tony remover`)")
     bloquear = comandos.add_parser("bloquear", help="nunca mais lê e-mails de um endereço (x@y.com) ou domínio (@y.com)")
     bloquear.add_argument("alvo")
     faccat = comandos.add_parser("faccat", help="configura a conta da Faccat (App da Web do Apps Script)")
@@ -142,6 +143,8 @@ def main() -> None:
     aceitar.add_argument("id")
     descartar = comandos.add_parser("descartar", help="uma data de revisar é jogada fora")
     descartar.add_argument("id")
+    remover_ = comandos.add_parser("remover", help="tira um evento da agenda \"Tony\" e não deixa ele voltar")
+    remover_.add_argument("id")
     args = parser.parse_args()
 
     cfg = config.carregar()
@@ -150,7 +153,8 @@ def main() -> None:
             from . import dia
 
             dia.dia(cfg, args.notificar) if args.comando == "dia" else dia.agendar(args.hora)
-        elif args.comando in ("autorizar", "coletar", "eventos", "bloquear", "agenda", "aceitar", "descartar", "faccat"):
+        elif args.comando in ("autorizar", "coletar", "eventos", "bloquear", "agenda", "aceitar", "descartar", "faccat",
+                              "remover"):
             from . import contas
 
             contas.rodar(cfg, args)

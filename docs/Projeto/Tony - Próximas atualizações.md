@@ -22,6 +22,7 @@ as ideias soltas. Quando uma versão sai, ela vai para o `CHANGELOG.md` e some d
 | v3.0.0   | O mundo de fora                                    | ✅ publicada (131/132) |
 | ~~v3.0.x~~ | ~~E-mail testado com a caixa real (IMAP)~~     | ❌ substituída pela v4 |
 | v4.0.0   | Assistente de e-mail: datas → agenda → Telegram (produção) | ✅ publicada (56/56) |
+| v4.1.0   | `/remover` no Telegram; o mesmo compromisso uma vez só | ✅ publicada |
 
 > [!important] A partir da v4, siga [[Tony - Regras do projeto]]
 > Trabalho só na branch `develop`; a `main` é produção e só recebe o que passou nos testes e não
@@ -293,6 +294,17 @@ Cada item vira uma linha no `DECISOES.md`, com o resultado:
 
 ### Depois da v4.0
 
+- ✅ v4.1.0 (2026-11-04): `/remover` no Telegram e o mesmo compromisso (remetente, dia e hora) uma vez só.
+- **Rodar 24 horas.** O Tony roda no notebook: fechando a tampa, o sistema suspende e o bot para (as
+  mensagens esperam no Telegram e são respondidas quando o PC acorda). Caminhos: não suspender com a
+  tampa fechada na tomada (`HandleLidSwitchExternalPower=ignore` no logind), ou uma máquina sempre
+  ligada (o que esbarra na regra 4, dados no PC).
+- **Filtro de "não é compromisso".** Avisos de termos de serviço, limites de conta, entrega de compra e
+  newsletter ainda viram evento com confiança alta; dá para tirar com `/remover`, mas o certo é a
+  pontuação de `datas.py` baixar essas frases ("vamos fazer mudanças", "chegará entre", "agenda da
+  semana") e a descrição não começar com HTML cru.
+- **App do Google publicado** ("Em teste" vence a autorização a cada 7 dias).
+- **Faccat com login** (sem URL pública).
 - **Conta da Faccat** por um Apps Script na própria conta (gatilho de hora em hora, só leitura),
   com os prazos do Classroom, que já vêm prontos na API (`dueDate`), e os anexos dos professores.
   O Apps Script entrega ao PC só o que já passou pelo filtro da conta.

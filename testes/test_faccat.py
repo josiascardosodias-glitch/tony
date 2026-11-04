@@ -70,6 +70,16 @@ class TestFaccat(unittest.TestCase):
         self.assertEqual(eventos["faccat.e1-1"]["data"], "2026-11-17")
         self.assertEqual(r["emails"], 1)
 
+    def test_prazo_removido_nao_volta_na_coleta(self):
+        coletar(self.cfg, self.fonte(), AGORA, self.conta)
+        arquivo = self.pasta / "eventos.json"
+        banco = json.loads(arquivo.read_text())
+        banco["eventos"].pop("faccat.classroom.111")
+        banco["removidos"] = ["faccat.classroom.111"]
+        arquivo.write_text(json.dumps(banco))
+        coletar(self.cfg, self.fonte(), AGORA, self.conta)
+        self.assertNotIn("faccat.classroom.111", json.loads(arquivo.read_text())["eventos"])
+
     def test_uma_chamada_por_coleta_com_chave_desde_e_filtro(self):
         coletar(self.cfg, self.fonte(), AGORA, self.conta)
         self.assertEqual(len(self.pedidos), 1)

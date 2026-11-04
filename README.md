@@ -57,6 +57,8 @@ uv run tony bloquear @loja.com   # nunca mais lê e-mails desse domínio (ou de 
 uv run tony aceitar <id>         # uma data de revisar vira evento (os ids estão no --revisar)
 uv run tony descartar <id>       # uma data de revisar é jogada fora
 uv run tony agenda               # leva os eventos para a agenda "Tony" (o coletar já faz isso)
+uv run tony eventos --ids        # os eventos com o id de cada um
+uv run tony remover <id>         # tira o evento da agenda e não deixa a coleta trazer de volta
 ```
 
 Os eventos vão para uma agenda "Tony" que ele cria no seu Google Agenda. Ele só tem acesso às agendas
@@ -75,7 +77,8 @@ uv run tony telegram     # o bot e a coleta de hora em hora (o `tony agendar` in
 
 Pergunte do jeito que quiser: "o que tenho amanhã?", "e sexta?", "semana que vem". Perguntas de agenda
 são respondidas pelo código, sem IA; as outras vão ao modelo, que recebe só a agenda (nunca o e-mail).
-Comandos: `/hoje`, `/semana`, `/proximos`, `/revisar` (com botões), `/coletar` e `/nova`. Ele só
+Comandos: `/hoje`, `/semana`, `/proximos`, `/revisar` (com botões), `/remover` (tira da agenda um
+compromisso já aceito, com confirmação), `/coletar` e `/nova`. Ele só
 responde ao `TELEGRAM_CHAT_ID` de `~/.config/tony/assistente.env`.
 
 ## Várias contas e a Faccat

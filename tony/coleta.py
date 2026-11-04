@@ -206,6 +206,59 @@ def processar(msg: Mensagem, conta: str, aceitar: float, revisar: float,
     return aceitos, duvidosos
 
 
+# --- Repetidos ------------------------------------------------------------------------------------
+
+def chave(evento: dict) -> tuple:
+    """O mesmo compromisso: mesmo remetente, mesmo dia e mesma hora (o convite e o ingresso do mesmo
+    evento são dois e-mails, mas um compromisso só). Os prazos do Classroom têm todos o mesmo
+    remetente e muitas vezes a mesma hora (23:59): ali o título também conta."""
+    if evento.get("remetente") == "classroom":
+        return evento["remetente"], evento["data"], evento["hora"], evento["titulo"]
+    return evento.get("remetente", ""), evento["data"], evento["hora"]
+
+
+def _preferido(evento: dict) -> tuple:
+    """Entre repetidos fica o que já está no Google; depois, o que chegou primeiro."""
+    return (not evento.get("evento_agenda"), evento.get("recebido") or "", evento["id"])
+
+
+def _tirar_repetido(banco: dict, secao: str, id_: str, fica: dict) -> None:
+    saiu = banco[secao].pop(id_)
+    banco.setdefault("repetidos", []).append(id_)
+    if saiu.get("evento_agenda") and saiu["evento_agenda"] != fica.get("evento_agenda"):
+        banco.setdefault("apagar_no_google", []).append(saiu["evento_agenda"])  # o `sincronizar` apaga
+
+
+def juntar_repetidos(banco: dict) -> int:
+    """Deixa um evento por compromisso (`chave`) em `eventos` e em `revisar`; o que está em `revisar` e
+    já está nos eventos sai. Os que saem vão para `repetidos` (a coleta não traz de volta). Devolve
+    quantos saíram. Roda no começo de cada coleta: arruma também o `eventos.json` antigo."""
+    saiu = 0
+    grupos: dict[tuple, list[dict]] = {}
+    for e in banco["eventos"].values():
+        grupos.setdefault(chave(e), []).append(e)
+    nos_eventos = {}
+    for k, grupo in grupos.items():
+        fica, *resto = sorted(grupo, key=_preferido)
+        nos_eventos[k] = fica
+        for e in resto:
+            _tirar_repetido(banco, "eventos", e["id"], fica)
+            saiu += 1
+    vistos_em_revisar = set()
+    for id_, e in sorted(banco["revisar"].items(), key=lambda par: _preferido(par[1])):
+        k = chave(e)
+        if k in nos_eventos or k in vistos_em_revisar:
+            _tirar_repetido(banco, "revisar", id_, nos_eventos.get(k, {}))
+            saiu += 1
+        vistos_em_revisar.add(k)
+    return saiu
+
+
+def chaves_fora(banco: dict) -> set:
+    """Compromissos que você descartou ou removeu: outro e-mail sobre eles também não entra."""
+    return {tuple(k) for k in banco.get("chaves_fora", [])}
+
+
 # --- Arquivos -------------------------------------------------------------------------------------
 
 def ler_json(arquivo: Path, padrao: dict) -> dict:
@@ -246,7 +299,8 @@ class FonteGmail:
 def coletar(cfg: dict, fonte, agora: datetime | None = None, conta: dict | None = None) -> dict:
     """Uma rodada da coleta numa conta (sem conta: a primeira). `fonte` é uma `FonteGmail` (ou o serviço
     do Gmail direto) ou a `FonteAppsScript` da Faccat. Devolve o que aconteceu:
-    {"emails", "eventos", "revisar", "bloqueados"}."""
+    {"emails", "eventos", "revisar", "bloqueados", "repetidos"}. O mesmo compromisso (`chave`) entra uma
+    vez só, venha de quantos e-mails vier."""
     if not hasattr(fonte, "prazos"):  # o serviço do Gmail direto
         fonte = FonteGmail(fonte)
     c = cfg["coleta"]
@@ -264,14 +318,35 @@ def coletar(cfg: dict, fonte, agora: datetime | None = None, conta: dict | None 
                  else agora - timedelta(days=c["primeira_vez_dias"]))
     filtro = consulta(c["filtro"], bloqueados, depois_de).split(" ", 1)[1] if (c["filtro"] or any(bloqueados.values())) else ""
     vistos = set(estado["vistos"])
-    resumo = {"emails": 0, "eventos": 0, "revisar": 0, "bloqueados": 0}
+    fora = set(banco.get("descartados", [])) | set(banco.get("removidos", [])) | set(banco.get("repetidos", []))
+    resumo = {"emails": 0, "eventos": 0, "revisar": 0, "bloqueados": 0, "repetidos": juntar_repetidos(banco)}
+    ocupadas = {chave(e) for e in banco["eventos"].values()} | chaves_fora(banco)
+    em_revisar = {chave(e): i for i, e in banco["revisar"].items()}
+
+    def entrar(e: dict, secao: str) -> bool:
+        """Um compromisso entra uma vez só. Data certa (eventos) tira a dúvida do mesmo compromisso em revisar."""
+        k = chave(e)
+        if e["id"] in fora or e["id"] in banco[secao] or k in ocupadas or (secao == "revisar" and k in em_revisar):
+            if e["id"] not in banco[secao] and e["id"] not in fora:
+                banco.setdefault("repetidos", []).append(e["id"])
+                resumo["repetidos"] += 1
+            return False
+        if secao == "eventos":
+            if k in em_revisar:
+                _tirar_repetido(banco, "revisar", em_revisar.pop(k), e)
+                resumo["repetidos"] += 1
+            ocupadas.add(k)
+        else:
+            em_revisar[k] = e["id"]
+        banco[secao][e["id"]] = e
+        return True
+
     if hasattr(fonte, "preparar"):  # a Faccat traz prazos e e-mails numa chamada só
         fonte.preparar(depois_de, filtro)
     for prazo in fonte.prazos():  # prazos do Classroom: a data vem pronta, confiança 1
         evento_do_prazo = {**prazo, "id": f"{prefixo}{prazo['id']}", "conta": conta["nome"],
                            "criado_em": agora.isoformat(timespec="seconds"), "evento_agenda": None}
-        if evento_do_prazo["id"] not in banco["eventos"] and evento_do_prazo["data"] >= agora.date().isoformat():
-            banco["eventos"][evento_do_prazo["id"]] = evento_do_prazo
+        if evento_do_prazo["data"] >= agora.date().isoformat() and entrar(evento_do_prazo, "eventos"):
             resumo["eventos"] += 1
     for msg in fonte.mensagens(depois_de, filtro, vistos):
         if msg.id in vistos:
@@ -286,12 +361,8 @@ def coletar(cfg: dict, fonte, agora: datetime | None = None, conta: dict | None 
         resumo["emails"] += 1
         aceitos, duvidosos = processar(msg, conta["nome"], c["aceitar_a_partir_de"], c["revisar_a_partir_de"],
                                        agora.date(), prefixo)
-        for e in aceitos:
-            banco["eventos"].setdefault(e["id"], e)
-        for e in duvidosos:
-            banco["revisar"].setdefault(e["id"], e)
-        resumo["eventos"] += len(aceitos)
-        resumo["revisar"] += len(duvidosos)
+        resumo["eventos"] += sum(entrar(e, "eventos") for e in aceitos)
+        resumo["revisar"] += sum(entrar(e, "revisar") for e in duvidosos)
         if len(estado["vistos"]) % SALVAR_A_CADA == 0:
             salvar_json(arquivo_eventos, banco)
             salvar_json(arquivo_estado, estado)  # sem mexer na `ultima`: ela só avança quando a rodada termina
