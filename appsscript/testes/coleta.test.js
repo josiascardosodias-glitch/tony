@@ -189,3 +189,85 @@ test('o executar tenta de novo só no erro passageiro', () => {
   assert.deepEqual(esperas, [2, 5]);
   assert.throws(() => tony.executar(() => { throw new Error('Not Found (404)'); }, () => {}), /404/);
 });
+
+// --- Repetidos entre as contas (etapa 4) ----------------------------------------------------------
+
+const msg = (id, de, texto, extra = {}) => ({ id, de, nome: '', assunto: 'Aviso', recebido: new Date('2026-11-03T12:00:00Z'),
+  texto, trecho: '', convites: [], emailDaConta: '', emMassa: false, ...extra });
+const fonteCom = (mensagens, prazos = []) => ({ * mensagens() { yield* mensagens; }, prazos: () => prazos });
+const prazo = (id, titulo, data = '2026-11-06', hora = '23:59') => ({ id: `classroom.${id}`, email: '', remetente: 'classroom', nome: 'IA',
+  titulo, data, hora, descricao: titulo, origem: 'classroom', confianca: 1, link: '', recebido: '' });
+
+test('o mesmo compromisso pelas três contas entra uma vez só', () => {
+  const { tony } = novoTony();
+  const convite = 'O evento será dia 05/11/2026 às 08:30.';
+  const ingresso = 'Seu ingresso: o evento será dia 05/11/2026 às 08:30.';
+  tony.coletar(fonteCom([msg('a1', 'contato@eventos.com', convite)]), { nome: 'pessoal' }, AGORA, true);
+  tony.coletar(fonteCom([msg('b1', 'contato@eventos.com', ingresso)]), { nome: 'pessoal2', email: 'b@x.com' }, AGORA, false);
+  tony.coletar(fonteCom([msg('c1', 'contato@eventos.com', convite)]), { nome: 'faccat' }, AGORA, false);
+  tony.coletar(fonteCom([msg('d1', 'outro@eventos.com', convite)]), { nome: 'pessoal' }, AGORA, true); // outro remetente
+  const banco = tony.ler('eventos');
+  assert.deepEqual(Object.keys(banco.eventos).sort(), ['a1-1', 'd1-1']);
+  assert.deepEqual(json(banco.repetidos), ['pessoal2.b1-1', 'faccat.c1-1']);
+});
+
+test('removido numa conta não volta por outra', () => {
+  const { tony } = tonyComAgenda();
+  tony.guardar('eventos', { eventos: { 'a1-1': { ...ev('a1-1', '2026-11-05', '08:30', 'contato@eventos.com') } }, revisar: {} });
+  tony.remover('a1-1');
+  tony.coletar(fonteCom([msg('b1', 'contato@eventos.com', 'O evento será dia 05/11/2026 às 08:30.')]),
+    { nome: 'pessoal2' }, AGORA, false);
+  assert.deepEqual(Object.keys(tony.ler('eventos').eventos), []);
+});
+
+test('Classroom: prazos diferentes na mesma hora ficam; o mesmo prazo duas vezes fica um', () => {
+  const { tony } = novoTony();
+  const prazos = [prazo('1', '[IA] Lista 1'), prazo('2', '[IA] Lista 2'), prazo('3', '[IA] Lista 1')];
+  const r = tony.coletar(fonteCom([], prazos), { nome: 'faccat' }, AGORA, false);
+  assert.deepEqual(Object.keys(tony.ler('eventos').eventos).sort(), ['faccat.classroom.1', 'faccat.classroom.2']);
+  assert.equal(r.repetidos, 1);
+});
+
+test('data certa tira a dúvida do mesmo compromisso em revisar', () => {
+  const { tony } = novoTony();
+  tony.coletar(fonteCom([msg('a1', 'loja@x.com', 'Data: 05/11/2026 às 08:30')]), { nome: 'pessoal' }, AGORA, true);
+  assert.ok('a1-1' in tony.ler('eventos').revisar);
+  tony.coletar(fonteCom([msg('a2', 'loja@x.com', 'O evento será dia 05/11/2026 às 08:30.')]), { nome: 'pessoal' }, AGORA, true);
+  const banco = tony.ler('eventos');
+  assert.deepEqual([Object.keys(banco.eventos), Object.keys(banco.revisar)], [['a2-1'], []]);
+});
+
+test('Faccat: prazos e e-mails do App da Web viram eventos com o prefixo da conta', () => {
+  const resposta = { prazos: [{ id: '9', turma: 'IA', titulo: 'Lista', prazo: '2026-11-09', hora: '19:30' }],
+    emails: [{ id: 'f1', de: 'Prof <prof@faccat.br>', assunto: 'Prova', data: String(Date.parse('2026-11-03T12:00:00Z')),
+      texto: 'A prova é dia 12/11 às 19h.' }] };
+  const props = new Propriedades();
+  props.setProperties({ FACCAT_URL: 'https://faccat.exemplo/exec', FACCAT_CHAVE: 'k' });
+  const urls = [];
+  const tony = carregar({ PROPRIEDADES_FALSAS: props,
+    BUSCAR_FALSO: url => { urls.push(url); return { getContentText: () => JSON.stringify(resposta) }; } });
+  tony.coletar(tony.fonteFaccat(), { nome: 'faccat' }, AGORA, false);
+  const banco = tony.ler('eventos');
+  assert.deepEqual(Object.keys(banco.eventos).sort(), ['faccat.classroom.9', 'faccat.f1-1']);
+  assert.equal(banco.eventos['faccat.classroom.9'].titulo, '[IA] Lista');
+  assert.equal(urls.length, 1); // prazos e e-mails numa chamada só
+  assert.match(urls[0], /chave=k&desde=\d+&filtro=/);
+});
+
+test('pessoal2: token renovado, guardado, e autorização vencida vira aviso claro', () => {
+  const props = new Propriedades();
+  props.setProperties({ GOOGLE_CLIENTE_ID: 'id', GOOGLE_CLIENTE_SEGREDO: 's', TOKEN_PESSOAL2: 'r' });
+  const cache = { d: {}, get(k) { return this.d[k] || null; }, put(k, v) { this.d[k] = v; } };
+  let pedidos = 0, vencido = false;
+  const tony = carregar({ PROPRIEDADES_FALSAS: props, CACHE_FALSO: cache, BUSCAR_FALSO: () => {
+    pedidos++;
+    return vencido ? { getResponseCode: () => 400, getContentText: () => '{"error":"invalid_grant"}' }
+      : { getResponseCode: () => 200, getContentText: () => '{"access_token":"acesso-1"}' };
+  } });
+  assert.equal(tony.tokenDeAcesso({ nome: 'pessoal2' }), 'acesso-1');
+  assert.equal(tony.tokenDeAcesso({ nome: 'pessoal2' }), 'acesso-1');
+  assert.equal(pedidos, 1);
+  cache.d = {};
+  vencido = true;
+  assert.throws(() => tony.tokenDeAcesso({ nome: 'pessoal2' }), /venceu: no PC, uv run tony autorizar --conta pessoal2/);
+});

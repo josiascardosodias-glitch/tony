@@ -21,9 +21,6 @@ const AJUDA = `Pode perguntar do jeito que quiser: "o que tenho amanhã?", "e se
 const MAXIMO_DE_UMA_VEZ = 3;   // mais datas novas que isso numa coleta viram uma mensagem só
 const REMOVER_NO_MAXIMO = 30;  // botões do /remover: os compromissos mais próximos
 
-/** As contas que o script lê. A primeira é a desta conta Google (as outras entram na etapa 4). */
-const CONTAS = [{ nome: 'pessoal', email: '' }];
-
 // --- API do Telegram ------------------------------------------------------------------------------
 
 class ErroDoTelegram extends Error {}
@@ -90,12 +87,13 @@ function rodarColeta(agora, avisarVazio) {
   agora = agora || new Date();
   const antes = new Set(Object.keys(_eventos().eventos));
   let lidos = 0;
-  CONTAS.forEach((conta, i) => {
+  CONTAS_DO_TONY.forEach((conta, i) => {
     try {
-      lidos += coletar(fonteDaConta(conta, i), conta, agora, i === 0).emails;
+      lidos += coletar(fonteDe(conta), conta, agora, i === 0).emails;
     } catch (e) {
       console.warn(`a coleta de ${conta.nome} falhou: ${e}`);
-      if (avisarVazio) enviar(`A coleta de ${conta.nome} falhou agora (${e.message || e}). Tento de novo na próxima.`);
+      if (e instanceof AutorizacaoVencida) avisarUmaVezPorDia(conta.nome, e.message, agora, avisarVazio);
+      else if (avisarVazio) enviar(`A coleta de ${conta.nome} falhou agora (${e.message || e}). Tento de novo na próxima.`);
     }
   });
   try {
@@ -117,11 +115,15 @@ function rodarColeta(agora, avisarVazio) {
   if (avisarVazio && !novos.length) enviar(`Olhei ${lidos} e-mail(s) novo(s): nada para a agenda.`);
 }
 
-/** A fonte de cada conta: a primeira é o Gmail desta conta Google. */
-function fonteDaConta(conta, i) {
-  if (typeof FONTE_FALSA !== 'undefined') return FONTE_FALSA;
-  if (i === 0) return fonteGmail(gmailDaConta());
-  throw new Error(`a conta ${conta.nome} ainda não tem fonte no Apps Script`);
+/** Uma vez por dia por conta (ou sempre, num /coletar): a autorização venceu e como renovar. */
+function avisarUmaVezPorDia(conta, texto, agora, sempre) {
+  const estado = _estado();
+  const hoje = emBrasilia(agora).data;
+  estado.avisos_autorizacao = estado.avisos_autorizacao || {};
+  if (estado.avisos_autorizacao[conta] === hoje && !sempre) return;
+  enviar(`Não consegui olhar os e-mails de ${conta}: ${texto}.`);
+  estado.avisos_autorizacao[conta] = hoje;
+  _salvarEstado(estado);
 }
 
 /** Cada data de confiança média chega uma vez, com os botões. Muitas de uma vez viram uma mensagem só. */
@@ -269,6 +271,17 @@ function _comTrava(fn) {
 
 function doPost(e) {
   const resposta = () => ContentService.createTextOutput('ok');
+  if (e && e.parameter && e.parameter.admin) { // o PC (appsscript/configurar.py), não o Telegram
+    const admin = _propriedades().getProperty('ADMIN_SEGREDO');
+    if (!admin || e.parameter.admin !== admin || !e.postData) return resposta();
+    let saida;
+    try {
+      saida = _comTrava(() => ({ ok: true, ...administrar(JSON.parse(e.postData.contents)) })) || { ok: false, erro: 'ocupado' };
+    } catch (erro) {
+      saida = { ok: false, erro: String(erro.message || erro) };
+    }
+    return ContentService.createTextOutput(JSON.stringify(saida)).setMimeType(ContentService.MimeType.JSON);
+  }
   if (!e || !e.parameter || e.parameter.k !== segredo('WEBHOOK_SEGREDO') || !e.postData) return resposta();
   let atualizacao;
   try {
