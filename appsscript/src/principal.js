@@ -124,8 +124,8 @@ function administrar(pedido) {
     },
     coletar: () => { rodarColeta(new Date(), false); return 'ok'; },
     instalarGatilhos: () => instalarGatilhos(),
-    esquecerFaccatAntiga: () => { // a URL e a chave da Faccat de antes da v5.2: não servem mais
-      for (const n of ['FACCAT_URL', 'FACCAT_CHAVE']) props.deleteProperty(n);
+    esquecerFaccatAntiga: () => { // a URL pública da Faccat (até a v5.1): não serve mais. A chave fica: é ela que identifica o envio
+      for (const n of ['FACCAT_URL', 'FACCAT_SEGREDO']) props.deleteProperty(n);
       return 'ok';
     },
     removerGatilhos: () => { for (const g of ScriptApp.getProjectTriggers()) ScriptApp.deleteTrigger(g); return []; },

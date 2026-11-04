@@ -258,16 +258,17 @@ test('Faccat calada há mais de 3 horas (ou que nunca mandou): a coleta avisa', 
   assert.throws(() => tony.fonteFaccat(new Date(AGORA.getTime() + 5 * 3600000)), /não manda nada há 5 horas/);
 });
 
-test('webhook da Faccat: só com o segredo certo', () => {
+test('webhook da Faccat: só com a chave certa dentro do envio', () => {
   const props = new Propriedades();
-  props.setProperties({ FACCAT_SEGREDO: 'fac' });
+  props.setProperties({ FACCAT_CHAVE: 'k' });
   const tony = carregar({ PROPRIEDADES_FALSAS: props, TRAVA_FALSA: { tryLock: () => true, releaseLock: () => {} },
     HtmlService: { createHtmlOutput: t => t },
     ContentService: { createTextOutput: t => ({ setMimeType: () => t }), MimeType: { JSON: 'json' } } });
-  const post = k => ({ parameter: { faccat: k }, postData: { contents: JSON.stringify({ prazos: [{ id: '1' }], emails: [] }) } });
-  assert.equal(tony.doPost(post('errado')), 'ok');
+  const post = chave => ({ parameter: { faccat: '1' }, postData: { contents: JSON.stringify({ chave, prazos: [{ id: '1' }], emails: [] }) } });
+  assert.equal(tony.doPost(post('errada')), 'ok');
+  assert.equal(tony.doPost(post(undefined)), 'ok');
   assert.equal(tony.ler('faccat-caixa'), null);
-  assert.deepEqual(JSON.parse(tony.doPost(post('fac'))), { ok: true, prazos: 1, emails_novos: 0 });
+  assert.deepEqual(JSON.parse(tony.doPost(post('k'))), { ok: true, prazos: 1, emails_novos: 0 });
 });
 
 test('pessoal2: token renovado, guardado, e autorização vencida vira aviso claro', () => {

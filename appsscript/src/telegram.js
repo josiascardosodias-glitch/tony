@@ -274,11 +274,19 @@ function doPost(e) {
   // Telegram trata como erro e reenvia sem parar, travando a fila. O HtmlService responde 200 direto.
   const resposta = () => HtmlService.createHtmlOutput('ok');
   if (e && e.parameter && e.parameter.faccat) { // o script da Faccat mandando prazos e e-mails
-    const segredoDaFaccat = _propriedades().getProperty('FACCAT_SEGREDO');
-    if (!segredoDaFaccat || e.parameter.faccat !== segredoDaFaccat || !e.postData) return resposta();
+    // Ela se identifica com a chave que já tinha (TONY_CHAVE lá, FACCAT_CHAVE aqui), dentro do envio:
+    // o endereço do Tony não carrega segredo nenhum.
+    const chave = _propriedades().getProperty('FACCAT_CHAVE');
+    let envio;
+    try {
+      envio = JSON.parse((e.postData || {}).contents || '{}');
+    } catch (erro) {
+      return resposta();
+    }
+    if (!chave || envio.chave !== chave) return resposta();
     let saida;
     try {
-      saida = _comTrava(() => ({ ok: true, ...receberFaccat(JSON.parse(e.postData.contents), new Date()) })) || { ok: false, erro: 'ocupado' };
+      saida = _comTrava(() => ({ ok: true, ...receberFaccat(envio, new Date()) })) || { ok: false, erro: 'ocupado' };
     } catch (erro) {
       saida = { ok: false, erro: String(erro.message || erro) };
     }

@@ -7,19 +7,20 @@
  * Faccat pode ser arquivada.
  *
  * Uma vez só, depois de colar:
- * 1. Configurações do projeto > Propriedades do script > adicionar TONY_URL com o endereço que o PC
- *    gerou (~/.config/tony/faccat-url-do-tony: `cat` no terminal e copie).
+ * 1. Troque o TONY_URL abaixo pelo endereço do App da Web do Tony (sem segredo: a Faccat se identifica
+ *    com a TONY_CHAVE, que este projeto já tem, dentro do envio).
  * 2. Rode instalarGatilhoDoTony() no editor e aceite as permissões (chamar serviço externo e gatilhos).
  * 3. Rode enviarAoTony() uma vez e veja no registro "Tony recebeu".
  */
+
+const TONY_URL = 'https://script.google.com/macros/s/ID_DA_IMPLANTACAO_DO_TONY/exec?faccat=1';
 
 const TONY_FOLGA_MS = 60 * 60 * 1000;  // uma hora para trás: o Tony ignora o que já viu
 
 function enviarAoTony() {
   const props = PropertiesService.getScriptProperties();
-  const url = props.getProperty('TONY_URL');
   const chave = props.getProperty('TONY_CHAVE');
-  if (!url || !chave) throw new Error('faltam as propriedades TONY_URL e/ou TONY_CHAVE');
+  if (!chave) throw new Error('falta a propriedade TONY_CHAVE');
   const ultimo = Number(props.getProperty('TONY_ULTIMO_ENVIO') || 0);
   const desde = ultimo ? ultimo - TONY_FOLGA_MS : Date.now() - 30 * 24 * 3600 * 1000;
   const agora = Date.now();
@@ -29,7 +30,8 @@ function enviarAoTony() {
   const dados = JSON.parse(saida.getContent());
   if (dados.erro) throw new Error('o doGet recusou: ' + dados.erro);
 
-  const resposta = UrlFetchApp.fetch(url, {
+  dados.chave = chave;
+  const resposta = UrlFetchApp.fetch(TONY_URL, {
     method: 'post', contentType: 'application/json', payload: JSON.stringify(dados),
     muteHttpExceptions: true, followRedirects: true,
   });

@@ -1,5 +1,10 @@
 # Changelog
 
+## v5.2.1 — 2026-11-04
+
+- A Faccat se identifica com a chave que já tinha (`TONY_CHAVE` lá, `FACCAT_CHAVE` no Tony), dentro do
+  envio: o endereço do Tony no script da Faccat não leva segredo, e não há segredo novo para copiar.
+
 ## v5.2.0 — 2026-11-04
 
 - **Faccat sem URL pública:** o script da Faccat passa a enviar os prazos e os e-mails para o Tony de

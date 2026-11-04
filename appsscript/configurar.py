@@ -3,7 +3,6 @@
 da pasta de produção, e a resposta traz só nomes e números.
 
     uv run python appsscript/configurar.py --segredos        # cliente OAuth, token da pessoal2, Faccat
-    uv run python appsscript/configurar.py --faccat          # segredo da Faccat e a URL para o script dela
     uv run python appsscript/configurar.py --tokens          # só o token da pessoal2 (depois de renovar)
     uv run python appsscript/configurar.py --importar        # eventos e estados da produção (a virada)
     uv run python appsscript/configurar.py --acao conferir --acao contas
@@ -59,24 +58,6 @@ def segredos_do_pc(so_tokens: bool = False) -> dict:
     return valores
 
 
-def segredo_da_faccat() -> dict:
-    """O segredo que a Faccat põe na URL do Tony. Gera na primeira vez; a URL completa vai para um arquivo
-    (chmod 600) para você copiar para as propriedades do script da Faccat, sem passar pela tela."""
-    import secrets
-
-    arquivo = SEGREDOS / "faccat-segredo"
-    if not arquivo.is_file():
-        arquivo.write_text(secrets.token_hex(24))
-        arquivo.chmod(0o600)
-    segredo = arquivo.read_text().strip()
-    implantacao = (SEGREDOS / "appsscript-implantacao").read_text().strip()
-    url = SEGREDOS / "faccat-url-do-tony"
-    url.write_text(f"https://script.google.com/macros/s/{implantacao}/exec?faccat={segredo}\n")
-    url.chmod(0o600)
-    print(f"URL para a propriedade TONY_URL do script da Faccat: cat {url}", file=sys.stderr)
-    return {"FACCAT_SEGREDO": segredo}
-
-
 def dados_da_producao() -> dict:
     """Os dados da produção como o Apps Script guarda. A agenda "Tony" do Apps Script é outra (ele só mexe
     no que criou): todo evento perde o `evento_agenda` e é criado de novo na agenda nova."""
@@ -103,15 +84,12 @@ def principal() -> None:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--segredos", action="store_true")
     p.add_argument("--tokens", action="store_true")
-    p.add_argument("--faccat", action="store_true")
     p.add_argument("--importar", action="store_true")
     p.add_argument("--acao", action="append", default=[])
     args = p.parse_args()
     pedido = {"acoes": args.acao}
     if args.segredos or args.tokens:
         pedido["segredos"] = segredos_do_pc(so_tokens=args.tokens and not args.segredos)
-    if args.faccat:
-        pedido.setdefault("segredos", {}).update(segredo_da_faccat())
     if args.importar:
         pedido["dados"] = dados_da_producao()
     resposta = pedir(pedido)
