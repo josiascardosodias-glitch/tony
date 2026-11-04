@@ -10,6 +10,29 @@ fonte: própria
 
 Uma entrada por sessão de trabalho, a mais recente no topo: o que foi feito, o que travou, o que aprendi.
 
+## 2026-11-04 (tarde) — v5, etapas 1 e 2: o Tony no Apps Script
+
+**Feito**
+- Decidido sair do notebook: VPS grátis pede cartão; hospedagens de bot sem cartão guardariam o token
+  do Gmail com terceiros. Fica o Google Apps Script (plano no [[Tony - Próximas atualizações]]).
+- Etapa 1: datas, consulta, resumo do dia e repetidos em JavaScript (`appsscript/src/`). Etapa 2:
+  coleta pela API avançada do Gmail, dados nas propriedades do script, agenda com `calendar.app.created`.
+- Teste diferencial: o Python gera as respostas (5412 datas, 552 consultas, 300 bancos de repetidos,
+  82 caixas de e-mail) e o JavaScript tem que responder igual. 19 testes no `node --test`.
+- No Google: `conferir()` leu 25 e-mails dos últimos 3 dias (0 para a agenda, 2 para revisar), igual
+  ao Python nos mesmos e-mails, e criou e apagou uma agenda de teste.
+
+**Travou**
+- O Google barrava as permissões ("Autorização obrigatória" sem saída): o script estava no projeto
+  "Padrão" do Apps Script, onde a leitura do Gmail é bloqueada. Resolvido ligando o script ao projeto
+  `tony-513620` (Configurações do projeto > Projeto do GCP), em que o dono é usuário de teste.
+- O app continua "Testando": o "Publicar app" pede o Branding completo. Em teste, a autorização pode
+  vencer em 7 dias; resolver antes da virada.
+
+**Aprendi**
+- `\b` do JavaScript não entende acento ("amanhã"); o do Python entende. Limite Unicode próprio.
+- Objetos criados num contexto do `vm` do Node não passam no `deepEqual` estrito (outro protótipo).
+
 ## 2026-11-04 — v4.1.0: `/remover` e um compromisso por vez
 
 **Diagnóstico do "bot travado"**
