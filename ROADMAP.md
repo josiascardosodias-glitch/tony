@@ -57,7 +57,7 @@ prazos do Classroom). A `main` passa a ser só produção; o trabalho segue na `
 
 - Os e-mails da Faccat por um caminho com login (sem URL pública).
 - Publicar o app do Google (hoje "Em teste": a autorização vence a cada 7 dias).
-- `tony remover <id>`: tirar um evento da agenda sem apagar à mão.
+- ✅ `tony remover <id>` (na `develop`): tirar um evento da agenda sem apagar à mão.
 
 ## Depois
 

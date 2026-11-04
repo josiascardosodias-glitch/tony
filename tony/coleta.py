@@ -264,13 +264,15 @@ def coletar(cfg: dict, fonte, agora: datetime | None = None, conta: dict | None 
                  else agora - timedelta(days=c["primeira_vez_dias"]))
     filtro = consulta(c["filtro"], bloqueados, depois_de).split(" ", 1)[1] if (c["filtro"] or any(bloqueados.values())) else ""
     vistos = set(estado["vistos"])
+    fora = set(banco.get("descartados", [])) | set(banco.get("removidos", []))  # você tirou: não volta
     resumo = {"emails": 0, "eventos": 0, "revisar": 0, "bloqueados": 0}
     if hasattr(fonte, "preparar"):  # a Faccat traz prazos e e-mails numa chamada só
         fonte.preparar(depois_de, filtro)
     for prazo in fonte.prazos():  # prazos do Classroom: a data vem pronta, confiança 1
         evento_do_prazo = {**prazo, "id": f"{prefixo}{prazo['id']}", "conta": conta["nome"],
                            "criado_em": agora.isoformat(timespec="seconds"), "evento_agenda": None}
-        if evento_do_prazo["id"] not in banco["eventos"] and evento_do_prazo["data"] >= agora.date().isoformat():
+        if (evento_do_prazo["id"] not in banco["eventos"] and evento_do_prazo["id"] not in fora
+                and evento_do_prazo["data"] >= agora.date().isoformat()):
             banco["eventos"][evento_do_prazo["id"]] = evento_do_prazo
             resumo["eventos"] += 1
     for msg in fonte.mensagens(depois_de, filtro, vistos):
@@ -286,6 +288,8 @@ def coletar(cfg: dict, fonte, agora: datetime | None = None, conta: dict | None 
         resumo["emails"] += 1
         aceitos, duvidosos = processar(msg, conta["nome"], c["aceitar_a_partir_de"], c["revisar_a_partir_de"],
                                        agora.date(), prefixo)
+        aceitos = [e for e in aceitos if e["id"] not in fora]
+        duvidosos = [e for e in duvidosos if e["id"] not in fora]
         for e in aceitos:
             banco["eventos"].setdefault(e["id"], e)
         for e in duvidosos:

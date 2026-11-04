@@ -57,6 +57,8 @@ uv run tony bloquear @loja.com   # nunca mais lê e-mails desse domínio (ou de 
 uv run tony aceitar <id>         # uma data de revisar vira evento (os ids estão no --revisar)
 uv run tony descartar <id>       # uma data de revisar é jogada fora
 uv run tony agenda               # leva os eventos para a agenda "Tony" (o coletar já faz isso)
+uv run tony eventos --ids        # os eventos com o id de cada um
+uv run tony remover <id>         # tira o evento da agenda e não deixa a coleta trazer de volta
 ```
 
 Os eventos vão para uma agenda "Tony" que ele cria no seu Google Agenda. Ele só tem acesso às agendas

@@ -99,3 +99,31 @@ def decidir(cfg: dict, id_: str, aceitar: bool) -> str:
         banco["descartados"].append(id_)
     salvar_json(arquivo, banco)
     return f"{'aceito' if aceitar else 'descartado'}: {evento['titulo']} ({evento['data']})."
+
+
+def remover(cfg: dict, servico, id_: str) -> str:
+    """Apaga o evento da agenda "Tony" e do `eventos.json`, e guarda o id em `removidos`, para a coleta
+    não trazer de volta. Os eventos que dividem o mesmo evento do Google (o mesmo compromisso vindo em
+    dois e-mails) saem juntos: senão ficariam apontando para um evento que não existe mais."""
+    from googleapiclient.errors import HttpError
+
+    arquivo = config.caminho(cfg["coleta"]["eventos"])
+    banco = ler_json(arquivo, {"eventos": {}, "revisar": {}})
+    evento = banco["eventos"].get(id_)
+    if not evento:
+        return f"não há {id_} nos eventos (veja os ids com `tony eventos --ids`)."
+    juntos = [i for i, e in banco["eventos"].items()
+              if i == id_ or (evento.get("evento_agenda") and e.get("evento_agenda") == evento["evento_agenda"])]
+    if evento.get("evento_agenda"):
+        try:
+            executar(servico.events().delete(calendarId=id_da_agenda(cfg, servico), eventId=evento["evento_agenda"]))
+        except HttpError as e:
+            if e.resp.status not in (404, 410):  # já apagado à mão na agenda: segue
+                raise
+    banco.setdefault("removidos", [])
+    for i in juntos:
+        banco["eventos"].pop(i)
+        banco["removidos"].append(i)
+    salvar_json(arquivo, banco)
+    extra = f" (e mais {len(juntos) - 1} e-mail(s) do mesmo compromisso)" if len(juntos) > 1 else ""
+    return f"removido: {evento['titulo']} ({evento['data']}){extra}."

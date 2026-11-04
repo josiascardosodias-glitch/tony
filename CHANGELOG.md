@@ -1,5 +1,13 @@
 # Changelog
 
+## Na `develop` (próxima versão)
+
+- `tony remover <id>`: apaga o evento da agenda "Tony" e do `eventos.json` e guarda o id em
+  `removidos`, para a coleta não trazer de volta (inclusive os prazos do Classroom, que voltavam a cada
+  coleta). Leva junto os eventos do mesmo compromisso (confirmação e lembrete) e não quebra se o
+  evento já foi apagado à mão. `tony eventos --ids` mostra os ids. A coleta também respeita os
+  `descartados`. Testes de código: 104.
+
 ## v4.0.0 — 2026-11-03
 
 O Tony vira assistente de e-mail: datas dos e-mails → agenda "Tony" → consulta pelo Telegram, com o

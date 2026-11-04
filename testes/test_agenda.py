@@ -10,7 +10,7 @@ from datetime import date
 from pathlib import Path
 
 from tony import config
-from tony.agenda import corpo, decidir, id_da_agenda, sincronizar
+from tony.agenda import corpo, decidir, id_da_agenda, remover, sincronizar
 
 HOJE = date(2026, 11, 3)
 
@@ -45,11 +45,28 @@ class AgendaFalsa:
         self.eventos.append(novo)
         return Executar(novo)
 
+    def delete(self, calendarId, eventId):
+        antes = len(self.eventos)
+        self.eventos = [e for e in self.eventos if e["id"] != eventId]
+        if len(self.eventos) == antes:  # como a API: evento que não existe é 404
+            from googleapiclient.errors import HttpError
+            from httplib2 import Response
+            return Executar404(HttpError(Response({"status": 404}), b"not found"))
+        return Executar({})
+
     def list(self, calendarId, privateExtendedProperty, maxResults=1, showDeleted=False):
         tony_id = privateExtendedProperty.split("=", 1)[1]
         achados = [e for e in self.eventos if e["calendarId"] == calendarId
                    and e["extendedProperties"]["private"]["tony_id"] == tony_id]
         return Executar({"items": achados[:maxResults]})
+
+
+class Executar404:
+    def __init__(self, erro):
+        self.erro = erro
+
+    def execute(self):
+        raise self.erro
 
 
 def evento(id_: str, data: str, hora: str | None = "19:00", remetente: str = "secretaria@faculdade.edu.br") -> dict:
@@ -111,6 +128,27 @@ class TestAgenda(unittest.TestCase):
         self.assertIn("https://mail.google.com/mail/u/0/#all/m1-1", com_hora["description"])
         dia = corpo(evento("m1-1", "2026-11-12", None))
         self.assertEqual((dia["start"], dia["end"]), ({"date": "2026-11-12"}, {"date": "2026-11-13"}))
+
+    def test_remover_apaga_no_google_e_leva_o_repetido_junto(self):
+        self.gravar({"m1-1": evento("m1-1", "2026-11-12"), "m2-1": evento("m2-1", "2026-11-12"),
+                     "m3-1": evento("m3-1", "2026-11-20")})
+        sincronizar(self.cfg, self.google, HOJE)
+        self.assertEqual(len(self.google.eventos), 2)  # m1 e m2 são o mesmo compromisso
+        resposta = remover(self.cfg, self.google, "m2-1")
+        self.assertIn("e mais 1 e-mail(s)", resposta)
+        banco = self.banco()
+        self.assertEqual((list(banco["eventos"]), sorted(banco["removidos"])), (["m3-1"], ["m1-1", "m2-1"]))
+        self.assertEqual([e["id"] for e in self.google.eventos], ["ev-2"])
+
+    def test_remover_o_que_ja_foi_apagado_a_mao_nao_quebra(self):
+        self.gravar({"m1-1": evento("m1-1", "2026-11-12")})
+        sincronizar(self.cfg, self.google, HOJE)
+        self.google.eventos.clear()
+        self.assertIn("removido", remover(self.cfg, self.google, "m1-1"))
+
+    def test_remover_o_que_nao_existe(self):
+        self.gravar({})
+        self.assertIn("não há", remover(self.cfg, self.google, "x-1"))
 
     def test_aceitar_e_descartar(self):
         self.gravar({}, {"r1-1": evento("r1-1", "2026-11-05"), "r2-1": evento("r2-1", "2026-11-06")})
