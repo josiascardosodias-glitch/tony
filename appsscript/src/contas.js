@@ -6,8 +6,8 @@
  *   Python já tem (o token OAuth do projeto `tony-513620`) e chama a API REST do Gmail, que devolve o
  *   mesmo formato da API avançada. Propriedades: `GOOGLE_CLIENTE_ID`, `GOOGLE_CLIENTE_SEGREDO`,
  *   `TOKEN_PESSOAL2` (o refresh token).
- * - `faccat`: o App da Web da Faccat (só os prazos do Classroom e os e-mails que ele entrega).
- *   Propriedades: `FACCAT_URL`, `FACCAT_CHAVE`.
+ * - `faccat`: o script da Faccat envia os prazos e os e-mails de hora em hora (`receberFaccat`); a Faccat
+ *   não tem URL pública. Propriedade: `FACCAT_SEGREDO` (o que ela põe na URL do Tony).
  *
  * Os ids da pessoal2 levam o prefixo `pessoal2.` e os da Faccat `faccat.`, como no Python.
  */
@@ -74,8 +74,56 @@ function gmailPorToken(conta) {
   };
 }
 
-/** O App da Web da Faccat: uma chamada por coleta traz os prazos e os e-mails novos. */
-function fonteFaccat() {
+const FACCAT_SEM_NOTICIA_H = 3;   // horas sem a Faccat mandar nada: a coleta avisa (no /coletar)
+const FACCAT_EMAILS_GUARDADOS = 100;
+const FACCAT_TEXTO_MAXIMO = 5000;  // caracteres de cada e-mail guardado (o armazém tem 500 KB)
+
+/**
+ * O que o script da Faccat mandou (`receberFaccat`, pelo `doPost` com `?faccat=`). Desde a v5.2 a Faccat
+ * não tem mais URL pública: ela envia de hora em hora, e a coleta lê daqui.
+ */
+function receberFaccat(dados, agora) {
+  const caixa = ler('faccat-caixa', { prazos: [], emails: [], recebido_em: null });
+  const vistos = new Set(caixa.emails.map(e => e.id));
+  const novos = (dados.emails || []).filter(e => !vistos.has(e.id))
+    .map(e => Object.assign({}, e, { texto: String(e.texto || '').slice(0, FACCAT_TEXTO_MAXIMO) }));
+  caixa.prazos = dados.prazos || [];
+  caixa.emails = caixa.emails.concat(novos).slice(-FACCAT_EMAILS_GUARDADOS);
+  caixa.recebido_em = (agora || new Date()).toISOString();
+  guardar('faccat-caixa', caixa);
+  return { prazos: caixa.prazos.length, emails_novos: novos.length };
+}
+
+/** A Faccat pelo que ela mandou: os prazos do último envio e os e-mails guardados (os vistos a coleta pula). */
+function fonteFaccat(agora) {
+  const caixa = ler('faccat-caixa', { prazos: [], emails: [], recebido_em: null });
+  const idade = caixa.recebido_em ? ((agora || new Date()) - new Date(caixa.recebido_em)) / 3600000 : Infinity;
+  if (idade > FACCAT_SEM_NOTICIA_H) {
+    throw new Error(caixa.recebido_em ? `a Faccat não manda nada há ${Math.floor(idade)} horas (confira o gatilho do script dela)`
+      : 'a Faccat ainda não mandou nada (falta instalar o enviar_ao_tony.gs no script dela)');
+  }
+  return {
+    prazos() {
+      return caixa.prazos.map(p => ({
+        id: `classroom.${p.id}`, email: '', remetente: 'classroom', nome: p.turma, titulo: `[${p.turma}] ${p.titulo}`,
+        data: p.prazo, hora: p.hora || null, descricao: (p.descricao || p.titulo).trim(), origem: 'classroom',
+        confianca: 1, link: p.link || '', recebido: p.atualizado_em || '' }));
+    },
+    * mensagens(depoisDe) {
+      for (const e of caixa.emails) {
+        if (Number(e.data) < depoisDe.getTime()) continue;
+        const { nome, endereco } = _remetente(e.de || '');
+        const texto = (e.texto || '').trim();
+        yield { id: e.id, de: endereco.toLowerCase(), nome, assunto: (e.assunto || '').trim(), recebido: new Date(Number(e.data)),
+          texto, trecho: texto.split(/\s+/).join(' ').slice(0, 160), convites: e.convites || [], emailDaConta: '',
+          emMassa: Boolean(e.em_massa) };
+      }
+    },
+  };
+}
+
+/** O caminho antigo (até a v5.1), pela URL pública da Faccat: só enquanto ela ainda não mandou nada. */
+function fonteFaccatPorUrl() {
   let resposta = null;
   const buscar = (depoisDe, filtro) => {
     if (resposta) return resposta;
@@ -116,6 +164,9 @@ function fonteDe(conta) {
   if (typeof FONTE_FALSA !== 'undefined') return FONTE_FALSA;
   if (conta.tipo === 'gmail') return fonteGmail(gmailDaConta());
   if (conta.tipo === 'oauth') return fonteGmail(gmailPorToken(conta));
-  if (conta.tipo === 'apps-script') return fonteFaccat();
+  if (conta.tipo === 'apps-script') {
+    const jaMandou = ler('faccat-caixa', null);
+    return !jaMandou && _propriedades().getProperty('FACCAT_URL') ? fonteFaccatPorUrl() : fonteFaccat();
+  }
   throw new Error(`tipo de conta desconhecido: ${conta.tipo}`);
 }

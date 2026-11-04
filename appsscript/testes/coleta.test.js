@@ -237,21 +237,37 @@ test('data certa tira a dúvida do mesmo compromisso em revisar', () => {
   assert.deepEqual([Object.keys(banco.eventos), Object.keys(banco.revisar)], [['a2-1'], []]);
 });
 
-test('Faccat: prazos e e-mails do App da Web viram eventos com o prefixo da conta', () => {
-  const resposta = { prazos: [{ id: '9', turma: 'IA', titulo: 'Lista', prazo: '2026-11-09', hora: '19:30' }],
+test('Faccat: o que ela manda vira eventos com o prefixo da conta, sem URL pública', () => {
+  const { tony } = novoTony();
+  const envio = { prazos: [{ id: '9', turma: 'IA', titulo: 'Lista', prazo: '2026-11-09', hora: '19:30' }],
     emails: [{ id: 'f1', de: 'Prof <prof@faccat.br>', assunto: 'Prova', data: String(Date.parse('2026-11-03T12:00:00Z')),
       texto: 'A prova é dia 12/11 às 19h.' }] };
-  const props = new Propriedades();
-  props.setProperties({ FACCAT_URL: 'https://faccat.exemplo/exec', FACCAT_CHAVE: 'k' });
-  const urls = [];
-  const tony = carregar({ PROPRIEDADES_FALSAS: props,
-    BUSCAR_FALSO: url => { urls.push(url); return { getContentText: () => JSON.stringify(resposta) }; } });
-  tony.coletar(tony.fonteFaccat(), { nome: 'faccat' }, AGORA, false);
+  assert.deepEqual(json(tony.receberFaccat(envio, AGORA)), { prazos: 1, emails_novos: 1 });
+  assert.deepEqual(json(tony.receberFaccat(envio, AGORA)), { prazos: 1, emails_novos: 0 }); // o mesmo e-mail de novo
+  tony.coletar(tony.fonteFaccat(AGORA), { nome: 'faccat' }, AGORA, false);
   const banco = tony.ler('eventos');
   assert.deepEqual(Object.keys(banco.eventos).sort(), ['faccat.classroom.9', 'faccat.f1-1']);
   assert.equal(banco.eventos['faccat.classroom.9'].titulo, '[IA] Lista');
-  assert.equal(urls.length, 1); // prazos e e-mails numa chamada só
-  assert.match(urls[0], /chave=k&desde=\d+&filtro=/);
+});
+
+test('Faccat calada há mais de 3 horas (ou que nunca mandou): a coleta avisa', () => {
+  const { tony } = novoTony();
+  assert.throws(() => tony.fonteFaccat(AGORA), /ainda não mandou nada/);
+  tony.receberFaccat({ prazos: [], emails: [] }, AGORA);
+  assert.doesNotThrow(() => tony.fonteFaccat(new Date(AGORA.getTime() + 2 * 3600000)));
+  assert.throws(() => tony.fonteFaccat(new Date(AGORA.getTime() + 5 * 3600000)), /não manda nada há 5 horas/);
+});
+
+test('webhook da Faccat: só com o segredo certo', () => {
+  const props = new Propriedades();
+  props.setProperties({ FACCAT_SEGREDO: 'fac' });
+  const tony = carregar({ PROPRIEDADES_FALSAS: props, TRAVA_FALSA: { tryLock: () => true, releaseLock: () => {} },
+    HtmlService: { createHtmlOutput: t => t },
+    ContentService: { createTextOutput: t => ({ setMimeType: () => t }), MimeType: { JSON: 'json' } } });
+  const post = k => ({ parameter: { faccat: k }, postData: { contents: JSON.stringify({ prazos: [{ id: '1' }], emails: [] }) } });
+  assert.equal(tony.doPost(post('errado')), 'ok');
+  assert.equal(tony.ler('faccat-caixa'), null);
+  assert.deepEqual(JSON.parse(tony.doPost(post('fac'))), { ok: true, prazos: 1, emails_novos: 0 });
 });
 
 test('pessoal2: token renovado, guardado, e autorização vencida vira aviso claro', () => {
@@ -285,4 +301,13 @@ test('limparHtml tira as tags das descrições guardadas e corrige no Google', (
   assert.equal(descricao, 'Para adicionar o evento, clique & pronto.\n\nTrecho forte');
   assert.equal(patches.length, 1);
   assert.doesNotMatch(patches[0][1], /<a|href/);
+});
+
+test('transição: sem nada da Faccat ainda, usa a URL antiga; depois do primeiro envio, só o que ela manda', () => {
+  const { tony, props } = novoTony();
+  props.setProperties({ FACCAT_URL: 'https://faccat.exemplo/exec', FACCAT_CHAVE: 'k' });
+  const conta = { nome: 'faccat', tipo: 'apps-script' };
+  assert.equal(typeof tony.fonteDe(conta).preparar, 'function'); // a antiga, pela URL
+  tony.receberFaccat({ prazos: [], emails: [] }, new Date());
+  assert.equal(tony.fonteDe(conta).preparar, undefined);           // a nova, pela caixa
 });
